@@ -1,0 +1,7 @@
+<h2>{{ question.question_text }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="question_id" value="{{ question.id }}">
+    <input type="text" name="answer" required>
+    <button type="submit">Next</button>
+</form>
