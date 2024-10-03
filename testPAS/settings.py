@@ -85,7 +85,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'testPAS.wsgi.application'
+WSGI_APPLICATION = 'testpas.wsgi.application'
 
 
 # Database
