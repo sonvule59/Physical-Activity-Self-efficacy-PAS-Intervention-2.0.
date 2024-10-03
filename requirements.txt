@@ -6,3 +6,4 @@ pytz==2024.2
 sendgrid==6.11.0
 sqlparse==0.5.1
 starkbank-ecdsa==2.2.0
+gunicorn>=20.0.0
