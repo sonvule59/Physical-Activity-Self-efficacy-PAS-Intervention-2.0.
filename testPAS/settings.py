@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-from testpas import settings
 import environ
 import dj_database_url
 
@@ -77,8 +76,8 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-ROOT_URLCONF = 'testpas.urls'
-
+# ROOT_URLCONF = 'testpas.urls'
+ROOT_URLCONF = 'urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -95,8 +94,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'testpas.wsgi.application'
-
+# WSGI_APPLICATION = 'testpas.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
