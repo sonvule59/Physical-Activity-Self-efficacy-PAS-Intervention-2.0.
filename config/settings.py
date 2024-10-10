@@ -35,8 +35,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-import os
-
 # PostgreSQL configuration (for use on Heroku)
 DATABASES = {
     'default': {
