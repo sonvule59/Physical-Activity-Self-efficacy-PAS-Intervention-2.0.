@@ -1,1 +1,3 @@
 sendgrid.env
+# Ignore virtual environment
+webdev/
