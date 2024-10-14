@@ -76,7 +76,7 @@ MIDDLEWARE = [
 ]
 
 # ROOT_URLCONF = 'testpas.urls'
-ROOT_URLCONF = 'testpas.urls'
+ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
