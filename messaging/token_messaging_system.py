@@ -37,7 +37,6 @@ class EmailService:
         except Exception as e:
             print(f"Failed to send email: {str(e)}")
 
-# Function to trigger SMS using Heroku (as a webhook example)
 class MessagingService:
     def __init__(self, heroku_webhook_url):
         self.heroku_webhook_url = heroku_webhook_url
