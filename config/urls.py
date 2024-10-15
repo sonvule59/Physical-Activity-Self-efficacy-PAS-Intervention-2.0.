@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-# from testpas import views
+import testpas
+from testpas import views
 
 urlpatterns = [
     path('survey/<int:survey_id>/start/', views.start_survey, name='start_survey'),
