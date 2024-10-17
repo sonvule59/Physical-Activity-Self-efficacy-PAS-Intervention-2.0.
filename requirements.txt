@@ -13,3 +13,4 @@ whitenoise==6.7.0
 flask
 requests
 dj-database-url
+psycopg2-binary

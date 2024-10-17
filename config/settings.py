@@ -14,8 +14,8 @@ from pathlib import Path
 import os
 import environ
 import dj_database_url
-# BASE_DIR = Path(__file__).resolve().parent.parent
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env()
 environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, ".env")
