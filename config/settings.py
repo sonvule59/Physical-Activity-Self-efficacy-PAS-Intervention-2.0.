@@ -165,7 +165,7 @@ STATIC_URL = '/static/'
 # command. This directory is typically used for serving static files in production.
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'staticfiles'),
 ]
 
 # Whitenoise settings to handle static files in production
