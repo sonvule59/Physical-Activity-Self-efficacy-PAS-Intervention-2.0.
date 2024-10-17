@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-@tnd2zmyq24gcl^by66kcv^r(fjmd(9pt+)_*($!ory$603sw0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # PostgreSQL configuration (for use on Heroku)
 # DATABASES = {
@@ -117,20 +117,23 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #     }
 # }
 
-DATABASES = {'default': {}}
+# DATABASES = {'default': {}}
+DATABASES = {
+    'default': dj_database_url.config(default='postgres://localhost:5432')
+}
 ATOMIC_REQUESTS = True
 
-if "DATABASE_NAME" in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': env('DATABASE_NAME'),
-            'USER' : env('DATABASE_USER'),
-            'PASSWORD' : env('DATABASE_PASS'),
-            'HOST' : env('DATABASE_HOST'),
-            'PORT' : env('DATABASE_PORT'),
-        }
-    }
+# if "DATABASE_NAME" in os.environ:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#             'NAME': env('DATABASE_NAME'),
+#             'USER' : env('DATABASE_USER'),
+#             'PASSWORD' : env('DATABASE_PASS'),
+#             'HOST' : env('DATABASE_HOST'),
+#             'PORT' : env('DATABASE_PORT'),
+#         }
+#     }
 
 
 
