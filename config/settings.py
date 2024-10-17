@@ -54,7 +54,7 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
-    'testpas',
+    # 'testpas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
