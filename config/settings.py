@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import environ
+import dj_database_url
 # BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env()
@@ -36,17 +37,26 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # PostgreSQL configuration (for use on Heroku)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('DB_USER'),
+#         'PASSWORD': os.getenv('DB_PASSWORD'),
+#         'HOST': os.getenv('DB_HOST'),
+#         'PORT': '5432',
+#     }
+# }
 DATABASES = {
-    'default': {
+    'default':{
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
+        'NAME':  os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': '5432',
+        'HOST': os.getenv ('DB_HOST', 'localhost'),  # Or your PostgreSQL server address
+        'PORT': ('DB_HOST','5432'),
     }
 }
-
 
 # # SendGrid configuration
 # SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
@@ -55,7 +65,7 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
-    # 'testpas',
+    'testpas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,7 +84,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    
 ]
 
 # ROOT_URLCONF = 'testpas.urls'

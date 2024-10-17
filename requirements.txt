@@ -10,3 +10,5 @@ sendgrid==6.11.0
 sqlparse==0.5.1
 starkbank-ecdsa==2.2.0
 whitenoise==6.7.0
+flask
+requests
