@@ -20,15 +20,16 @@ from django.contrib import admin
 # from django.contrib import views as auth_views
 from django.urls import path, include
 # from testpas import views as auth_views
+import testpas.views as views
 
 app_name = 'testpas'
 
 urlpatterns = [
-    # path('survey/<int:survey_id>/start/', auth_views.start_survey, name='start_survey'),
-    # path('survey/<int:survey_id>/questions/', auth_views.survey_questions, name='survey_questions'),
-    # path('survey/<int:survey_id>/complete/', auth_views.survey_complete, name='survey_complete'),
+    path('survey/<int:survey_id>/start/', views.start_survey, name='start_survey'),
+    path('survey/<int:survey_id>/questions/', views.survey_questions, name='survey_questions'),
+    path('survey/<int:survey_id>/complete/', views.survey_complete, name='survey_complete'),
     path('admin/', admin.site.urls),
     path('', include('config.urls')),  
-    path('', include('testpas.views')),  
+    # path('', include('testpas.views')),  
     path('', include('https://git.heroku.com/testpas.git')),
 ]
