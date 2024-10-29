@@ -54,5 +54,5 @@ def send_completion_email(user_email, survey):
         to_emails=user_email,
         subject='Survey Completed',
         html_content=f'Thank you for completing the survey: {survey.title}.')
-    sg = SendGridAPIClient("")
+    sg = SendGridAPIClient("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")
     sg.send(message)
