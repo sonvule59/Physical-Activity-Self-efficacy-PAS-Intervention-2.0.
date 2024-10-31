@@ -29,7 +29,7 @@ urlpatterns = [
     # path('survey/<int:survey_id>/questions/', views.survey_questions, name='survey_questions'),
     # path('survey/<int:survey_id>/complete/', views.survey_complete, name='survey_complete'),
     path('admin/', admin.site.urls),
-    path('', include('urls')),  
+    path('', include('config.urls')),  
     # path('', include('testpas.views')),  
     path('', include('https://git.heroku.com/testpas.git')),
 ]
