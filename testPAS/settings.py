@@ -65,14 +65,14 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
-    # 'testpas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'whitenoise.runserver_nostatic',   
+    'whitenoise.runserver_nostatic',  
+    'testpas', 
 ]
 
 MIDDLEWARE = [
