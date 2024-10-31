@@ -20,7 +20,7 @@ from django.contrib import admin
 # from django.contrib import views as auth_views
 from django.urls import path, include
 # from testpas import views as auth_views
-# import testpas.views as views
+import testpas.views as views
 
 app_name = 'testpas'
 
