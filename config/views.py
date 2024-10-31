@@ -1,7 +1,7 @@
 #track user progress through survey and then (maybe) send an email when the survey is completed
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from .models import Survey, Question, Response, UserSurveyProgress
+from testpas.models import Survey, Question, Response, UserSurveyProgress
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
