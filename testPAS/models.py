@@ -8,13 +8,22 @@ import random
 import uuid
 
 class Token(models.Model):
+    recipient = models.EmailField(max_length=255)
+    token = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+
     # recipient = models.CharField(max_length=255)
     # token = models.CharField(max_length=10, unique=True)
     # created_at = models.DateTimeField(auto_now_add=True)
-
-    recipient = models.CharField(max_length=100)
-    token = models.CharField(max_length=100, default=uuid.uuid4)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # recipient = models.CharField(max_length=100)
+    # token = models.CharField(max_length=100, default=uuid.uuid4)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # valid_until = models.DateTimeField(null=True, blank=True) 
+    # recipient = models.EmailField(max_length=255)
+    # token = models.CharField(max_length=255, unique=True)
+    # created_at = models.DateTimeField(default=timezone.now)
+    # valid_until = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"Token for {self.recipient}: {self.token}"

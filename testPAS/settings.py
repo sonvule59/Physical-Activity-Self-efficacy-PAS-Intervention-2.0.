@@ -34,27 +34,17 @@ SECRET_KEY = 'django-insecure-@tnd2zmyq24gcl^by66kcv^r(fjmd(9pt+)_*($!ory$603sw0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
 
+ALLOWED_HOSTS = ['*']
 # PostgreSQL configuration (for use on Heroku)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('DB_USER'),
-#         'PASSWORD': os.getenv('DB_PASSWORD'),
-#         'HOST': os.getenv('DB_HOST'),
-#         'PORT': '5432',
-#     }
-# }
 DATABASES = {
-    'default':{
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  os.getenv('DB_NAME'),
+        'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv ('DB_HOST', 'localhost'),  # Or your PostgreSQL server address
-        'PORT': ('DB_HOST','5432'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': '5432',
     }
 }
 
@@ -72,7 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',  
-    # 'testpas', 
+    'testpas', 
 ]
 
 MIDDLEWARE = [
@@ -105,6 +95,19 @@ TEMPLATES = [
     },
 ]
 
+
+# Email settings
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server
+EMAIL_HOST = 'smtp.iastate.edu'  # Replace with your SMTP server
+EMAIL_PORT = 587  # Typically 587 for TLS, 465 for SSL
+EMAIL_USE_TLS = True  # Use TLS (True) or SSL (False)
+# EMAIL_HOST_USER = 'projectpas2024@gmail.com'  # Replace with your email
+EMAIL_HOST_USER = 'svu23@iastate.edu'  # Replace with your email
+
+EMAIL_HOST_PASSWORD = ' '  # Replace with your email password
+DEFAULT_FROM_EMAIL = 'svu23@iastate.edu'  # Replace with your email
 # WSGI_APPLICATION = "testpas.wsgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
 
@@ -119,9 +122,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 # }
 
 # DATABASES = {'default': {}}
-DATABASES = {
-    'default': dj_database_url.config(default='postgres://localhost:5432')
-}
+# DATABASES = {
+#     'default': dj_database_url.config(default='postgres://localhost:5432')
+# }
 ATOMIC_REQUESTS = True
 
 # if "DATABASE_NAME" in os.environ:
@@ -168,10 +171,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 
 ALLOWED_HOSTS = ['*']
 
