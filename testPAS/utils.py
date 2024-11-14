@@ -3,6 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random
 import string
+import requests
 
 # Function to generate a token
 def generate_token(length=6):
