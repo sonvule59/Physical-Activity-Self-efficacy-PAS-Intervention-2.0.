@@ -1,4 +1,5 @@
 #track user progress through survey and then (maybe) send an email when the survey is completed
+from smtplib import SMTPException
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from testPAS.models import Survey, Question, Response, UserSurveyProgress

@@ -23,7 +23,7 @@ from django.urls import path, include
 from testPAS import views
 #import testpas.views as views
 # from django.contrib.auth import views as views
-app_name = 'testpas'
+app_name = 'testPAS'
 
 urlpatterns = [
     path('', views.index, name="index"),
