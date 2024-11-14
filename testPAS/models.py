@@ -51,7 +51,7 @@ class Token(models.Model):
         return f"Token for {self.recipient}: {self.token}"
 
     @staticmethod
-    def generate_token(length=6):
+    def generate_token(length=10):
         import string
         import random
         characters = string.ascii_letters + string.digits
