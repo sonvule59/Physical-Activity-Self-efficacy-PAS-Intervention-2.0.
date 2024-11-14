@@ -44,7 +44,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCSRFToken(),  // Use CSRF token for secure requests
+                        'X-CSRFToken': getCSRFToken(),  
                     },
                     body: JSON.stringify({ email: email })
                 });

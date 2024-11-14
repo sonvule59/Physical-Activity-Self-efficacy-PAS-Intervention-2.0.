@@ -99,15 +99,15 @@ TEMPLATES = [
 # Email settings
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server
-EMAIL_HOST = 'smtp.iastate.edu'  # Replace with your SMTP server
+# EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_HOST = 'smtp.iastate.edu' 
 EMAIL_PORT = 587  # Typically 587 for TLS, 465 for SSL
-EMAIL_USE_TLS = True  # Use TLS (True) or SSL (False)
-# EMAIL_HOST_USER = 'projectpas2024@gmail.com'  # Replace with your email
-EMAIL_HOST_USER = 'svu23@iastate.edu'  # Replace with your email
+EMAIL_USE_TLS = True  
+# EMAIL_HOST_USER = 'projectpas2024@gmail.com'  
+EMAIL_HOST_USER = 'svu23@iastate.edu'  
 
-EMAIL_HOST_PASSWORD = ' '  # Replace with your email password
-DEFAULT_FROM_EMAIL = 'svu23@iastate.edu'  # Replace with your email
+EMAIL_HOST_PASSWORD = ' '  
+DEFAULT_FROM_EMAIL = 'svu23@iastate.edu' 
 # WSGI_APPLICATION = "testpas.wsgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
 
