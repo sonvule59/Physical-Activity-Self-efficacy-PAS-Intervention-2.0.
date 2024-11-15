@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Account</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Create Your Account</h1>
+    </header>
+    
+    <main>
+        <section id="create-account">
+            <h2>Register to Get Started</h2>
+            <form id="create-account-form" onsubmit="createAccount(event)">
+                <label for="registration-code">Registration Code*</label>
+                <input type="text" id="registration-code" name="registration-code" required><br><br>
+
+                <label for="user-id">ID (no case-sensitive)*</label>
+                <input type="text" id="user-id" name="user-id" required><br><br>
+                
+                <label for="password">Password (case-sensitive)*</label>
+                <input type="password" id="password" name="password" required><br><br>
+                
+                <label for="password-confirmation">Password Confirmation (case-sensitive)*</label>
+                <input type="password" id="password-confirmation" name="password-confirmation" required><br><br>
+                
+                <label for="email">Email Address (no case-sensitive)*</label>
+                <input type="email" id="email" name="email" required><br><br>
+                
+                <label for="phone-number">Phone Number*</label>
+                <input type="tel" id="phone-number" name="phone-number" required><br><br>
+                
+                <button type="submit">Create Account</button>
+            </form>
+            <div id="create-account-output"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Progress Tracking System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function createAccount(event) {
+            event.preventDefault();
+
+            const registrationCode = document.getElementById('registration-code').value.trim().toLowerCase();
+            const userId = document.getElementById('user-id').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirmation = document.getElementById('password-confirmation').value;
+            const email = document.getElementById('email').value.trim();
+            const phoneNumber = document.getElementById('phone-number').value.trim();
+
+            const outputDiv = document.getElementById('create-account-output');
+
+            // Verify registration code
+            if (registrationCode !== 'wavepa') {
+                outputDiv.innerHTML = "Invalid registration code.";
+                return;
+            }
+
+            // Verify passwords match
+            if (password !== passwordConfirmation) {
+                outputDiv.innerHTML = "Passwords do not match.";
+                return;
+            }
+
+            // Placeholder for an actual API call to create the account
+            outputDiv.innerHTML = "Creating your account...";
+
+            setTimeout(() => {
+                // This is a placeholder to indicate success. Replace with real API response handling.
+                outputDiv.innerHTML = "Account created successfully. Please check your email to confirm your account.";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

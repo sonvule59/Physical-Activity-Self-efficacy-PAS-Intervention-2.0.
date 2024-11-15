@@ -1,6 +1,8 @@
 #track user progress through survey and then (maybe) send an email when the survey is completed
 from smtplib import SMTPException
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
 from django.utils import timezone
 from testpas.models import Survey, Question, Response, UserSurveyProgress
 from sendgrid import SendGridAPIClient
@@ -157,3 +159,42 @@ def send_completion_email(user_email, survey):
         html_content=f'Thank you for completing the survey: {survey.title}.')
     sg = SendGridAPIClient("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")
     sg.send(message)
+
+def create_account(request):
+    if request.method == 'POST':
+        registration_code = request.POST.get('registration-code').strip().lower()
+        user_id = request.POST.get('user-id').strip()
+        password = request.POST.get('password')
+        password_confirmation = request.POST.get('password-confirmation')
+        email = request.POST.get('email').strip().lower()
+        phone_number = request.POST.get('phone-number').strip()
+
+        # Verify registration code
+        if registration_code != 'wavepa':
+            return JsonResponse({'error': 'Invalid registration code.'}, status=400)
+
+        # Verify passwords match
+        if password != password_confirmation:
+            return JsonResponse({'error': 'Passwords do not match.'}, status=400)
+
+        # Check if user already exists
+        if User.objects.filter(username=user_id).exists():
+            return JsonResponse({'error': 'User ID already taken.'}, status=400)
+
+        # Create user
+        user = User.objects.create_user(username=user_id, password=password, email=email)
+        user.is_active = False  # Mark the user as inactive until email confirmation
+        user.save()
+
+        # Send confirmation email (replace with your email backend settings)
+        send_mail(
+            'Confirm your account',
+            'Please confirm your account by clicking the link below.',
+            'noreply@example.com',
+            [email],
+            fail_silently=False,
+        )
+
+        return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
+
+    return render(request, 'create_account.html')
