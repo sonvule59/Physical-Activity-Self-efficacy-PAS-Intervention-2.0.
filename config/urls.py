@@ -28,12 +28,13 @@ app_name = 'testpas'
 urlpatterns = [
     path('', views.index, name="index"),
     path('api/send_token_email/', views.send_token_email, name='send_token_email'),
+    path('create-account/', views.create_account, name="create_account"),  # New URL path for account creation
     path('survey/<int:survey_id>/start/', views.start_survey, name='start_survey'),
     path('survey/<int:survey_id>/questions/', views.survey_questions, name='survey_questions'),
     path('survey/<int:survey_id>/complete/', views.survey_complete, name='survey_complete'),
-    path('create-account/', views.create_account, name='create_account'),  # New URL path for account creation
-    # path('login/', views.login_view, name='login'),  # New URL path for login
     path('admin/', admin.site.urls),
+    # path('login/', views.login_view, name='login'),  # New URL path for login
+    
     # path('404', views.FourZeroFour, name="404")
 ]
     # path('', include('https://git.heroku.com/testpas.git')),
