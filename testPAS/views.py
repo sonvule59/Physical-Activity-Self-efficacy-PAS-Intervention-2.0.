@@ -21,11 +21,11 @@ from .models import Token
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated  # <-- Here
+from rest_framework.permissions import IsAuthenticated 
 
 
 # class HelloView(APIView):
-#     permission_classes = (IsAuthenticated,)             # <-- And here
+#     permission_classes = (IsAuthenticated,)             # Require authentication
 
 #     def get(self, request):
 #         content = {'message': 'Hello, World!'}
