@@ -5,6 +5,7 @@ import random
 import string
 
 
+
 # Function to generate a token
 def generate_token(length=6):
     characters = string.ascii_letters + string.digits
