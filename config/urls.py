@@ -24,17 +24,31 @@ from testpas import views
 #import testpas.views as views
 # from django.contrib.auth import views as views
 app_name = 'testpas'
-
 urlpatterns = [
-    path('', views.index, name="index"),
-    path('api/send_token_email/', views.send_token_email, name='send_token_email'),
-    path('create-account/', views.create_account, name="create_account"),  
-    path('survey/<int:survey_id>/start/', views.start_survey, name='start_survey'),
-    path('survey/<int:survey_id>/questions/', views.survey_questions, name='survey_questions'),
-    path('survey/<int:survey_id>/complete/', views.survey_complete, name='survey_complete'),
+    path('', views.questionnaire_interest, name="index"),
+    path('create-account/', views.create_account, name='create_account'),
+    path('confirm-account/', views.confirm_account, name='confirm_account'),
+    path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
+    path('questionnaire/', views.questionnaire, name='questionnaire'),
+    path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+    path('consent-form/', views.consent_form, name='consent_form'),
+
+    path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
+    path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
+    path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+
     path('admin/', admin.site.urls),
+]
+# urlpatterns = [
+#     path('', views.index, name="index"),
+#     path('api/send_token_email/', views.send_token_email, name='send_token_email'),
+#     path('create-account/', views.create_account, name="create_account"),  
+#     path('survey/<int:survey_id>/start/', views.start_survey, name='start_survey'),
+#     path('survey/<int:survey_id>/questions/', views.survey_questions, name='survey_questions'),
+#     path('survey/<int:survey_id>/complete/', views.survey_complete, name='survey_complete'),
+#     path('admin/', admin.site.urls),
     # path('login/', views.login_view, name='login'),  # New URL path for login
     
     # path('404', views.FourZeroFour, name="404")
-]
+
     # path('', include('https://git.heroku.com/testpas.git')),

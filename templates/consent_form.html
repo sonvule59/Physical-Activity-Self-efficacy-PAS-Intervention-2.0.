@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consent Form</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Consent to Participate</h1>
+    </header>
+    
+    <main>
+        <section id="consent-form">
+            <h2>Please read the following information and provide your consent to participate in this study.</h2>
+            <p>
+                By consenting to participate, you agree to comply with the study requirements, including:
+            </p>
+            <ul>
+                <li>Wearing a physical activity monitor for two weeks during the study (e.g., one week at the beginning and one week at the end).</li>
+                <li>Responding to emails and phone contacts from the research team.</li>
+                <li>Following all instructions related to the study.</li>
+            </ul>
+            <p>
+                If you have any questions about the study, feel free to reach out to the research team.
+            </p>
+            <form id="consent-form" action="" method="POST">
+                {% csrf_token %}
+                <label>
+                    <input type="radio" name="consent" value="yes" required> I consent to participate in this study.
+                </label><br><br>
+                <label>
+                    <input type="radio" name="consent" value="no" required> I do not consent to participate.
+                </label><br><br>
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+</body>
+</html>

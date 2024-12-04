@@ -42,18 +42,26 @@ class UserSurveyProgress(models.Model):
     def __str__(self):
         return f"{self.user} - {self.survey} - {self.progress}%"
 
-class Token(models.Model):
-    recipient = models.EmailField(max_length=255)
-    token = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class Token(models.Model):
+#     recipient = models.EmailField(max_length=255)
+#     token = models.CharField(max_length=255)
+#     created_at = models.DateTimeField(auto_now_add=True)
         
+#     def __str__(self):
+#         return f"Token for {self.recipient}: {self.token}"
+    
+
+class Token(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
+
     def __str__(self):
-        return f"Token for {self.recipient}: {self.token}"
+        return f"Token for {self.recipient.username}"
 
     @staticmethod
     def generate_token(length=10):
-        import string
-        import random
         characters = string.ascii_letters + string.digits
         return ''.join(random.choice(characters) for _ in range(length))
 

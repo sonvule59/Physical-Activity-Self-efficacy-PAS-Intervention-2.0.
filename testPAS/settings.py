@@ -20,6 +20,7 @@ env = environ.Env()
 environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, ".env")
 )
+BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local development if not set
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -104,10 +105,11 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # Typically 587 for TLS, 465 for SSL
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False  
-# EMAIL_HOST_USER = 'projectpas2024@gmail.com'  
-EMAIL_HOST_USER = 'svu23@iastate.edu'  
+EMAIL_HOST_USER = 'projectpas2024@gmail.com'  
+# EMAIL_HOST_USER = 'svu23@iastate.edu'  
 
-EMAIL_HOST_PASSWORD = ' '  
+
+EMAIL_HOST_PASSWORD = 'gbze lshz gbqj kccb'  
 DEFAULT_FROM_EMAIL = 'svu23@iastate.edu' 
 # WSGI_APPLICATION = "testpas.wsgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -191,6 +193,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # STATIC_URL = "static/"
 # # The `STATIC_ROOT` setting in Django is used to specify the directory where Django will collect all
 # # static files from various applications into one location when you run the `collectstatic` management

@@ -1,0 +1,36 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionnaire Interest</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Participation Questionnaire</h1>
+    </header>
+    
+    <main>
+        <section id="questionnaire-interest">
+            <h2>Are you interested in participating in the eligibility questionnaire?</h2>
+            <form id="questionnaire-interest-form" action="" method="POST">
+                {% csrf_token %}
+                <label>
+                    <input type="radio" name="interested" value="yes" required> Yes
+                </label><br><br>
+                <label>
+                    <input type="radio" name="interested" value="no" required> No
+                </label><br><br>
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy;Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+</body>
+</html>

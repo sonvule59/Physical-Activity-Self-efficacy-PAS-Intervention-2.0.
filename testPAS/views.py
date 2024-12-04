@@ -1,231 +1,248 @@
-#track user progress through survey and then (maybe) send an email when the survey is completed
-from smtplib import SMTPException
-from django.core.mail import send_mail
-from django.shortcuts import render, redirect
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
-from django.utils import timezone
-from testpas.models import Survey, Question, Response, UserSurveyProgress
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-import json
-import logging
-# from testpas.utils import EmailService, generate_token  
-from .models import Token
-from django.utils import timezone
+# views.py
+
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .utils import EmailService, generate_token  
 from .models import Token
-from django.utils import timezone
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated 
+import uuid
+from django.contrib.auth import login
+from django.conf import settings
 
+# Eligibility check function
+def eligibility_check(data):
+    age = int(data.get('age'))
+    if age < 18 or age > 64:
+        return False, 'Age requirement not met. Must be between 18 and 64 years.'
 
-# class HelloView(APIView):
-#     permission_classes = (IsAuthenticated,)             # Require authentication
+    height = int(data.get('height'))  # in inches
+    weight = int(data.get('weight'))  # in lbs
+    bmi = (weight / (height ** 2)) * 703
+    if bmi < 25.0:
+        return False, 'BMI must be greater than or equal to 25.'
 
-#     def get(self, request):
-#         content = {'message': 'Hello, World!'}
-#         return Response(content)
-    
-def index(request):
-    surveys = Survey.objects.all()
-    return render(request, 'index.html', {'surveys': surveys})
+    has_device = data.get('has_device', '').lower() == 'yes'
+    if not has_device:
+        return False, 'Must have access to a technological device to participate.'
 
-def start_survey(request, survey_id):
-    survey = Survey.objects.get(pk=survey_id)
-    if request.method == 'POST':
-        progress, _ = UserSurveyProgress.objects.get_or_create(user=request.user, survey=survey)
-        progress.start_time = timezone.now()
-        progress.save()
-        return redirect('survey_questions', survey_id=survey_id)
-    
-    return render(request, 'start_survey.html', {'survey': survey})
+    not_enroll_other = data.get('not_enroll_other', '').lower() == 'yes'
+    if not not_enroll_other:
+        return False, 'Must agree not to enroll in another research-based intervention program.'
 
-def survey_questions(request, survey_id):
-    survey = Survey.objects.get(pk=survey_id)
-    progress = UserSurveyProgress.objects.get(user=request.user, survey=survey)
+    comply_monitoring = data.get('comply_monitoring', '').lower() == 'yes'
+    if not comply_monitoring:
+        return False, 'Must agree to comply with physical activity monitoring requirements.'
 
-    if request.method == 'POST':
-        question_id = request.POST.get('question_id')
-        answer = request.POST.get('answer')
-        question = Question.objects.get(pk=question_id)
-        Response.objects.create(user=request.user, question=question, answer=answer)
-        
-        # Track progress
-        progress.progress += 1
-        if progress.progress == survey.questions.count():
-            progress.end_time = timezone.now()
-        progress.save()
+    respond_contacts = data.get('respond_contacts', '').lower() == 'yes'
+    if not respond_contacts:
+        return False, 'Must agree to respond to study-related contacts.'
 
-        return redirect('next_question', survey_id=survey_id)
+    return True, 'Eligible'
 
-    unanswered = survey.questions.exclude(response__user=request.user).first()
-    if unanswered:
-        return render(request, 'question.html', {'question': unanswered})
-    
-    return redirect('survey_complete', survey_id=survey_id)
-
-def survey_complete(request, survey_id):
-    survey = Survey.objects.get(pk=survey_id)
-    progress = UserSurveyProgress.objects.get(user=request.user, survey=survey)
-    
-    # Send completion email
-    send_completion_email(request.user.email, survey)
-    
-    return render(request, 'survey_complete.html', {'survey': survey, 'progress': progress})
-
-@csrf_exempt
-def send_token_email(request):
-    if request.method == 'POST':
-        try:
-            # Debug: Print incoming request data
-            print("Request body:", request.body)
-            data = json.loads(request.body)
-
-            email = data.get('email')
-            if not email:
-                return JsonResponse({'error': 'Email is required'}, status=400)
-
-            # Debug: Generating the token
-            print(f"Generating token for email: {email}")
-            token_value = generate_token()
-
-            # Debug: Saving the token to the database
-            print(f"Saving token {token_value} to database for {email}")
-            Token.objects.create(recipient=email, token=token_value, created_at=timezone.now())
-
-            # Configure and use the email service
-            email_service = EmailService(
-                smtp_server="smtp.gmail.com",
-                smtp_port=587,
-                smtp_user="projectpas2024@gmail.com",
-                smtp_password="ybmp kmbc xxve lghn "
-            )
-
-            # Debug: Sending the email
-            print(f"Sending token email to {email}")
-            email_service.send_email(email, "Your Token", f"Your token is: {token_value}")
-
-            return JsonResponse({'message': 'Token sent successfully'})
-
-        except SMTPException as smtp_err:
-            print(f"SMTPException occurred: {str(smtp_err)}")
-            return JsonResponse({'error': f'SMTP error: {str(smtp_err)}'}, status=500)
-
-        except json.JSONDecodeError:
-            print("Error: Failed to parse JSON request body.")
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-
-        except Exception as e:
-            print(f"Exception occurred: {str(e)}")
-            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-def send_completion_email(user_email, survey):
-    message = Mail(
-        from_email='no-reply@example.com',
-        to_emails=user_email,
-        subject='Survey Completed',
-        html_content=f'Thank you for completing the survey: {survey.title}.')
-    sg = SendGridAPIClient("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")
-    sg.send(message)
-
-# Configure logging
-logger = logging.getLogger(__name__)
 @csrf_exempt
 def create_account(request):
-    if request.method == 'GET':
-        return render(request, 'create_account.html')
-    elif request.method == 'POST':
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            registration_code = data.get('registration-code').strip().lower()
-            user_id = data.get('user-id').strip()
-            password = data.get('password')
-            password_confirmation = data.get('password-confirmation')
-            email = data.get('email').strip().lower()
-            phone_number = data.get('phone-number').strip()
 
-            # Verify registration code
+            registration_code = data.get('registration-code', '').strip().lower()
+            user_id = data.get('user-id').strip()
+            password = data.get('password', '')
+            password_confirmation = data.get('password-confirmation', '')
+            email = data.get('email').strip().lower()
+            phone_number = data.get('phone-number', '').strip()
+
             if registration_code != 'wavepa':
                 return JsonResponse({'error': 'Invalid registration code.'}, status=400)
 
-            # Verify passwords match
             if password != password_confirmation:
                 return JsonResponse({'error': 'Passwords do not match.'}, status=400)
 
-            # Check if user already exists
             if User.objects.filter(username=user_id).exists():
                 return JsonResponse({'error': 'User ID already taken.'}, status=400)
 
-            # Create user
             user = User.objects.create_user(username=user_id, password=password, email=email)
-            user.is_active = False  # Mark the user as inactive until email confirmation
+            user.is_active = False
             user.save()
 
-            # Send confirmation email
-            try:
-                send_mail(
-                    'Confirm Your Account',
-                    'Thank you for registering. Please confirm your account by clicking the link below.',
-                    'noreply@example.com',
-                    [email],
-                    fail_silently=False,
-                )
-                return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
-            except Exception as e:
-                return JsonResponse({'error': f'Failed to send email: {str(e)}'}, status=500)
+            token_value = str(uuid.uuid4())
+            Token.objects.create(recipient=user, token=token_value)
+
+            confirmation_link = f"{settings.BASE_URL}/confirm-account/?token={token_value}"
+            send_mail(
+                'Confirm Your Account',
+                f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
+                'noreply@example.com',
+                [email],
+                fail_silently=False,
+            )
+            # send_mail(
+            #     'Confirm Your Account',
+            #     f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
+            #     'noreply@example.com',
+            #     [email],
+            #     fail_silently=False,
+            # )
+
+            return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
+
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
+
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-# def create_account(request):
+
+    return render(request, 'create_account.html')
+
+def confirm_account(request):
+    token_value = request.GET.get('token')
+    try:
+        token = Token.objects.get(token=token_value, used=False)
+        user = token.recipient
+        user.is_active = True
+        user.save()
+        token.used = True
+        token.save()
+
+        request.session['user_id'] = user.username
+        request.session.modified = True  # Ensure session is saved
+        login(request, user)
+        
+        return redirect(f'/questionnaire/?token={token_value}')
+    except Token.DoesNotExist:
+        return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
+        
+
+def questionnaire_interest(request):
+    if request.method == 'GET':
+        return render(request, 'questionnaire_interest.html')
+    elif request.method == 'POST':
+        interested = request.POST.get('interested')
+        if interested == 'no':
+            return redirect('exit_screen_not_interested')
+        return redirect('questionnaire')
+
+@csrf_exempt
+def questionnaire(request):
+    token_value = request.GET.get('token')
+    if not token_value:
+        return JsonResponse({'error': 'Token not found in request.'}, status=400)
+    
+    try:
+        # Retrieve the token and user directly from the request
+        token = Token.objects.get(token=token_value, used=True)
+        user = token.recipient
+    except Token.DoesNotExist:
+        return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
+
+    if request.method == 'GET':
+        return render(request, 'questionnaire.html', {'token': token_value})
+
+    elif request.method == 'POST':
+        # Proceed with processing the form data
+        data = {
+            'age': request.POST.get('age'),
+            'height': request.POST.get('height'),
+            'weight': request.POST.get('weight'),
+            'has_device': request.POST.get('has_device'),
+            'not_enroll_other': request.POST.get('not_enroll_other'),
+            'comply_monitoring': request.POST.get('comply_monitoring'),
+            'respond_contacts': request.POST.get('respond_contacts'),
+        }
+
+        # Check eligibility using the updated `eligibility_check()` function
+        is_eligible, message = eligibility_check(data)
+
+        if not is_eligible:
+            # Redirect to not eligible exit screen
+            return redirect('exit_screen_not_eligible')
+
+        # If eligible, proceed to consent form, keep passing the token
+        return redirect(f'/consent-form/?token={token_value}')
+
+# @csrf_exempt
+# def questionnaire(request):
 #     if request.method == 'GET':
-#         return render(request, 'create_account.html')
+#         # Ensure user_id exists in session
+#         user_id = request.session.get('user_id')
+#         if not user_id:
+#             return JsonResponse({'error': 'User not found in session. Please confirm your account first.'}, status=400)
+
+#         return render(request, 'questionnaire.html')
+
 #     elif request.method == 'POST':
-#         registration_code = request.POST.get('registration-code').strip().lower()
-#         user_id = request.POST.get('user-id').strip()
-#         password = request.POST.get('password')
-#         password_confirmation = request.POST.get('password-confirmation')
-#         email = request.POST.get('email').strip().lower()
-#         phone_number = request.POST.get('phone-number').strip()
+#         # Get user using the user ID stored in the session
+#         user_id = request.session.get('user_id')
+#         if not user_id:
+#             return JsonResponse({'error': 'User not found in session.'}, status=400)
 
-#         # Verify registration code
-#         if registration_code != 'wavepa':
-#             return JsonResponse({'error': 'Invalid registration code.'}, status=400)
+#         # Proceed with processing the form data
+#         data = {
+#             'age': request.POST.get('age'),
+#             'height': request.POST.get('height'),
+#             'weight': request.POST.get('weight'),
+#             'has_device': request.POST.get('has_device'),
+#             'not_enroll_other': request.POST.get('not_enroll_other'),
+#             'comply_monitoring': request.POST.get('comply_monitoring'),
+#             'respond_contacts': request.POST.get('respond_contacts'),
+#         }
 
-#         # Verify passwords match
-#         if password != password_confirmation:
-#             return JsonResponse({'error': 'Passwords do not match.'}, status=400)
+#         user = get_object_or_404(User, pk=user_id)
 
-#         # Check if user already exists
-#         if User.objects.filter(username=user_id).exists():
-#             return JsonResponse({'error': 'User ID already taken.'}, status=400)
+#         # Check eligibility using the updated `eligibility_check()` function
+#         is_eligible, message = eligibility_check(data)
 
-#         # Create user
-#         user = User.objects.create_user(username=user_id, password=password, email=email)
-#         user.is_active = False  # Mark the user as inactive until email confirmation
-#         user.save()
+#         if not is_eligible:
+#             # Send ineligibility email (optional, as per your request)
+#             return redirect('exit_screen_not_eligible')
 
-#         # Send confirmation email
-#         try:
-#             send_mail(
-#                 'Confirm Your Account',
-#                 'Thank you for registering. Please confirm your account by clicking the link below.',
-#                 'noreply@example.com',
-#                 [email],
-#                 fail_silently=False,
-#             )
-#             return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
-#         except Exception as e:
-#             return JsonResponse({'error': f'Failed to send email: {str(e)}'}, status=500)
+#         # If eligible, proceed to consent form
+#         return redirect('consent_form')
 
-#     return render(request, 'create_account.html')
-  
+
+def exit_screen_not_interested(request):
+    if request.method == 'GET':
+        return render(request, 'exit_screen_not_interested.html')
+
+
+def exit_screen_not_eligible(request):
+    return render(request, 'exit_screen_not_eligible.html')
+
+def consent_form(request):
+    token_value = request.GET.get('token')
+    if not token_value:
+        return JsonResponse({'error': 'Token not found in request.'}, status=400)
+    
+    try:
+        # Retrieve the token and user directly from the request
+        token = Token.objects.get(token=token_value, used=True)
+        user = token.recipient
+    except Token.DoesNotExist:
+        return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
+
+    if request.method == 'GET':
+        return render(request, 'consent_form.html', {'token': token_value})
+
+    elif request.method == 'POST':
+        consent = request.POST.get('consent')
+        if consent == 'yes':
+            # Proceed to the waiting screen, keep passing the token
+            return redirect(f'/waiting-screen/?token={token_value}')
+        return redirect('exit_screen_not_interested')
+
+# def consent_form(request):
+#     if request.method == 'GET':
+#         return render(request, 'consent_form.html')
+#     elif request.method == 'POST':
+#         consent = request.POST.get('consent')
+#         if consent == 'yes':
+#             return redirect('waiting_screen')
+#         return redirect('exit_screen_not_interested')
+
+def waiting_screen(request):
+    if request.method == 'GET':
+        return render(request, 'waiting_screen.html')
