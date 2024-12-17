@@ -3,8 +3,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random
 import string
-
-
+from testpas.models import Token
+from django.contrib.sites  import requests
 
 # Function to generate a token
 def generate_token(length=6):
@@ -36,6 +36,13 @@ class EmailService:
             print("Email sent successfully!")
         except Exception as e:
             print(f"Failed to send email: {str(e)}")
+
+def validate_token(token_value):
+    try:
+        token = Token.objects.get(token=token_value)
+        return token.recipient  
+    except Token.DoesNotExist:
+        return None  # Invalid token
 
 class MessagingService:
     def __init__(self, heroku_webhook_url):

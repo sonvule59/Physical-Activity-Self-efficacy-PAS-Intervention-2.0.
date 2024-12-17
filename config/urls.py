@@ -16,28 +16,48 @@ Including another URLconf
 """
 import os, sys
 from django.contrib import admin
-# from . import views
-# from django.contrib import views as auth_views
 from django.urls import path, include
-# from testpas import views as auth_views
 from testpas import views
-#import testpas.views as views
-# from django.contrib.auth import views as views
+
 app_name = 'testpas'
 urlpatterns = [
     path('', views.questionnaire_interest, name="index"),
     path('create-account/', views.create_account, name='create_account'),
     path('confirm-account/', views.confirm_account, name='confirm_account'),
+    path('login/', views.login_view, name='login'),
+    path('login-with-token/', views.login_with_token, name='login_with_token'),
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    # path('enter-code/', views.enter_code, name='enter_code'),
+    # path('code-success/', views.code_success, name='code_success'),
+    # path('code-failure/', views.code_failure, name='code_failure'),
+
+    path('confirm-account/', views.confirm_account, name='confirm_account'),
     path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
     path('questionnaire/', views.questionnaire, name='questionnaire'),
     path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
     path('consent-form/', views.consent_form, name='consent_form'),
-
     path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
     path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
-    path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
-
+    # path('enter-code/', views.enter_code, name='enter_code'),
+    # path('code-success/', views.code_success, name='code_success'),
+    # path('code-failure/', views.code_failure, name='code_failure'),
     path('admin/', admin.site.urls),
+    # path('', views.questionnaire_interest, name="index"),
+    # path('create-account/', views.create_account, name='create_account'),
+    # path('confirm-account/', views.confirm_account, name='confirm_account'),
+    # path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
+    # path('questionnaire/', views.questionnaire, name='questionnaire'),
+    # path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+    # path('consent-form/', views.consent_form, name='consent_form'),
+
+    # path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
+    # path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
+    # path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+    # path('questionnaire/', views.questionnaire, name='questionnaire'),  # Add this line for questionnaire
+    # path('confirm-account/', views.confirm_account, name='confirm_account'),
+    
+    # path('admin/', admin.site.urls),
 ]
 # urlpatterns = [
 #     path('', views.index, name="index"),

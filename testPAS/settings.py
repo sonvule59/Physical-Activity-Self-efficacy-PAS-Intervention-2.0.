@@ -107,10 +107,8 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False  
 EMAIL_HOST_USER = 'projectpas2024@gmail.com'  
 # EMAIL_HOST_USER = 'svu23@iastate.edu'  
-
-
 EMAIL_HOST_PASSWORD = 'gbze lshz gbqj kccb'  
-DEFAULT_FROM_EMAIL = 'svu23@iastate.edu' 
+DEFAULT_FROM_EMAIL = 'projectpas2024@gmail.com' 
 # WSGI_APPLICATION = "testpas.wsgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
 
@@ -185,6 +183,9 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+SESSION_COOKIE_AGE = 86400  # 1 day in seconds
+# Make sure the session expires when the user closes the browser
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 STORAGES = {
     # Enable WhiteNoise's GZip and Brotli compression of static assets:

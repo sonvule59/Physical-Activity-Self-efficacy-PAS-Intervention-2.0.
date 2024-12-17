@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to PAS Intervention</h1>
+    </header>
+
+    <main>
+        <section id="user-info">
+            <h2>User Information</h2>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+        </section>
+
+        <section id="survey-progress">
+            <h2>Survey Progress</h2>
+            {% if progress %}
+                <p><strong>Eligible:</strong> {{ progress.eligible }}</p>
+                <p><strong>Consent Given:</strong> {{ progress.consent_given }}</p>
+                <p><strong>Survey Completed:</strong> {{ progress.survey_completed }}</p>
+                <p><strong>Progress Percentage:</strong> {{ progress.progress_percentage }}%</p>
+                <p><strong>Start Time:</strong> {{ progress.start_time }}</p>
+                <p><strong>End Time:</strong> {{ progress.end_time }}</p>
+            {% else %}
+                <p>No progress information available.</p>
+            {% endif %}
+        </section>
+
+        <section id="wave1-code">
+            <h2>Enter Wave 1 Physical Activity Code</h2>
+            {% if within_wave1_period %}
+                <form method="POST" action="{% url 'enter_code' %}">
+                    {% csrf_token %}
+                    <label for="code">Enter Code:</label>
+                    <input type="text" id="code" name="code" required>
+                    <button type="submit">Submit</button>
+                </form>
+                {% if code_error %}
+                    <p style="color: red;">{{ code_error }}</p>
+                {% endif %}
+            {% else %}
+                <p>This task has expired.</p>
+            {% endif %}
+        </section>
+
+        <section id="actions">
+            <h2>Actions</h2>
+            <ul>
+                <li><a href="/logout/">Logout</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+</body>
+</html>

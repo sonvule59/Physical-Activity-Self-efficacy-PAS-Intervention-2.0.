@@ -1,0 +1,23 @@
+<h3>User Data Report</h3>
+{% for user_entry in user_data %}
+    <div class="user-entry">
+        <h4>User: {{ user_entry.user.username }}</h4>
+        <p>Email: {{ user_entry.user.email }}</p>
+        <p>Phone: {{ user_entry.user.phone_number }}</p>
+        {% if user_entry.survey_progress %}
+            <p>Eligible: {{ user_entry.survey_progress.eligible }}</p>
+            <p>Day 1: {{ user_entry.survey_progress.day_1 }}</p>
+            <p>Survey Completed: {{ user_entry.survey_progress.survey_completed }}</p>
+        {% else %}
+            <p>No survey progress found.</p>
+        {% endif %}
+
+        <h5>Responses:</h5>
+        {% for response in user_entry.responses %}
+            <p>Question: {{ response.question.text }}, Answer: {{ response.answer }}</p>
+        {% empty %}
+            <p>No responses found.</p>
+        {% endfor %}
+    </div>
+    <hr>
+{% endfor %}
