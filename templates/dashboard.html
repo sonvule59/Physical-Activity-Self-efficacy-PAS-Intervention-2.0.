@@ -33,6 +33,33 @@
             {% endif %}
         </section>
 
+        {% block content %}
+        <div class="container mt-5">
+            <h1>Welcome, {{ user.username }}</h1>
+            
+            {% if within_wave1_period %}
+                <div class="alert alert-info">
+                    <h4>Wave 1 Code Entry Period Active!</h4>
+                    <p>You can now enter your Wave 1 Physical Activity Code.</p>
+                    <p>Time remaining: {{ days_until_end }} days</p>
+                    <!-- <a href="{% url 'enter_code' %}" class="btn btn-primary">Enter Code</a> -->
+                </div>
+            {% elif days_until_start > 0 %}
+                <div class="alert alert-warning">
+                    <h4>Wave 1 Code Entry Period Starting Soon</h4>
+                    <p>You will be able to enter your code in {{ days_until_start }} days.</p>
+                    <p>Start date: {{ start_date }}</p>
+                    <p>End date: {{ end_date }}</p>
+                </div>
+            {% else %}
+                <div class="alert alert-secondary">
+                    <h4>Wave 1 Code Entry Period Ended</h4>
+                    <p>The code entry period has ended.</p>
+                </div>
+            {% endif %}
+        </div>
+        {% endblock %}
+
         <section id="wave1-code">
             <h2>Enter Wave 1 Physical Activity Code</h2>
             {% if within_wave1_period %}

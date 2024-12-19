@@ -1,7 +1,7 @@
 # views.py
 
-import datetime
-from time import timezone
+from django.utils import timezone
+from datetime import timedelta
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.models import User
@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
-from .models import Survey, Question, Response, UserSurveyProgress, Token, User, Survey
+from .models import Survey, Question, Response, UserSurveyProgress, Token, User
 from .utils import validate_token
 import uuid
 from django.contrib.auth import login, authenticate, logout
@@ -185,71 +185,108 @@ def logout_view(request):
     logout(request)
     return redirect('login') 
 
-# @login_required
+@login_required
 def dashboard(request):
     # user = request.user
     # participant = get_object_or_404(Participant, user=user)
-    # current_date = timezone.now().date()
-    # day_11 = participant.enrollment_date + timezone.timedelta(days=10)
-    # day_21 = participant.enrollment_date + timezone.timedelta(days=20)
-    # within_wave1_period = day_11 <= current_date <= day_21
+    participant, created = Participant.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'enrollment_date': timezone.now().date(),
+            'code_entered': False
+        }
+    )
+    current_date = timezone.now().date()
+    
+    day_11 = participant.enrollment_date + timedelta(days=10)
+    day_21 = participant.enrollment_date + timedelta(days=20)
+    
+    within_wave1_period = day_11 <= current_date <= day_21
 
-    # context = {
-    #     'user': user,
-    #     'progress': participant,
-    #     'within_wave1_period': within_wave1_period,
-    #     'code_error': request.GET.get('code_error', None),
-    # }
-    return render(request, 'dashboard.html')
+    context = {
+        'user': request.user,
+        'progress': participant,
+        'within_wave1_period': within_wave1_period,
+        'code_error': request.GET.get('code_error', None),
+        'days_until_start': (day_11 - current_date).days if current_date < day_11 else 0,
+        'days_until_end': (day_21 - current_date).days if current_date <= day_21 else 0,
+        'start_date': day_11,
+        'end_date': day_21
+    }
+    return render(request, 'dashboard.html', context)
 
-# @login_required
-# def enter_code(request):
-#     participant = Participant.objects.get(user=request.user)
-#     current_date = timezone.now().date()
-#     day_21 = participant.enrollment_date + timezone.timedelta(days=20)
+@login_required
+def enter_code(request):
+    participant = Participant.objects.get(user=request.user)
+    current_date = timezone.now().date()
 
-#     if current_date > day_21:
-#         return redirect('code_failure')
+    day_11 = participant.enrollment_date + timedelta(days=10)  
+    day_21 = participant.enrollment_date + timedelta(days=20)   
+    # Check if we're in the valid date range
+    if current_date < day_11 or current_date > day_21:
+        return redirect('code_failure')
 
-#     if request.method == 'POST':
-#         form = CodeEntryForm(request.POST)
-#         if form.is_valid():
-#             code = form.cleaned_data['code'].strip().lower()
-#             if code == 'wavepa':
-#                 participant.code_entered = True
-#                 participant.code_entry_date = current_date
-#                 participant.save()
-#                 send_mail(
-#                     'Code Entered Successfully',
-#                     'You have successfully entered the Wave 1 Physical Activity Code.',
-#                     'from@example.com',
-#                     [request.user.email],
-#                     fail_silently=False,
-#                 )
-#                 return redirect('code_success')
-#             else:
-#                 return render(request, 'participants/enter_code.html', {'form': form, 'error': 'Incorrect code. Please try again.'})
-#     else:
-#         form = CodeEntryForm()
+    if request.method == 'POST':
+        form = CodeEntryForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['code'].strip().lower()
+            if code == 'wavepa':
+                participant.code_entered = True
+                participant.code_entry_date = current_date
+                participant.save()
+                
+                # Send success email (Information 12)
+                send_mail(
+                    'Wave 1 Physical Activity Code Entry Successful',
+                    f'''Dear {request.user.username},
 
-#     return render(request, 'participants/enter_code.html', {'form': form})
+Thank you for entering your Wave 1 Physical Activity Code. Your entry has been recorded successfully.
 
-# @login_required
-# def code_success(request):
-#     return render(request, 'participants/code_success.html')
+Best regards,
+Research Team''',
+                    'noreply@example.com',
+                    [request.user.email],
+                    fail_silently=False,
+                )
+                return redirect('code_success')
+            else:
+                return render(request, 'enter_code.html', {
+                    'form': form,
+                    'error': 'Incorrect code. Please try again.'
+                })
+    else:
+        form = CodeEntryForm()
 
-# @login_required
-# def code_failure(request):
-#     participant = Participant.objects.get(user=request.user)
-#     if not participant.code_entered and timezone.now().date() > participant.enrollment_date + timezone.timedelta(days=20):
-#         send_mail(
-#             'Code Entry Failed',
-#             'You did not enter the Wave 1 Physical Activity Code by Day 20.',
-#             'from@example.com',
-#             [request.user.email],
-#             fail_silently=False,
-#         )
-#     return render(request, 'participants/code_failure.html')
+    return render(request, 'enter_code.html', {
+        'form': form,
+        'days_remaining': (day_21 - current_date).days
+    })
+
+@login_required
+def code_success(request):
+    return render(request, 'code_success.html')
+
+@login_required
+def code_failure(request):
+    return render(request, 'code_failure.html')
+
+# Add this function to be called by a scheduled task on Day 21
+def check_code_entries():
+    today = timezone.now().date()
+    participants = Participant.objects.filter(
+        enrollment_date=today - timedelta(days=20),
+        code_entered=False
+    )
+    
+    for participant in participants:
+        # Send failure email (Information 14)
+        send_mail(
+            'Wave 1 Physical Activity Code Entry - Deadline Passed',
+            'You did not enter the Wave 1 Physical Activity Code by Day 20. This task has now expired.',
+            'from@yourdomain.com',  # Update this
+            [participant.user.email],
+            fail_silently=False,
+        )
 
 
 

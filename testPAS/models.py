@@ -55,8 +55,8 @@ class Participant(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField
     enrollment_date = models.DateField(default=timezone.now)
-    # code_entered = models.BooleanField(default=False)
-    # code_entry_date = models.DateField(null=True, blank=True)
+    code_entered = models.BooleanField(default=False)
+    code_entry_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.user.username

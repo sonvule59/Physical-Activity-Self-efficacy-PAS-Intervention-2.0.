@@ -1,31 +1,42 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enter Code</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <title>Enter Wave 1 Physical Activity Code</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <header>
-        <h1>Enter Wave 1 Physical Activity Code</h1>
-    </header>
-    
-    <main>
-        <section id="enter-code">
-            <h2>Please enter the code</h2>
-            <form method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Submit</button>
-            </form>
-            {% if error %}
-                <p style="color: red;">{{ error }}</p>
-            {% endif %}
-        </section>
-    </main>
+    <div class="container">
+        <h2>Enter Wave 1 Physical Activity Code</h2>
+        
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
 
+        {% if days_remaining %}
+            <div class="info">
+                Time remaining: {{ days_remaining }} days
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Code</button>
+        </form>
+
+        {% if participant %}
+            <div class="participant-info">
+                <p>Enrollment date: {{ participant.enrollment_date }}</p>
+                {% if participant.code_entry_date %}
+                    <p>Code entered on: {{ participant.code_entry_date }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
     <footer>
         <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
     </footer>
