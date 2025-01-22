@@ -17,11 +17,17 @@ Including another URLconf
 import os, sys
 from django.contrib import admin
 from django.urls import path, include
-from testpas import views
+from testpas import views, settings
 
 app_name = 'testpas'
 urlpatterns = [
-    path('', views.questionnaire_interest, name="index"),
+    path('', views.home, name='home'),  # Home page
+    path('dashboard/', views.dashboard, name='dashboard'),  # Dashboard page
+    path('enter-code/', views.enter_code, name='enter_code'),
+    path('code-success/', views.code_success, name='code_success'),
+    path('code-failure/', views.code_failure, name='code_failure'),
+    path('check-day-21/', views.check_day_21, name='check_day_21'),
+    # path('', views.questionnaire_interest, name="index"),
     path('create-account/', views.create_account, name='create_account'),
     path('confirm-account/', views.confirm_account, name='confirm_account'),
     path('login/', views.login_view, name='login'),
@@ -35,9 +41,10 @@ urlpatterns = [
     path('consent-form/', views.consent_form, name='consent_form'),
     path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
     path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
-    path('enter-code/', views.enter_code, name='enter_code'),
-    path('code-success/', views.code_success, name='code_success'),
-    path('code-failure/', views.code_failure, name='code_failure'),
+    # path('enter-code/', views.enter_code, name='enter_code'),
+    # path('check-day-21/', views.check_day_21, name='check_day_21'),
+    # path('code-success/', views.code_success, name='code_success'),
+    # path('code-failure/', views.code_failure, name='code_failure'),
     path('admin/', admin.site.urls),
     # path('', views.questionnaire_interest, name="index"),
     # path('create-account/', views.create_account, name='create_account'),
@@ -55,6 +62,11 @@ urlpatterns = [
     
     # path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
+    ]
 
 
     # path('', include('https://git.heroku.com/testpas.git')),

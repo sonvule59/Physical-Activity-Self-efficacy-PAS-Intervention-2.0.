@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PAS Project Home</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Welcome to the PAS Project</h1>
+    <p>Hello, {{ user.username }}!</p>
+    <p>Welcome to the Physical Activity Study (PAS) Project. Here you can monitor your progress and participate in various activities.</p>
+
+    <h2>Your Participation</h2>
+    <p>Enrollment Date: {{ progress.enrollment_date }}</p>
+
+    {% if within_wave1_period %}
+        <p>You are currently within the Wave 1 period.</p>
+        <p>Days until the end of Wave 1: {{ days_until_end }}</p>
+        <form method="post" action="{% url 'enter_code' %}">
+            {% csrf_token %}
+            <label for="code">Enter Code:</label>
+            <input type="text" id="code" name="code">
+            <button type="submit">Submit</button>
+        </form>
+    {% else %}
+        <p>You are not within the Wave 1 period. Please check back later.</p>
+    {% endif %}
+
+    <h2>Other Information</h2>
+    <ul>
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+    </ul>
+</body>
+</html>

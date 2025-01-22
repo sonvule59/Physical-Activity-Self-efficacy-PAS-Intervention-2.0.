@@ -1,3 +1,9 @@
+{% if debug %}
+<div class="dev-menu">
+    <a href="{% url 'dev_time_controls' %}">Time Controls (Dev Only)</a>
+</div>
+{% endif %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,6 +91,7 @@
             }
         }
 
+        
         // Function to get the CSRF token for secure requests
         function getCSRFToken() {
             let cookieValue = null;

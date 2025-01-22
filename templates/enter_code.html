@@ -27,7 +27,17 @@
             </div>
             <button type="submit" class="btn btn-primary">Submit Code</button>
         </form>
-
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endif %}
         {% if participant %}
             <div class="participant-info">
                 <p>Enrollment date: {{ participant.enrollment_date }}</p>
