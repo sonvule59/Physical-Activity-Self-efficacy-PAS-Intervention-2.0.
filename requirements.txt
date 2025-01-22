@@ -14,3 +14,4 @@ flask
 requests
 dj-database-url
 psycopg2-binary
+celery  
