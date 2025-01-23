@@ -17,6 +17,7 @@ Including another URLconf
 import os, sys
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
 from testpas import views, settings
 
 app_name = 'testpas'
@@ -30,6 +31,8 @@ urlpatterns = [
     # path('', views.questionnaire_interest, name="index"),
     path('create-account/', views.create_account, name='create_account'),
     path('confirm-account/', views.confirm_account, name='confirm_account'),
+    path('accounts/login/', views.LoginView.as_view(), name='login'),  # Default Django login view
+    path('accounts/logout/', views.LogoutView.as_view(), name='logout'),  # Default Django logout view
     path('login/', views.login_view, name='login'),
     path('login-with-token/', views.login_with_token, name='login_with_token'),
     path('logout/', views.logout_view, name='logout'),
