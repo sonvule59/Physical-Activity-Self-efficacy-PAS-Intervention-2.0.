@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Scheduled Email</title>
+</head>
+<body>
+    <h1>Send Scheduled Email</h1>
+    <form action="/send_scheduled_email/" method="post">
+        {% csrf_token %}
+        <label for="subject">Subject:</label><br>
+        <input type="text" id="subject" name="subject"><br><br>
+
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" cols="50"></textarea><br><br>
+
+        <label for="from_email">From Email:</label><br>
+        <input type="email" id="from_email" name="from_email"><br><br>
+
+        <label for="recipient_list">Recipient List (comma-separated emails):</label><br>
+        <input type="text" id="recipient_list" name="recipient_list"><br><br>
+
+        <input type="submit" value="Send Email">
+    </form>
+</body>
+</html>

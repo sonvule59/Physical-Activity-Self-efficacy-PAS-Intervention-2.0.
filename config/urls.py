@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from testpas import views, settings
+from testpas.views import send_scheduled_email
 
 app_name = 'testpas'
 urlpatterns = [
@@ -44,6 +45,8 @@ urlpatterns = [
     path('consent-form/', views.consent_form, name='consent_form'),
     path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
     path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
+    path('send_scheduled_email/', send_scheduled_email, name='send_scheduled_email'),
+
     # path('enter-code/', views.enter_code, name='enter_code'),
     # path('check-day-21/', views.check_day_21, name='check_day_21'),
     # path('code-success/', views.code_success, name='code_success'),
