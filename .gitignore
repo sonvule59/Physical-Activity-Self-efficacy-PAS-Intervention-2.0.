@@ -1,3 +1,8 @@
+*.pyc        # Compiled Python files
+dump.rdb     # Database dumps
+*.py[cod]   # Compiled Python files (more comprehensive)
+__pycache__/ # Python cache directories
+testpas/migrations/* # Typically migrations are auto-generated and shouldn't be tracked
 sendgrid.env
 # Ignore virtual environment
 webdev/

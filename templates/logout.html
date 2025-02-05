@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Logged Out - TestPAS</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Logged Out</h2>
+        <p>You have been successfully logged out of TestPAS.</p>
+        <p>Thank you for visiting our platform. We hope to see you again soon.</p>
+        <a href="{% url 'login' %}">Log in again</a>
+    </div>
+</body>
+</html>

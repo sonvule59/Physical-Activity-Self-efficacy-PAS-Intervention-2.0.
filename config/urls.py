@@ -36,7 +36,8 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),  # Default Django logout view
     path('login/', views.login_view, name='login'),
     path('login-with-token/', views.login_with_token, name='login_with_token'),
-    path('logout/', views.logout_view, name='logout'),
+    # path('logout/', views.logout_view, name='logout'),
+     path('logout/', auth_views.LogoutView.as_view(template_name='logout.html'), name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('confirm-account/', views.confirm_account, name='confirm_account'),
     path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
