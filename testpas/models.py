@@ -3,7 +3,7 @@ from django.db import models, migrations
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .tasks.email_tasks import schedule_email
+from .tasks.tasks.email_tasks import schedule_email
 from testpas import settings
 import string
 import random
