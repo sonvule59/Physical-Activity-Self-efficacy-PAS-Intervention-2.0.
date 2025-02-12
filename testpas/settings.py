@@ -25,7 +25,11 @@ environ.Env.read_env(
 )
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = False
+DEBUG = True
+if not SECRET_KEY:
+    raise ValueError("The SECRET_KEY setting must not be empty.")
+
+
 
 BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local development if not set
 

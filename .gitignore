@@ -2,7 +2,7 @@
 sendgrid.en
 dump.rdb     # Database dumps
 *.py[cod]   # Compiled Python files (more comprehensive)
-__pycache__/ # Python cache directories
+__pycache__/  # Python cache directory
 testpas/migrations/*
 testpas/migrations/__pycache__/
 __pycache__/  # For any other __pycache__ directories in your project
@@ -39,7 +39,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
+*.pyc
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -172,7 +172,7 @@ dmypy.json
 .pytype/
 
 # Cython debug symbols
-cython_debug/
+cython_debug/\
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

@@ -20,6 +20,7 @@ from freezegun import freeze_time
 import os
 import datetime
 from twilio.rest import Client
+import pytz
 from .models import Participant
 from .forms import CodeEntryForm
 # from .tasks.tasks import send_scheduled_email
@@ -121,101 +122,138 @@ def eligibility_check(data):
 @csrf_exempt
 def create_account(request):
     if request.method == 'POST':
-        # Parse JSON with error handling
-            try:
-                data = json.loads(request.body)
-            except json.JSONDecodeError as e:
-                return JsonResponse({'error': f'Invalid JSON format: {str(e)}'}, status=400)
+        try:
+            data = json.loads(request.body)
 
-            # Extract and validate required fields
-            required_fields = {
-                'registration-code': '',
-                'user-id': '',
-                'password': '',
-                'password-confirmation': '',
-                'email': '',
-                'phone-number': '',
-                'age': '0',
-                'has_device': 'no',
-                'not_enroll_other': 'no',
-                'comply_monitoring': 'no',
-                'respond_contacts': 'no'
-            }
+            registration_code = data.get('registration-code', '').strip().lower()
+            user_id = data.get('user-id').strip()
+            password = data.get('password', '')
+            password_confirmation = data.get('password-confirmation', '')
+            email = data.get('email').strip().lower()
+            phone_number = data.get('phone-number', '').strip()
 
-            # Set default values for missing fields
-            for field, default in required_fields.items():
-                if field not in data:
-                    data[field] = default
-                elif isinstance(data[field], str):
-                    data[field] = data[field].strip()
-
-            # Perform eligibility check with error handling
-            try:
-                is_eligible, eligibility_reason = eligibility_check(data)
-                if not is_eligible:
-                    return JsonResponse({"error": eligibility_reason}, status=400)
-            except (TypeError, ValueError) as e:
-                return JsonResponse({"error": f"Invalid eligibility data: {str(e)}"}, status=400)
-
-    
-            registration_code = data.get('registration-code')
             if registration_code != 'wavepa':
                 return JsonResponse({'error': 'Invalid registration code.'}, status=400)
 
-            password = data.get('password')
-            password_confirmation = data.get('password-confirmation')
             if password != password_confirmation:
                 return JsonResponse({'error': 'Passwords do not match.'}, status=400)
 
-            user_id = data.get('user-id')
             if User.objects.filter(username=user_id).exists():
                 return JsonResponse({'error': 'User ID already taken.'}, status=400)
-            
-            # Generate and hash a unique token
-            token = get_random_string(64)
-            token_hash = sha256(token.encode()).hexdigest()
 
             user = User.objects.create_user(username=user_id, password=password, email=email)
             user.is_active = False
-            
-            user.profile.confirmation_token = token_hash
-            user.profile.token_expiration = datetime.datetime.now() + datetime.timedelta(hours=1)
-
             user.save()
 
             token_value = str(uuid.uuid4())
             Token.objects.create(recipient=user, token=token_value)
 
             confirmation_link = f"{settings.BASE_URL}/confirm-account/?token={token_value}"
-            
             send_mail(
                 'Confirm Your Account',
                 f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
-                settings.DEFAULT_FROM_EMAIL,  # Use the verified "from" email address
-                [user.email],
+                'noreply@example.com',
+                [email],
                 fail_silently=False,
             )
+            # send_mail(
+            #     'Confirm Your Account',
+            #     f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
+            #     'noreply@example.com',
+            #     [email],
+            #     fail_silently=False,
+            # )
+
             return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
-    return JsonResponse({"Account created. Please check your email to confirm your account."})
-        #     send_mail(
-        #         'Confirm Your Account',
-        #         f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
-        #         'noreply@example.com',
-        #         [email],
-        #         fail_silently=False,
-        #     )
 
-        #     return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
 
-        # except json.JSONDecodeError:
-        #     return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-
-        # except Exception as e:
-        #     import traceback
-        #     print(traceback.format_exc())
-        #     return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
     return render(request, 'create_account.html')
+    # if request.method == 'POST':
+    #     # Parse JSON with error handling
+    #         try:
+    #             data = json.loads(request.body)
+    #         except json.JSONDecodeError as e:
+    #             return JsonResponse({'error': f'Invalid JSON format: {str(e)}'}, status=400)
+
+    #         # Extract and validate required fields
+    #         required_fields = {
+    #             'registration-code': '',
+    #             'user-id': '',
+    #             'password': '',
+    #             'password-confirmation': '',
+    #             'email': '',
+    #             'phone-number': '',
+    #             'age': '0',
+    #             'has_device': 'no',
+    #             'not_enroll_other': 'no',
+    #             'comply_monitoring': 'no',
+    #             'respond_contacts': 'no'
+    #         }
+
+    #         # Set default values for missing fields
+    #         for field, default in required_fields.items():
+    #             if field not in data:
+    #                 data[field] = default
+    #             elif isinstance(data[field], str):
+    #                 data[field] = data[field].strip()
+
+    #         # Perform eligibility check with error handling
+    #         try:
+    #             is_eligible, eligibility_reason = eligibility_check(data)
+    #             if not is_eligible:
+    #                 return JsonResponse({"error": eligibility_reason}, status=400)
+    #         except (TypeError, ValueError) as e:
+    #             return JsonResponse({"error": f"Invalid eligibility data: {str(e)}"}, status=400)
+
+    
+    #         registration_code = data.get('registration-code')
+    #         if registration_code != 'wavepa':
+    #             return JsonResponse({'error': 'Invalid registration code.'}, status=400)
+
+    #         email = data.get('email')
+    #         password = data.get('password')
+    #         password_confirmation = data.get('password-confirmation')
+    #         if password != password_confirmation:
+    #             return JsonResponse({'error': 'Passwords do not match.'}, status=400)
+
+    #         user_id = data.get('user-id')
+    #         if User.objects.filter(username=user_id).exists():
+    #             return JsonResponse({'error': 'User ID already taken.'}, status=400)
+            
+    #         # Generate and hash a unique token
+    #         token = get_random_string(64)
+    #         token_hash = sha256(token.encode()).hexdigest()
+
+    #         user = User.objects.create_user(username=user_id, password=password, email=email)
+    #         user.is_active = False
+            
+    #         user.profile.confirmation_token = token_hash
+    #         user.profile.token_expiration = datetime.datetime.now() + datetime.timedelta(hours=1)
+
+    #         user.save()
+
+    #         token_value = str(uuid.uuid4())
+    #         Token.objects.create(recipient=user, token=token_value)
+
+    #         confirmation_link = f"{settings.BASE_URL}/confirm-account/?token={token_value}"
+            
+    #         send_mail(
+    #             'Confirm Your Account',
+    #             f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
+    #             settings.DEFAULT_FROM_EMAIL,  # Use the verified "from" email address
+    #             [user.email],
+    #             fail_silently=False,
+    #         )
+    #         return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
+
+    # return render(request, 'create_account.html')
 
 def confirm_account(request):
     if request.method == 'GET':
