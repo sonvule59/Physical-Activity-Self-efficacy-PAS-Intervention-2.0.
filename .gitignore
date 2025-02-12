@@ -8,6 +8,7 @@ testpas/migrations/__pycache__/
 __pycache__/  # For any other __pycache__ directories in your project
 *.pyc        # For compiled Python files
 sendgrid.env
+.env
 # Ignore virtual environment
 webdev/
 staticfiles/

@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from re import DEBUG
 import environ
+from dotenv import load_dotenv
+load_dotenv()
 import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,6 +23,10 @@ env = environ.Env()
 environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, ".env")
 )
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = False
+
 BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local development if not set
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,10 +36,6 @@ BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local de
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 
 ALLOWED_HOSTS = ['*']
@@ -51,7 +54,7 @@ DATABASES = {
 }
 
 # # SendGrid configuration
-# SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 
 
 # Application definition

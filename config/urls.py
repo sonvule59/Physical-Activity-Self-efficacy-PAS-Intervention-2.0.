@@ -69,11 +69,3 @@ urlpatterns = [
     
     # path('admin/', admin.site.urls),
 ]
-
-if settings.DEBUG:
-    urlpatterns += [
-        path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
-    ]
-
-
-    # path('', include('https://git.heroku.com/testpas.git')),
