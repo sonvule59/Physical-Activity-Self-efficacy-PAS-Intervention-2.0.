@@ -1,4 +1,5 @@
 *.pyc        # Compiled Python files
+sendgrid.en
 dump.rdb     # Database dumps
 *.py[cod]   # Compiled Python files (more comprehensive)
 __pycache__/ # Python cache directories
