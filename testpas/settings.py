@@ -36,7 +36,7 @@ BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local de
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 
 ALLOWED_HOSTS = ['*']
 # PostgreSQL configuration (for use on Heroku)
