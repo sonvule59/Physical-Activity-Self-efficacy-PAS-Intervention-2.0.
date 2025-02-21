@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import datetime
 from django.http import JsonResponse
+from .models import *
 import random
 import string
 
@@ -40,4 +41,4 @@ def json_response(data, status=200):
 def validate_token(token, user_profile):
     """Validate the token for the user profile."""
     token_hash = sha256(token.encode()).hexdigest()
-    return user_profile.confirmation_token == token_hash and user_profile.token_expiration >= datetime.datetime.now()
+    return Participant.confirmation_token == token_hash and Participant.token_expiration >= datetime.datetime.now()

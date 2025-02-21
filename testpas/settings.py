@@ -40,7 +40,7 @@ BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local de
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+# SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 
 ALLOWED_HOSTS = ['*']
 # PostgreSQL configuration (for use on Heroku)
@@ -57,8 +57,8 @@ DATABASES = {
     }
 }
 
-# # SendGrid configuration
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+# # # SendGrid configuration
+# SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 
 
 # Application definition
@@ -107,6 +107,10 @@ TEMPLATES = [
     },
 ]
 
+
+#Time settings
+USE_TZ = True
+TIME_ZONE = 'America/Chicago'
 # Celery settings
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -115,24 +119,23 @@ CELERY_TIMEZONE = 'America/Chicago'
 CELERY_ENABLE_UTC = False
 
 # Email settings
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-EMAIL_HOST = 'smtp.sendgrid.com'  
-SENDGRID_SANDBOX_MODE_IN_DEBUG = False  # Set to False to send real emails in production
-SENDGRID_ECHO_TO_STDOUT = True  # Set to True to print email contents to console in development
-# SENDGRID_SANDBOX_MODE_IN_DEBUG = False  # Set to True for testing without sending emails
 
-# EMAIL_HOST = 'smtp.iastate.edu' 
-EMAIL_PORT = 587  # Typically 587 for TLS, 465 for SSL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False  
-EMAIL_HOST_USER = 'PAS Project'  
-DEFAULT_FROM_EMAIL = 'projectpas2024@gmail.com'  ## Change to your email address when run
-# WSGI_APPLICATION = "testpas.wsgi.application"
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER') ## Change to your email address when run
+# # WSGI_APPLICATION = "testpas.wsgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
+
+DEBUG = True
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

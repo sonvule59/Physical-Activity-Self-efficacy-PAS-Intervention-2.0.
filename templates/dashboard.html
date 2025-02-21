@@ -20,7 +20,7 @@
         </section>
 
         <section id="survey-progress">
-            <h2>Survey Progress</h2>
+            <h2>Survey Progress</h2>    
             {% if progress %}
                 <p><strong>Eligible:</strong> {{ progress.eligible }}</p>
                 <p><strong>Consent Given:</strong> {{ progress.consent_given }}</p>
@@ -28,9 +28,17 @@
                 <p><strong>Progress Percentage:</strong> {{ progress.progress_percentage }}%</p>
                 <p><strong>Start Time:</strong> {{ progress.start_time }}</p>
                 <p><strong>End Time:</strong> {{ progress.end_time }}</p>
-            {% else %}
-                <p>No progress information available.</p>
-            {% endif %}
+                <p>Current Phase: {{ user_profile.phase }}</p>
+
+                {% if user_profile.monitoring_start_date %}
+                    <p>Monitoring Start Date: {{ user_profile.monitoring_start_date }}</p> 
+                {% else %}
+                    <p>Monitoring Start Date: Not Available</p>
+                {% endif %}  <!-- ✅ Closes the inner IF block -->
+
+    {% else %}
+        <p>No progress recorded yet.</p>
+    {% endif %} 
         </section>
 
         {% block content %}
@@ -74,7 +82,7 @@
                 {% endif %}
             {% else %}
                 <p>This task has expired.</p>
-            {% endif %}
+            {% endif %}   
         </section>
 
         <section id="actions">

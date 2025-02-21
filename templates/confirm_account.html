@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Confirmation</title>
+</head>
+<body>
+    <h1>Account Confirmation</h1>
+    {% if confirmed %}
+        <p>Your account has been confirmed successfully. You can now log in.</p>
+    {% else %}
+        <p>The account confirmation failed. Please check the confirmation link or contact support.</p>
+    {% endif %}
+</body>
+</html>

@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from testpas import views, settings
-from testpas.views import send_scheduled_email
+from testpas.views import *
 
 app_name = 'testpas'
 urlpatterns = [
@@ -35,24 +35,33 @@ urlpatterns = [
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),  # Default Django login view
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),  # Default Django logout view
     path('login/', views.login_view, name='login'),
-    path('login-with-token/', views.login_with_token, name='login_with_token'),
+    # path('login-with-token/', views.login_with_token, name='login_with_token'),
     # path('logout/', views.logout_view, name='logout'),
     path('logout/', auth_views.LogoutView.as_view(template_name='logout.html'), name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('confirm-account/', views.confirm_account, name='confirm_account'),
+    
     path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
-    path('questionnaire/', views.questionnaire, name='questionnaire'),
+    path('questionnaire/', views.questionnaire, name='questionnaire'), 
     path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
     path('consent-form/', views.consent_form, name='consent_form'),
     path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
     path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
-    path('send_scheduled_email/', send_scheduled_email, name='send_scheduled_email'),
+    path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+    path('send_scheduled_email/', views.send_scheduled_email, name='send_scheduled_email'),
 
     # path('enter-code/', views.enter_code, name='enter_code'),
     # path('check-day-21/', views.check_day_21, name='check_day_21'),
     # path('code-success/', views.code_success, name='code_success'),
     # path('code-failure/', views.code_failure, name='code_failure'),
     path('admin/', admin.site.urls),
+    
+    # The line `path('', include('config.urls'))` is including the URL patterns defined in the
+    # `config.urls` module into the main URL configuration of the `testPAS` project. This allows you
+    # to organize your URL patterns into separate modules for better code organization and
+    # maintainability. By including `config.urls`, you can define additional URL patterns specific to
+    # the `config` app without cluttering the main `urlpatterns` list in this file.
+    # path('', include('config.urls'))
     # path('', views.questionnaire_interest, name="index"),
     # path('create-account/', views.create_account, name='create_account'),
     # path('confirm-account/', views.confirm_account, name='confirm_account'),
@@ -70,7 +79,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
 ]
 
-if settings.DEBUG:
-    urlpatterns += [
-        path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
-    ]
+# if settings.DEBUG:
+#     urlpatterns += [
+#         path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
+#     ]

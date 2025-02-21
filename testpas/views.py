@@ -1,15 +1,16 @@
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.utils.crypto import get_random_string
 import json
 from hashlib import sha256
-from testpas.settings import DEFAULT_FROM_EMAIL
+from .settings import *
 from .models import *
 from .utils import validate_token
 import uuid
@@ -19,373 +20,217 @@ from django.conf import settings
 from freezegun import freeze_time
 import os
 import datetime
-from twilio.rest import Client
+# from twilio.rest import Client
 import pytz
 from .models import Participant
+import requests
 from .forms import CodeEntryForm
 # from .tasks.tasks import send_scheduled_email
-_fake_time = None
 
-def get_current_time():
-    global _fake_time
-    if _fake_time is not None:
-        return _fake_time
-    return timezone.now()
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.core.mail import send_mail
+from datetime import timedelta
+from testpas.models import User, Token, UserSurveyProgress
 
-def get_current_date(request):
-    mock_date = request.GET.get('mock_date')
-    if mock_date:
-        return timezone.datetime.strptime(mock_date, '%Y-%m-%d').date()
-    return timezone.now().date()
-# For developers only
-def dev_time_controls(request):
-    if not settings.DEBUG:
-        return redirect('dashboard')
-    
-    global _fake_time
-    
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'reset':
-            _fake_time = None
-            messages.success(request, 'Time reset to current time')
-        elif action == 'add_days':
-            days = int(request.POST.get('days', 1))
-            if _fake_time is None:
-                _fake_time = timezone.now()
-            _fake_time += timedelta(days=days)
-            messages.success(request, f'Added {days} days. Current time: {_fake_time}')
-        elif action == 'set_date':
-            date_str = request.POST.get('date')
-            try:
-                _fake_time = datetime.strptime(date_str, '%Y-%m-%d').replace(tzinfo=pytz.UTC)
-                messages.success(request, f'Time set to: {_fake_time}')
-            except ValueError:
-                messages.error(request, 'Invalid date format')
-    
-    return render(request, 'dev_time_controls.html', {
-        'current_time': get_current_time(),
-        'real_time': timezone.now(),
-    })
-
-def send_wave_1_email(user):
-    subject = 'Wave 1 Online Survey Set – Ready'
-      # Use an absolute path to the email content file
-    email_file_path = os.path.join(settings.BASE_DIR, 'testpas', 'wave_1_email.txt')
-    
-    # Read the email content from the text file
-    with open(email_file_path, 'r') as file:
-        message = file.read().format(username=user.username)  
-    # # Read the email content from a text file
-    # with open('wave_1_email.txt', 'r') as file:
-    #     message = file.read().format(username=user.username)
-    
-    # Send email to the participant and CC the research team
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,  # Ensure this is set in settings.py
-        [user.email, DEFAULT_FROM_EMAIL],
-        fail_silently=False,
-    )
-
-# Eligibility check function
-def eligibility_check(data):
-    age = int(data.get('age'))
-    if age < 18 or age > 64:
-        return False, 'Age requirement not met. Must be between 18 and 64 years.'
-
-    height = int(data.get('height'))  # in inches
-    weight = int(data.get('weight'))  # in lbs
-    bmi = (weight / (height ** 2)) * 703
-    if bmi < 25.0:
-        return False, 'BMI must be greater than or equal to 25.'
-
-    has_device = data.get('has_device', '').lower() == 'yes'
-    if not has_device:
-        return False, 'Must have access to a technological device to participate.'
-
-    not_enroll_other = data.get('not_enroll_other', '').lower() == 'yes'
-    if not not_enroll_other:
-        return False, 'Must agree not to enroll in another research-based intervention program.'
-
-    comply_monitoring = data.get('comply_monitoring', '').lower() == 'yes'
-    if not comply_monitoring:
-        return False, 'Must agree to comply with physical activity monitoring requirements.'
-
-    respond_contacts = data.get('respond_contacts', '').lower() == 'yes'
-    if not respond_contacts:
-        return False, 'Must agree to respond to study-related contacts.'
-
-    return True, 'Eligible'
-
-@csrf_exempt
+# 1️⃣ User Registration
 def create_account(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
 
-            registration_code = data.get('registration-code', '').strip().lower()
-            user_id = data.get('user-id').strip()
-            password = data.get('password', '')
-            password_confirmation = data.get('password-confirmation', '')
-            email = data.get('email').strip().lower()
-            phone_number = data.get('phone-number', '').strip()
+        user = User.objects.create_user(username=username, email=email, password=password)
+        token = Token.objects.create(recipient=user)  # Generate a confirmation token
+        
+        # Send confirmation email
+        confirmation_url = f"{request.build_absolute_uri('/confirm-account/')}?token={token.token}"
+        send_mail(
+            "Confirm Your Account",
+            f"Click the link to confirm your account: {confirmation_url}",
+            "vuleson59@gmail.com",
+            [user.email], [token.token]
+        )
 
-            if registration_code != 'wavepa':
-                return JsonResponse({'error': 'Invalid registration code.'}, status=400)
-
-            if password != password_confirmation:
-                return JsonResponse({'error': 'Passwords do not match.'}, status=400)
-
-            if User.objects.filter(username=user_id).exists():
-                return JsonResponse({'error': 'User ID already taken.'}, status=400)
-
-            user = User.objects.create_user(username=user_id, password=password, email=email)
-            user.is_active = False
-            user.save()
-
-            token_value = str(uuid.uuid4())
-            Token.objects.create(recipient=user, token=token_value)
-
-            confirmation_link = f"{settings.BASE_URL}/confirm-account/?token={token_value}"
-            send_mail(
-                'Confirm Your Account',
-                f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
-                'noreply@example.com',
-                [email],
-                fail_silently=False,
-            )
-            # send_mail(
-            #     'Confirm Your Account',
-            #     f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
-            #     'noreply@example.com',
-            #     [email],
-            #     fail_silently=False,
-            # )
-
-            return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
-
-    return render(request, 'create_account.html')
-    # if request.method == 'POST':
-    #     # Parse JSON with error handling
-    #         try:
-    #             data = json.loads(request.body)
-    #         except json.JSONDecodeError as e:
-    #             return JsonResponse({'error': f'Invalid JSON format: {str(e)}'}, status=400)
-
-    #         # Extract and validate required fields
-    #         required_fields = {
-    #             'registration-code': '',
-    #             'user-id': '',
-    #             'password': '',
-    #             'password-confirmation': '',
-    #             'email': '',
-    #             'phone-number': '',
-    #             'age': '0',
-    #             'has_device': 'no',
-    #             'not_enroll_other': 'no',
-    #             'comply_monitoring': 'no',
-    #             'respond_contacts': 'no'
-    #         }
-
-    #         # Set default values for missing fields
-    #         for field, default in required_fields.items():
-    #             if field not in data:
-    #                 data[field] = default
-    #             elif isinstance(data[field], str):
-    #                 data[field] = data[field].strip()
-
-    #         # Perform eligibility check with error handling
-    #         try:
-    #             is_eligible, eligibility_reason = eligibility_check(data)
-    #             if not is_eligible:
-    #                 return JsonResponse({"error": eligibility_reason}, status=400)
-    #         except (TypeError, ValueError) as e:
-    #             return JsonResponse({"error": f"Invalid eligibility data: {str(e)}"}, status=400)
-
+        return JsonResponse({"message": "Account created. Check your email to confirm."})
     
-    #         registration_code = data.get('registration-code')
-    #         if registration_code != 'wavepa':
-    #             return JsonResponse({'error': 'Invalid registration code.'}, status=400)
+    return render(request, "create_account.html")
 
-    #         email = data.get('email')
-    #         password = data.get('password')
-    #         password_confirmation = data.get('password-confirmation')
-    #         if password != password_confirmation:
-    #             return JsonResponse({'error': 'Passwords do not match.'}, status=400)
-
-    #         user_id = data.get('user-id')
-    #         if User.objects.filter(username=user_id).exists():
-    #             return JsonResponse({'error': 'User ID already taken.'}, status=400)
-            
-    #         # Generate and hash a unique token
-    #         token = get_random_string(64)
-    #         token_hash = sha256(token.encode()).hexdigest()
-
-    #         user = User.objects.create_user(username=user_id, password=password, email=email)
-    #         user.is_active = False
-            
-    #         user.profile.confirmation_token = token_hash
-    #         user.profile.token_expiration = datetime.datetime.now() + datetime.timedelta(hours=1)
-
-    #         user.save()
-
-    #         token_value = str(uuid.uuid4())
-    #         Token.objects.create(recipient=user, token=token_value)
-
-    #         confirmation_link = f"{settings.BASE_URL}/confirm-account/?token={token_value}"
-            
-    #         send_mail(
-    #             'Confirm Your Account',
-    #             f'Thank you for registering. Please confirm your account by clicking the link below:\n\n{confirmation_link}',
-    #             settings.DEFAULT_FROM_EMAIL,  # Use the verified "from" email address
-    #             [user.email],
-    #             fail_silently=False,
-    #         )
-    #         return JsonResponse({'message': 'Account created successfully. Please check your email to confirm your account.'})
-
-    # return render(request, 'create_account.html')
-
+# 2️⃣ Confirm Account
 def confirm_account(request):
+    token_value = request.GET.get("token", "").strip()
+    if not token_value:
+        return JsonResponse({"error": "Token not found."}, status=400)
+
+    try:
+        token = Token.objects.get(token=token_value)
+        user = token.recipient
+        user.is_active = True
+        user.save()
+        token.used = True
+        token.save()
+        login(request, user)  # Auto-login after confirmation
+        return redirect("/questionnaire/?token=" + token_value)
+    except Token.DoesNotExist:
+        return JsonResponse({"error": "Invalid or expired token."}, status=400)
+
+def questionnaire_interest(request):
     if request.method == 'GET':
-        token = request.GET.get('token')
-        token_hash = sha256(token.encode()).hexdigest()
-        user_profile = get_object_or_404(UserProfile, confirmation_token=token_hash, token_expiration__gte=datetime.datetime.now())
-        
-        # Confirm the user's account
-        user_profile.user.is_active = True
-        user_profile.confirmation_token = None
-        user_profile.token_expiration = None
-        user_profile.save()
-        
-        return JsonResponse({"message": "Your account has been confirmed successfully."})
-    return JsonResponse({"error": "Invalid request method"}, status=405)
-# def confirm_account(request):
-#     token_value = request.GET.get('token')
-#     try:
-#         token = Token.objects.get(token=token_value, used=False)
-#         user = token.recipient
-#         user.is_active = True
-#         user.save()
-#         token.used = True
-#         token.save()
+        return render(request, 'questionnaire_interest.html')
+    elif request.method == 'POST':
+        interested = request.POST.get('interested')
+        if interested == 'no':
+            return redirect('exit_screen_not_interested')
+        return redirect('questionnaire')
 
-#         request.session['user_id'] = user.username
-#         request.session.modified = True  
-#         login(request, user)
-        
-#         return redirect('/questionnaire/?token= ' + str(token_value))
-#     except Token.DoesNotExist:
-#         return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
-    
-    # token_value = request.GET.get('token')
-    # if not token_value:
-    #     return JsonResponse({'error': 'Token not found.'}, status=400)
+def create_participant(request):
+    if request.method == "POST":
+        username = request.POST.get("username").strip()
+        email = request.POST.get("email").strip()
+        password = request.POST.get("password")
+        phone_number = request.POST.get("phone_number").strip()
 
-    # # Validate the token
-    # user = validate_token(token_value)
-    # if not user:
-    #     return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
+        # Check if user already exists
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({"error": "Username already exists"}, status=400)
 
-    # # Log the user in (assuming you use Django's authentication system)
-    # from django.contrib.auth import login
-    # login(request, user)
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Email already in use"}, status=400)
 
-    # # Redirect to the next step (e.g., questionnaire)
-    # return redirect('/questionnaire/?token=' + str(token_value))
+        # Create user account
+        user = User.objects.create_user(username=username, email=email, password=password)
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        # Create participant profile
+        participant = Participant.objects.create(
+            user=user, email=email, phone_number=phone_number, confirmation_token=str(uuid.uuid4())
+        )
 
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('dashboard')  # Redirect to a dashboard or home page after login
-        else:
-            return JsonResponse({'error': 'Invalid username or password'}, status=400)
+        return JsonResponse({"message": "Participant registered successfully!"})
 
-    return render(request, 'login.html')
+    return render(request, "create_participant.html")
 
-def login_with_token(request):
-    token_value = request.GET.get('token')
-    user = validate_token(token_value)
-    if user is not None:
-        login(request, user)
-        return redirect('dashboard')  # Redirect to the dashboard or any authenticated page
-    return JsonResponse({'error': 'Invalid token'}, status=400)
 
-def logout_view(request):
-    logout(request)
-    return redirect('login') 
-
+# 3️⃣ Questionnaire for Eligibility
 @login_required
-def home(request):
-    participant, created = Participant.objects.get_or_create(
-        user=request.user,
-        defaults={
-            'enrollment_date': timezone.now().date(),
-            'code_entered': False
-        }
-    )
-    current_date = timezone.now().date()
-    
-    day_11 = participant.enrollment_date + timedelta(days=10)
-    day_21 = participant.enrollment_date + timedelta(days=20)
-    
-    within_wave1_period = day_11 <= current_date <= day_21
+def questionnaire(request):
+    if request.method == "POST":
+        user = request.user
+        answers = request.POST  # Process answers from form submission
+        # Debug: Print the raw POST data to check if values are missing
+        print(f"Full POST Data: {answers}")
 
-    context = {
-        'user': request.user,
-        'progress': participant,
-        'within_wave1_period': within_wave1_period,
-        'days_until_start': (day_11 - current_date).days if current_date < day_11 else 0,
-        'days_until_end': (day_21 - current_date).days if current_date <= day_21 else 0,
-        'start_date': day_11,
-        'end_date': day_21
-    }
-    return render(request, 'home.html', context)
+        # Eligibility check logic
+        age = int(answers.get("age", 0))
+        height = int(answers.get("height", 0))  # Inches
+        weight = int(answers.get("weight", 0))  # Pounds
+        access_to_device = answers.get("has_device", "").strip().lower() == "yes"
+        willing_no_other_study = answers.get("not_enroll_other", "").strip().lower() == "yes"
+        willing_monitor = answers.get("comply_monitoring", "").strip().lower() == "yes"
+        willing_contact = answers.get("respond_contacts", "").strip().lower() == "yes"
+        # BMI Calculation
+        bmi = (weight / (height ** 2)) * 703  # Convert inches/lbs to BMI
+        print(f"Debugging Eligibility Check:")
+        print(f"Age: {age}, Height: {height}, Weight: {weight}, BMI: {bmi:.2f}")
+        print(f"Device Access: {access_to_device}, No Other Study: {willing_no_other_study}")
+        print(f"Willing to Monitor: {willing_monitor}, Willing to Contact: {willing_contact}")
 
+        existing_progress = UserSurveyProgress.objects.filter(user=user).first()
+
+        # Eligibility Conditions
+        eligible = (
+            (18 <= age <= 64) and  # Age requirement
+            (bmi >= 25) and        # BMI requirement
+            access_to_device and    # Must have device access
+            willing_no_other_study and  # Must not enroll in another study
+            willing_monitor and  # Must agree to monitoring
+            willing_contact  # Must agree to respond to research contact
+        )
+        print(f"Eligibility Result: {eligible}")  # Debug final eligibility result
+        survey = Survey.objects.first()
+        if existing_progress:
+            existing_progress.eligible = eligible  # ✅ Updates existing record
+            existing_progress.save()
+        else:
+            UserSurveyProgress.objects.create(user=user, survey=survey, eligible=eligible, consent_given=False)
+
+
+        
+        if not survey:
+            return JsonResponse({"error": "No survey available. Contact support."}, status=500)
+
+        existing_progress = UserSurveyProgress.objects.filter(user=user).first()
+
+        if existing_progress:
+            existing_progress.eligible = eligible
+            existing_progress.save()
+        else:
+            UserSurveyProgress.objects.create(user=user, survey=survey, eligible=eligible, consent_given=False)
+
+        if eligible:
+            return redirect("consent_form")
+        else:
+            # return redirect(("exit_screen_not_eligible"))
+            return redirect(reverse("exit_screen_not_eligible"))
+    
+    return render(request, "questionnaire.html")
+def send_wave_1_email(user):
+    subject = "Wave 1 Online Survey Set – Ready"
+    message = f"""
+    Hi {user.username},
+
+    Congratulations! You are now enrolled as a participant in the study.
+
+    Your next task is to complete the Wave 1 Online Survey Set within 10 days. 
+    Please check your email for further details.
+
+    Best,  
+    The Research Team
+    """
+    from_email = "vuleson59@gmail.com" 
+    recipient_list = [user.email, "vuleson59@gmail.com"] 
+
+    send_mail(subject, message, from_email, recipient_list)
+def exit_screen_not_interested(request):
+    if request.method == 'GET':
+        return render(request, 'exit_screen_not_interested.html')
+
+
+def exit_screen_not_eligible(request):
+    return render(request, 'exit_screen_not_eligible.html')
+
+# 4️⃣ Consent Form
+@login_required
+def consent_form(request):
+    if request.method == "POST":
+        user = request.user
+        user_progress = UserSurveyProgress.objects.filter(user=user).last()
+        # user_progress.consent_given = True
+        # user_progress.day_1 = timezone.now().date()  # Set Day 1 as today
+        # user_progress.save()
+        if user_progress and user_progress.eligible:
+            user_progress.consent_given = True
+            user_progress.day_1 = timezone.now().date()
+            user_progress.save()
+        send_wave_1_email(request.user)
+
+        return redirect("/waiting-screen/")
+
+    return render(request, "consent_form.html")
+
+# 5️⃣ Waiting Screen
+@login_required
+def waiting_screen(request):
+    return render(request, "waiting_screen.html")
+
+# 6️⃣ Dashboard
 @login_required
 def dashboard(request):
-    current_time = get_current_time()
-    # user = request.user
-    # participant = get_object_or_404(Participant, user=user)
-    participant, created = Participant.objects.get_or_create(
-        user=request.user,
-        defaults={
-            'enrollment_date': timezone.now().date(),
-            'code_entered': False
-        }
-    )
-    current_date = timezone.now().date()
-    
-    day_11 = participant.enrollment_date + timedelta(days=0)
-    day_21 = participant.enrollment_date + timedelta(days=1)
-    
-    within_wave1_period = day_11 <= current_date <= day_21
-
-    context = {
-        'user': request.user,
-        'progress': participant,
-        'within_wave1_period': within_wave1_period,
-        'code_error': request.GET.get('code_error', None),
-        'days_until_start': (day_11 - current_date).days if current_date < day_11 else 0,
-        'days_until_end': (day_21 - current_date).days if current_date <= day_21 else 0,
-        'start_date': day_11,
-        'end_date': day_21
-    }
-    return render(request, 'dashboard.html', context)
+    user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
+    return render(request, "dashboard.html", {"progress": user_progress})
 
 @login_required
 def enter_code(request):
@@ -424,7 +269,66 @@ def enter_code(request):
         'days_remaining': (day_21 - current_date).days
     })
 
+
+# 7️⃣ Challenge System (Enter Code)
 @login_required
+def enter_wave_1_code(request):
+    user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
+
+    if not user_progress:
+        return JsonResponse({"error": "User progress not found."}, status=400)
+
+    today = timezone.now().date()
+    day_1 = user_progress.day_1
+    day_11 = day_1 + timedelta(days=10)
+    day_20 = day_1 + timedelta(days=20)
+    day_21 = day_1 + timedelta(days=21)
+
+    # Only allow code entry from Day 11 to Day 20
+    if not (day_11 <= today <= day_20):
+        return JsonResponse({"error": "Code entry is not available at this time."}, status=400)
+
+    if request.method == "POST":
+        entered_code = request.POST.get("code", "").strip().lower()
+        correct_code = "wavepa"
+
+        if entered_code == correct_code:
+            Challenge.objects.create(user=request.user, description="Wave 1 Code Entered", completed=True)
+
+            # Send immediate email (Information 12)
+            send_mail(
+                "Physical Activity Monitoring Tomorrow (Wave 1)",
+                f"Hi {request.user.username},\n\nYou have successfully entered the access code. Please start wearing the monitor tomorrow!",
+                "vuleson59@gmail.com",
+                [request.user.email]
+            )
+
+            return JsonResponse({"message": "Code accepted. Please check your email for further instructions."})
+        else:
+            return JsonResponse({"error": "Incorrect code. Please try again."}, status=400)
+
+    return render(request, "enter_wave_1_code.html")
+
+@login_required
+def code_success(request):
+    return render(request, 'code_success.html')
+@login_required
+def code_failure(request):
+    return render(request, 'code_failure.html')
+
+# 8️⃣ Send Missed Code Entry Email (Day 21)
+def check_missed_code_entry():
+    today = timezone.now().date()
+    participants = Participant.objects.filter(code_entered=False, enrollment_date__lte=today - timedelta(days=20))
+
+    for participant in participants:
+        send_mail(
+            "Missing Code Entry (Wave 1)",
+            f"Hi {participant.user.username},\n\nYou missed the code entry (i.e., no $35 worth of Amazon electronic gift cards). However, you will still have more tasks in the future. We will contact you via email, so please regularly check your inbox.",
+            "vuleson59@gmail.com",
+            [participant.user.email]
+        )
+
 def check_day_21(request):
     participants = Participant.objects.filter(
         enrollment_date=timezone.now().date() - timedelta(days=20),
@@ -501,9 +405,9 @@ def check_day_21(request):
                 send_mail(
                     subject,
                     message,
-                    'vuleson59@gmail.com',
-                    [request.user.email, 'vuleson59@gmail.com'],
-                    fail_silently=False,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email, settings.DEFAULT_FROM_EMAIL],
+                    fail_silently=False
                 )
 
                 messages.success(request, "Code entered successfully!")
@@ -520,47 +424,25 @@ def check_day_21(request):
         'form': form,
         'days_remaining': (day_21 - current_date).days
     })
-
-@login_required
-def code_success(request):
-    return render(request, 'code_success.html')
-
-@login_required
-def code_failure(request):
-    return render(request, 'code_failure.html')
-
-# Add this function to be called by a scheduled task on Day 21
-def check_code_entries():
+# 8️⃣ Automatically Send Missed Code Entry Email (Day 21)
+def check_missed_challenges():
     today = timezone.now().date()
-    participants = Participant.objects.filter(
-        enrollment_date=today - timedelta(days=20),
-        code_entered=False
-    )
-    
-    for participant in participants:
-        # Send failure email (Information 14)
-        send_mail(
-            'Wave 1 Physical Activity Code Entry - Deadline Passed',
-            'You did not enter the Wave 1 Physical Activity Code by Day 20. This task has now expired.',
-            'from@yourdomain.com',  
-            [participant.user.email],
-            fail_silently=False,
-        )
+    user_progresses = UserSurveyProgress.objects.filter(day_1__isnull=False)
 
-def generate_or_get_token(user):
-    token, created = Token.objects.get_or_create(recipient=user)
-    return token.token
+    for progress in user_progresses:
+        day_21 = progress.day_1 + timedelta(days=21)
 
-def questionnaire_interest(request):
-    if request.method == 'GET':
-        return render(request, 'questionnaire_interest.html')
-    elif request.method == 'POST':
-        interested = request.POST.get('interested')
-        if interested == 'no':
-            return redirect('exit_screen_not_interested')
-        return redirect('questionnaire')
+        if today == day_21:
+            challenge = Challenge.objects.filter(user=progress.user, description="Wave 1 Code Entered").first()
 
-#This function is used to send the email to the user in an automated schedule using celery
+            if not challenge:  # User never entered the code
+                send_mail(
+                    "Missed Wave 1 Code Entry",
+                    f"Hi {progress.user.username},\n\nYou did not enter the Wave 1 code in time. Please contact the research team for further assistance.",
+                    "vuleson59@gmail.com",
+                    [progress.user.email]
+                )
+
 @csrf_exempt
 def send_scheduled_email(request):
     if request.method == 'POST':
@@ -579,179 +461,50 @@ def send_scheduled_email(request):
 
     # Return a JSON response indicating invalid request method
     return render(request, 'send_scheduled_email.html')
-
-def intervention_access(request, participant_id):
-    participant = Participant.objects.get(participant_id=participant_id)
-    now = timezone.now()
-
-    if participant.group == 0:
-        access_message = "You will be given access to the intervention after Day 113."
-    elif participant.group == 1:
-        start_date = participant.entry_date + timedelta(days=29)
-        end_date = participant.entry_date + timedelta(days=56)
-        if start_date <= now <= end_date:
-            access_message = "You have access to the intervention."
-            # Track engagement
-            participant.engagement_tracked = True
-            participant.save()
-        else:
-            access_message = "Your access to the intervention is currently not available."
-    else:
-        access_message = "You have not been assigned to a group yet."
-
-    return render(request, 'intervention_access.html', {'access_message': access_message})
-
-
-@csrf_exempt
-def questionnaire(request):
-    token_value = request.GET.get('token')
-    if not token_value:
-        return JsonResponse({'error': 'Token not found in request.'}, status=400)
-    
-    token_value = token_value.strip()
-
-    try:
-        # Retrieve the token and user directly from the request
-        token = Token.objects.get(token=token_value, used=True)
-        user = token.recipient
-    except Token.DoesNotExist:
-        return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
-
-    survey = Survey.objects.first()  # Assuming there is already at least one survey in the database
-    if not survey:
-        return JsonResponse({'error': 'No survey found.'}, status=404)
-    
-    if request.method == 'GET':
-        survey = Survey.objects.first()
-        if not survey:
-            return JsonResponse({'error': 'No survey found.'}, status=404)     
-        user_survey_progress, created = UserSurveyProgress.objects.get_or_create(user=user, survey=survey)
-        if created:
-            user_survey_progress.start_time = datetime.datetime.now()
-            user_survey_progress.save()
-        #     user=user,
-        #     survey=survey,
-        #     defaults={'start_time': datetime.datetime.now()}
-        # )        
-        questions = Question.objects.filter(survey=survey)
-        return render(request, 'questionnaire.html', {'questions': questions, 'token': token_value})
-    
-    elif request.method == 'POST':
-        survey = Survey.objects.first()
-        if not survey:
-            return JsonResponse({'error': 'No survey found.'}, status=404)
-        # Get user using the token
-        user_survey_progress, created = UserSurveyProgress.objects.get_or_create(user=user, survey=survey)
-
-        # Save responses for each question
-        questions = Question.objects.filter(survey=survey)
-        for question in questions:
-            answer = request.POST.get(f'question-{question.id}')
-            if answer:
-                Response.objects.create(
-                    user=user,
-                    question=question,
-                    answer=answer
-                )
-
-        # Eligibility check logic
-        data = {
-            'age': request.POST.get('age'),
-            'height': request.POST.get('height'),
-            'weight': request.POST.get('weight'),
-            'has_device': request.POST.get('has_device'),
-            'not_enroll_other': request.POST.get('not_enroll_other'),
-            'comply_monitoring': request.POST.get('comply_monitoring'),
-            'respond_contacts': request.POST.get('respond_contacts'),
+# 9️⃣ Home Page
+@login_required
+def home(request):
+    participant, created = Participant.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'enrollment_date': timezone.now().date(),
+            'code_entered': False
         }
-        # Check eligibility using the updated `eligibility_check()` function
-        is_eligible, eligibility_reason = eligibility_check(data)
-        
-        # Update the user survey progress
-        user_survey_progress.eligible = is_eligible
-        user_survey_progress.eligibility_reason = eligibility_reason
-        user_survey_progress.end_time = datetime.datetime.now()  # Record end time
-        user_survey_progress.survey_completed = True
-        user_survey_progress.progress_percentage = 100  # Assuming survey completion means 100%
-        user_survey_progress.save()
-        # user_survey_progress, created = UserSurveyProgress.objects.get_or_create(user=user)
-        # user_survey_progress.eligible = is_eligible
-        # user_survey_progress.save()
-
-        if not is_eligible:
-            # Redirect to not eligible exit screen
-            return redirect('exit_screen_not_eligible')
-
-        # If eligible, proceed to consent form, keep passing the token
-        return redirect(f'/consent-form/?token={token_value}')
-
-
-def exit_screen_not_interested(request):
-    if request.method == 'GET':
-        return render(request, 'exit_screen_not_interested.html')
-
-
-def exit_screen_not_eligible(request):
-    return render(request, 'exit_screen_not_eligible.html')
-
-def consent_form(request):
-    token_value = request.GET.get('token')
-    if not token_value:
-        return JsonResponse({'error': 'Token not found in request.'}, status=400)
+    )
+    current_date = timezone.now().date()
     
-    try:
-        # Retrieve the token and user directly 
-        token = Token.objects.get(token=token_value, used=True)
-        user = token.recipient
-    except Token.DoesNotExist:
-        return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
+    day_11 = participant.enrollment_date + timedelta(days=10)
+    day_21 = participant.enrollment_date + timedelta(days=20)
+    
+    within_wave1_period = day_11 <= current_date <= day_21
 
-    if request.method == 'GET':
-        return render(request, 'consent_form.html', {'token': token_value})
+    context = {
+        'user': request.user,
+        'progress': participant,
+        'within_wave1_period': within_wave1_period,
+        'days_until_start': (day_11 - current_date).days if current_date < day_11 else 0,
+        'days_until_end': (day_21 - current_date).days if current_date <= day_21 else 0,
+        'start_date': day_11,
+        'end_date': day_21
+    }
+    return render(request, 'home.html', context)
 
-    elif request.method == 'POST':
-        consent = request.POST.get('consent')
-        if consent == 'yes':
-            # User day 1
-            user_survey_progress, created = UserSurveyProgress.objects.get_or_create(user=user)
-            # user_survey_progress.day_1 = timezone.now().date()
-            user_survey_progress.day_1 = datetime.datetime.now()
-            user_survey_progress.save()
+# 9️⃣ Login & Logout
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
 
-            # Send email for wave 1 (information 9)
-            send_wave_1_email(user)
-            
-            # Proceed to the waiting screen, keep passing the token
-            return redirect(f'/waiting-screen/?token={token_value}')
-        return redirect('exit_screen_not_interested')
+        if user:
+            login(request, user)
+            return redirect("dashboard")
+        else:
+            return JsonResponse({"error": "Invalid login credentials."}, status=400)
 
-# views.py
+    return render(request, "login.html")
 
-def user_data_report(request):
-    users = User.objects.all()
-    user_data = []
-
-    for user in users:
-        survey_progress = UserSurveyProgress.objects.filter(user=user).first()
-        responses = Response.objects.filter(user=user)
-
-        user_data.append({
-            'user': user,
-            'survey_progress': survey_progress,
-            'responses': responses,
-        })
-
-    return render(request, 'user_data_report.html', {'user_data': user_data})
-
-# def consent_form(request):
-#     if request.method == 'GET':
-#         return render(request, 'consent_form.html')
-#     elif request.method == 'POST':
-#         consent = request.POST.get('consent')
-#         if consent == 'yes':
-#             return redirect('waiting_screen')
-#         return redirect('exit_screen_not_interested')
-
-def waiting_screen(request):
-    if request.method == 'GET':
-        return render(request, 'waiting_screen.html')
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect("/login/")

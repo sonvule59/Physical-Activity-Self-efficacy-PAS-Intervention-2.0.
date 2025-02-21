@@ -29,7 +29,7 @@ class MessageContentAdmin(admin.ModelAdmin):
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'confirmation_token', 'token_expiration')
 
-admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(Participant, UserProfileAdmin)
 
 # Register your models here
 admin.site.register(UserSurveyProgress)

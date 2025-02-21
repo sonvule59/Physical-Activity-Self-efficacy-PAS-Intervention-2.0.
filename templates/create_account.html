@@ -20,8 +20,8 @@
                 <label for="registration-code">Registration Code*</label>
                 <input type="text" id="registration-code" name="registration-code" required><br><br>
 
-                <label for="user-id">ID (no case-sensitive)*</label>
-                <input type="text" id="user-id" name="user-id" required><br><br>
+                <label for="username">ID (no case-sensitive)*</label>
+                <input type="text" id="username" name="username" required><br><br>
                 
                 <label for="password">Password (case-sensitive)*</label>
                 <input type="password" id="password" name="password" required><br><br>
@@ -50,7 +50,7 @@
             event.preventDefault();
 
             const registrationCode = document.getElementById('registration-code').value.trim().toLowerCase();
-            const userId = document.getElementById('user-id').value.trim();
+            const userId = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const passwordConfirmation = document.getElementById('password-confirmation').value;
             const email = document.getElementById('email').value.trim();
@@ -73,7 +73,7 @@
             // Prepare data to send to backend
             const formData = {
                 'registration-code': registrationCode,
-                'user-id': userId,
+                'username': userId,
                 'password': password,
                 'password-confirmation': passwordConfirmation,
                 'email': email,
