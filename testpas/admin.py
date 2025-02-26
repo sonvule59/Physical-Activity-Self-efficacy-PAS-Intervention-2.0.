@@ -2,39 +2,50 @@ from django.contrib import admin
 from .models import *
 from django.db import models
 from django.contrib.auth.models import User
-# from django.utils import timezone
+from .models import EmailTemplate, Participant, UserSurveyProgress, Survey  # Add other models as needed
 
-# @admin.register(Participant)
-# class ParticipantAdmin(admin.ModelAdmin):
-#     list_display = ('user', 'enrollment_date', 'code_entered', 'code_entry_date')
-#     search_fields = ('user__username',)
-@admin.register(Token)
-class TokenAdmin(admin.ModelAdmin):
-    list_display = ('recipient', 'token', 'used', 'created_at')
-    actions = ['reset_token']
+# testpas/admin.py
+from django.contrib import admin
+from .models import UserSurveyProgress, Participant, Survey, Question, Response
+import csv
+from django.http import HttpResponse
 
-    def reset_token(self, request, queryset):
-        for token in queryset:
-            token.used = False
-            token.save()
-        self.message_user(request, "Selected tokens have been reset.")
-    reset_token.short_description = "Reset selected tokens"
+class ParticipantAdmin(admin.ModelAdmin):
+    list_display = ('participant_id', 'user', 'enrollment_date', 'code_entered', 'wave3_code_entered')
+    actions = ['export_study_data']
 
-# Register MessageContent
-@admin.register(MessageContent)
-class MessageContentAdmin(admin.ModelAdmin):
-    list_display = ('subject',)
-    search_fields = ('subject',)
+    def export_study_data(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="study_data.csv"'
+        writer = csv.writer(response)
+        writer.writerow([
+            'Participant ID', 'Username', 'Email', 'Enrollment Date', 'Eligible', 'Consent Given',
+            'Wave 1 Code Entered', 'Wave 3 Code Entered', 'Wave 3 Code Entry Date', 'Survey Responses'
+        ])
+        for participant in queryset:
+            progress = UserSurveyProgress.objects.filter(user=participant.user).first()
+            responses = Response.objects.filter(user=participant.user).values_list('answer', flat=True)
+            writer.writerow([
+                participant.participant_id,
+                participant.user.username,
+                participant.user.email,
+                participant.enrollment_date,
+                progress.eligible if progress else 'N/A',
+                progress.consent_given if progress else 'N/A',
+                participant.code_entered,
+                participant.wave3_code_entered,
+                participant.wave3_code_entry_date,
+                ';'.join(responses)
+            ])
+        return response
+    export_study_data.short_description = "Export study data (Info 2-6, 11, 15, 22)"
 
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'confirmation_token', 'token_expiration')
-
-admin.site.register(Participant, UserProfileAdmin)
-
-# Register your models here
+admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(UserSurveyProgress)
-admin.site.register(Response)
 admin.site.register(Survey)
 admin.site.register(Question)
-admin.site.register(ParticipantEntry)
+admin.site.register(Response)
+admin.site.register(EmailTemplate)
 admin.site.register(EmailContent)
+admin.site.register(ParticipantEntry)
+

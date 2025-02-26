@@ -14,16 +14,21 @@
     <p>Enrollment Date: {{ progress.enrollment_date }}</p>
 
     {% if within_wave1_period %}
-        <p>You are currently within the Wave 1 period.</p>
-        <p>Days until the end of Wave 1: {{ days_until_end }}</p>
+        <h3>Enter Wave 1 Physical Activity Code</h3>
+        <p>You are within the Wave 1 period (ends {{ end_date }}).</p>
+        <p>Days remaining: {{ days_until_end }}</p>
         <form method="post" action="{% url 'enter_code' %}">
             {% csrf_token %}
             <label for="code">Enter Code:</label>
             <input type="text" id="code" name="code">
             <button type="submit">Submit</button>
         </form>
+    {% elif current_date < start_date %}
+        <h3>Wave 1 Code Entry Starts Soon</h3>
+        <p>Code entry begins on {{ start_date }} (in {{ days_until_start }} days).</p>
     {% else %}
-        <p>You are not within the Wave 1 period. Please check back later.</p>
+        <h3>Wave 1 Code Entry Period Ended</h3>
+        <p>The code entry period ended on {{ end_date }}.</p>
     {% endif %}
 
     <h2>Other Information</h2>

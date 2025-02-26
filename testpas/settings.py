@@ -30,7 +30,7 @@ if not SECRET_KEY:
     raise ValueError("The SECRET_KEY setting must not be empty.")
 
 
-
+TEST_MODE = False  # Set to True for 112-minute testing mode
 BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local development if not set
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
