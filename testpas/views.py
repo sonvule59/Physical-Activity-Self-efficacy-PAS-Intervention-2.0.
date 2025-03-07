@@ -87,6 +87,7 @@ def questionnaire_interest(request):
             return redirect('exit_screen_not_interested')
         return redirect('questionnaire')
 
+## Create Membership
 def create_participant(request):
     if request.method == "POST":
         username = request.POST.get("username").strip()
@@ -103,34 +104,9 @@ def create_participant(request):
         user = User.objects.create_user(username=username, email=email, password=password)
         return JsonResponse({"message": "User registered successfully! Please complete the eligibility questionnaire."})
     return render(request, "create_participant.html")
-# def create_participant(request):
-#     if request.method == "POST":
-#         username = request.POST.get("username").strip()
-#         email = request.POST.get("email").strip()
-#         password = request.POST.get("password")
-#         phone_number = request.POST.get("phone_number").strip()
-
-#         # Check if user already exists
-#         if User.objects.filter(username=username).exists():
-#             return JsonResponse({"error": "Username already exists"}, status=400)
-
-#         if User.objects.filter(email=email).exists():
-#             return JsonResponse({"error": "Email already in use"}, status=400)
-
-#         # Create user account
-#         user = User.objects.create_user(username=username, email=email, password=password)
-
-#         # Create participant profile
-#         participant = Participant.objects.create(
-#             user=user, email=email, phone_number=phone_number, confirmation_token=str(uuid.uuid4())
-#         )
-
-#         return JsonResponse({"message": "Participant registered successfully!"})
-
-#     return render(request, "create_participant.html")
-
 
 # 3️⃣ Questionnaire for Eligibility
+@login_required
 def questionnaire(request):
     if request.method == "POST":
         user = request.user

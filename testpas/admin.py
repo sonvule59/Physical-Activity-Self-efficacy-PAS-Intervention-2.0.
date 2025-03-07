@@ -13,7 +13,6 @@ from django.http import HttpResponse
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ('participant_id', 'user', 'enrollment_date', 'code_entered', 'wave3_code_entered')
     actions = ['export_study_data']
-
     def export_study_data(self, request, queryset):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="study_data.csv"'

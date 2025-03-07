@@ -90,7 +90,6 @@ class Participant(models.Model):
     token_expiration = models.DateTimeField(default=timezone.now)
     phase = models.CharField(max_length=100, blank=True, null=True)
     monitoring_start_date = models.DateField(blank=True, null=True)
-
     # Double-blind Randomization
     participant_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     group = models.IntegerField(null=True, blank=True)
@@ -102,9 +101,6 @@ class Participant(models.Model):
     wave3_code_entered = models.BooleanField(default=False)  # New field for Wave 3
     wave3_code_entry_date = models.DateField(null=True, blank=True)
     
-    
-    def __str__(self):
-        return self.participant_id
     
     def save(self, *args, **kwargs):
         if not self.confirmation_token:
@@ -121,6 +117,16 @@ class Participant(models.Model):
     #             self.confirmation_token = uuid.uuid4().hex
     #     super().save(*args, **kwargs)
 
+    def send_confirmation_email(self):
+        from django.core.mail import send_mail
+        template = EmailTemplate.objects.get(name='account_confirmation')
+        subject = template.subject
+        confirmation_link = f"http://localhost:8000/confirm/{self.confirmation_token}/"
+        message = template.body.format(participant_id=self.participant_id, confirmation_link=confirmation_link)
+        send_mail(subject, message, 'projectpas2024@gmail.com', [self.email])
+
+    def __str__(self):
+        return self.participant_id
     def __str__(self):
         return self.user.username
     def send_code_entry_email(self):
@@ -349,6 +355,9 @@ The Obesity and Physical Activity Research Team"""
             self.email_status = 'failed'
             self.save()
             return False
+        
+    def __str__(self):
+        return self.participant_id
     # def send_code_entry_email(self):
     #     subject = "Physical Activity Monitoring Tomorrow (Wave 1)"
     #     message = f"""
