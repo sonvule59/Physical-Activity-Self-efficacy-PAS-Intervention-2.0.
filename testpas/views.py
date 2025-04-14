@@ -332,6 +332,15 @@ def dashboard(request):
 #     user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
 #     return render(request, "dashboard.html", {"progress": user_progress})
 
+
+"""
+This function requires the user to be logged in before they can enter a code.
+INFORMATION 11
+:param request: The `request` parameter in the `enter_code` function is an object that contains
+information about the current HTTP request, such as the user making the request, any data being sent
+with the request, and other metadata related to the request. This object allows you to access and
+manipulate various aspects of the
+"""
 @login_required
 def enter_code(request):
     participant = Participant.objects.get(user=request.user)

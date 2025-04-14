@@ -48,8 +48,8 @@ def send_scheduled_email_task(participant_id):
 def run_randomization():
     call_command('randomize_participants')
 
-def schedule_email(participant_entry):
-    from datetime import timedelta
-    send_date = participant_entry.entry_date + timedelta(days=0)
-    send_date = send_date.replace(hour=0, minute=0, second=10, microsecond=0)
-    send_scheduled_email_task.apply_async((participant_entry.participant_id,), eta=send_date)
+# def schedule_email(participant_entry):
+#     from datetime import timedelta
+#     send_date = participant_entry.entry_date + timedelta(days=0)
+#     send_date = send_date.replace(hour=0, minute=0, second=10, microsecond=0)
+#     send_scheduled_email_task.apply_async((participant_entry.participant_id,), eta=send_date)

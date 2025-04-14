@@ -1,0 +1,181 @@
+import os
+import sys
+import django
+from django.conf import settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testpas.settings')  # Replace 'PAS_Project.settings' with your project's settings module
+django.setup()
+from testpas.models import EmailTemplate
+
+def create_email_templates():
+    templates = [
+        {
+            'name': 'wave1_code_entry',
+            'subject': 'Physical Activity Monitoring Tomorrow (Wave 1)',
+            'body': (
+                'Hi {username},\n\n'
+                'You have successfully entered the access code for physical activity monitoring. Thank you!\n\n'
+                'Please start wearing the monitor tomorrow for seven consecutive days. For example, if you enter the code on {code_date} (Fri), '
+                'please wear the device starting on {start_date} (Sat) and continue wearing it until {end_date} (Fri).\n\n'
+                'To earn $35 in Amazon gift cards, please wear the monitor for at least 4 days, including one weekend day, with at least 10 hours each day. '
+                'For the following seven days, complete the daily log at the end of each day. You will receive your total incentives after the study ends.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave1_survey_return',
+            'subject': 'Survey by Today & Return Monitor (Wave 1)',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'The timeline for wearing the physical activity monitor is complete for this wave.\n\n'
+                'Your next two tasks are listed below:\n'
+                'Please complete a short survey. This task must be done by today and should take approximately 10 minutes to complete.\n'
+                'Please click the following link to complete the task: [link placeholder].\n\n'
+                'Please return the monitor. Within a couple of days, research members will contact you to arrange the return.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave1_missing_code',
+            'subject': 'Missing Code Entry (Wave 1)',
+            'body': (
+                'Hi {username},\n\n'
+                'You missed the code entry (i.e., no $35 worth of Amazon electronic gift cards). However, you will still have more tasks in the future. '
+                'We will contact you via email, so please regularly check your inbox.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'intervention_access_later',
+            'subject': 'Intervention Access Later',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'Your access to the online physical activity intervention will begin after this study ends, approximately 4 months from your enrollment in this study.\n\n'
+                'We will email you again in approximately 4 weeks for the next task (i.e., completing an online survey set). Please regularly check your inbox. '
+                'You will receive the accrued incentives after this study ends.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'intervention_access_immediate',
+            'subject': 'Intervention Access Immediately',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'Your access to the online physical activity intervention will begin immediately. You may access it whenever you wish throughout approximately 4 weeks.\n'
+                'Please log in from the following website: [login link].\n'
+                'Your ID is: {participant_id}. If you forgot your password, you may reset it on the website.\n\n'
+                'If you complete at least 24 post-introductory challenges during the 4 weeks, you will earn additional $20 in your Amazon electronic gift card account. '
+                'Thoughtfully completing at least 24 post-introductory challenges may take approximately 2 hours. You will receive the accrued incentives after this study ends.\n\n'
+                'We will also email you again in approximately 4 weeks for the next task (i.e., completing an online survey set). Please regularly check your inbox.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave2_survey_ready',
+            'subject': 'Wave 2 Online Survey Set – Ready',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'Your next task is to complete the Wave 2 Online Survey Set within 10 days. You will earn $5 in your Amazon electronic gift card account for completing this task. '
+                'You will receive the accrued incentives after this study ends. After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n'
+                'Please click the following link to complete the task: [link placeholder].\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave2_no_monitoring',
+            'subject': 'No Wave 2 Physical Activity Monitoring',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'There is no Wave 2 Physical Activity Monitoring.\n\n'
+                'We will email you again in approximately 4 weeks for the next task (i.e., completing an online survey set). '
+                'Please regularly check your inbox. You will receive the accrued incentives after this study ends.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave3_survey_ready',
+            'subject': 'Wave 3 Online Survey Set – Ready',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'Your next task is to complete the Wave 3 Online Survey Set within 10 days. You will earn $5 in your Amazon electronic gift card account for completing this task. '
+                'You will receive the accrued incentives after this study ends. After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n'
+                'Please click the following link to complete the task: [link placeholder].\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave3_monitoring_ready',
+            'subject': 'Wave 3 Physical Activity Monitoring – Ready',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'Your next task is to complete Wave 3 Physical Activity Monitoring.\n\n'
+                'You need to meet with research members within 10 days to complete the physical activity monitoring. '
+                'Within the next few days, research members will contact you to provide a physical activity monitor and instructions for wearing it. '
+                'You will earn an additional $40 in your Amazon electronic gift card account for completing this task. '
+                'You will receive the accrued incentives after this study ends. After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave3_code_entry',
+            'subject': 'Physical Activity Monitoring Tomorrow (Wave 3)',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'You have successfully entered the access code for physical activity monitoring. Thank you!\n\n'
+                'Please start wearing the monitor tomorrow for seven consecutive days. For example, if you enter the code on {code_date} (Fri), '
+                'please wear the device starting on {start_date} (Sat) and continue wearing it until {end_date} (Fri).\n\n'
+                'To earn $40 in Amazon gift cards, please wear the monitor for at least 4 days, including one weekend day, with at least 10 hours each day. '
+                'For the following seven days, complete the daily log at the end of each day. You will receive your total incentives after the study ends.\n\n'
+                'If you need any assistance, contact Seungmin Lee at seunglee@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'study_end',
+            'subject': 'Survey by Today & Return Monitor (Study End)',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'The timeline for wearing the physical activity monitor is complete for this wave.\n\n'
+                'Your next two tasks are listed below:\n'
+                'Please complete a short survey. This task must be done by today and should take approximately 10 minutes to complete.\n'
+                'Please click the following link to complete the task: [link placeholder].\n\n'
+                'Please return the monitor. Within a couple of days, research members will contact you to arrange the return.\n\n'
+                'If you complete the above tasks, no further action is required for this study. If you did not have access to the online physical activity intervention before, you now have immediate access.\n'
+                'Please log in from the following website: [login link].\n'
+                'Your ID is: {participant_id}. If you forgot your password, you may reset it on the website.\n\n'
+                'Any funds earned on your Amazon electronic gift card account will be sent to you as soon as possible via your email. Thank you for the time you have contributed to this study!\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        {
+            'name': 'wave3_missing_code',
+            'subject': 'Missing Code Entry (Study End)',
+            'body': (
+                'Hi {participant_id},\n\n'
+                'You missed the code entry (i.e., no $40 worth of Amazon electronic gift cards). No further action is required for this study. '
+                'If you did not have access to the online physical activity intervention before, you now have immediate access.\n'
+                'Please log in from the following website: [login link].\n'
+                'Your ID is: {participant_id}. If you forgot your password, you may reset it on the website.\n\n'
+                'Any funds earned on your Amazon electronic gift card account will be sent to you as soon as possible via your email. '
+                'Thank you for the time you have contributed to this study!\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+    ]
+    for template in templates:
+        EmailTemplate.objects.get_or_create(
+            name=template['name'],
+            defaults={'subject': template['subject'], 'body': template['body']}
+        )
+    print("Email templates populated.")
+
+if __name__ == "__main__":
+    create_email_templates()
