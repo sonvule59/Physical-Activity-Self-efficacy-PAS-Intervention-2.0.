@@ -16,7 +16,6 @@ from re import DEBUG
 import environ
 from dotenv import load_dotenv
 load_dotenv()
-import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env()
@@ -72,7 +71,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',  
     'testpas',
-    # 'django_celery_beat',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -113,14 +112,25 @@ USE_TZ = True
 TIME_ZONE = 'America/Chicago'
 # Celery settings
 
+# Testing Configuration
+TEST_MODE = os.getenv('TEST_MODE', 'False') == 'True'
+# TEST_TIME_SCALE = 10  # 1 day = 10 seconds for testing
+TEST_TIME_SCALE = float(os.getenv('TEST_TIME_SCALE', '5'))  # 1 day = 1 second (or set to 60 for minutes)
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = 'America/Chicago'
 CELERY_ENABLE_UTC = False
+CELERY_BEAT_SCHEDULE = {
+    'send-emails-every-minute': {
+        'task': 'testpas.tasks.send_scheduled_emails',
+        'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
+    },
+}
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
 
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

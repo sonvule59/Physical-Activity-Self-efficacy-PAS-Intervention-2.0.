@@ -49,11 +49,11 @@ urlpatterns = [
     path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
     path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
     path('send_scheduled_email/', views.send_scheduled_email, name='send_scheduled_email'),
-
-    # path('enter-code/', views.enter_code, name='enter_code'),
-    # path('check-day-21/', views.check_day_21, name='check_day_21'),
-    # path('code-success/', views.code_success, name='code_success'),
-    # path('code-failure/', views.code_failure, name='code_failure'),
+    path('enter-wave-3-code/', views.enter_wave_3_code, name='enter_wave3_code'),
+    path('enter-code/', views.enter_code, name='enter_code'),
+    path('check-day-21/', views.check_day_21, name='check_day_21'),
+    path('code-success/', views.code_success, name='code_success'),
+    path('code-failure/', views.code_failure, name='code_failure'),
     path('admin/', admin.site.urls),
     
     # The line `path('', include('config.urls'))` is including the URL patterns defined in the

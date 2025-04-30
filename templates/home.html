@@ -1,40 +1,39 @@
-{% load static %}
+<!-- templates/home.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PAS Project Home</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAS 2.0 - Home</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>Welcome to the PAS Project</h1>
-    <p>Hello, {{ user.username }}!</p>
-    <p>Welcome to the Physical Activity Study (PAS) Project. Here you can monitor your progress and participate in various activities.</p>
-
-    <h2>Your Participation</h2>
-    <p>Enrollment Date: {{ progress.enrollment_date }}</p>
-
-    {% if within_wave1_period %}
-        <h3>Enter Wave 1 Physical Activity Code</h3>
-        <p>You are within the Wave 1 period (ends {{ end_date }}).</p>
-        <p>Days remaining: {{ days_until_end }}</p>
-        <form method="post" action="{% url 'enter_code' %}">
-            {% csrf_token %}
-            <label for="code">Enter Code:</label>
-            <input type="text" id="code" name="code">
-            <button type="submit">Submit</button>
-        </form>
-    {% elif current_date < start_date %}
-        <h3>Wave 1 Code Entry Starts Soon</h3>
-        <p>Code entry begins on {{ start_date }} (in {{ days_until_start }} days).</p>
-    {% else %}
-        <h3>Wave 1 Code Entry Period Ended</h3>
-        <p>The code entry period ended on {{ end_date }}.</p>
+    <h1>Welcome to PAS 2.0, {{ user.username }}!</h1>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
     {% endif %}
-
-    <h2>Other Information</h2>
-    <ul>
-        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-        <li><a href="{% url 'logout' %}">Logout</a></li>
-    </ul>
+    {% if progress %}
+        <p>Thank you for participating in the Physical Activity Self-efficacy (PAS) Intervention 2.0 study.</p>
+        {% if within_wave1_period %}
+            <p><a href="{% url 'enter_code' %}">Enter your Wave 1 Physical Activity Code</a></p>
+        {% elif within_wave3_period %}
+            <p><a href="{% url 'enter_wave3_code' %}">Enter your Wave 3 Physical Activity Code</a></p>
+        {% else %}
+            <p>Please check your email for upcoming tasks.</p>
+        {% endif %}
+        <p>Study start date: {{ start_date|date:"Y-m-d" }}</p>
+        <p>Days until Wave 1 code entry starts: {{ days_until_start }}</p>
+        {% if days_until_end > 0 %}
+            <p>Days until Wave 1 code entry ends: {{ days_until_end }}</p>
+        {% endif %}
+    {% else %}
+        <p>You are not currently enrolled in the study. Please <a href="{% url 'create_account' %}">create an account</a> or contact support.</p>
+    {% endif %}
+    <p>For assistance, contact Seungmin (“Seung”) Lee at seunglee@iastate.edu or 517-898-0020.</p>
 </body>
 </html>
