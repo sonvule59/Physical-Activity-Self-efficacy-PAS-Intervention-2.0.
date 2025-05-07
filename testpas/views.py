@@ -220,6 +220,100 @@ def consent_form(request):
         form = ConsentForm()
     return render(request, "consent_form.html", {'form': form})
 
+@login_required
+def home(request):
+    user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
+    participant = Participant.objects.filter(user=request.user).first()
+
+    # Redirect if not eligible or consented
+    if not user_progress or not user_progress.eligible or not user_progress.consent_given or not participant:
+        return render(request, 'home.html', {
+            'user': request.user,
+            'progress': None,
+            'within_wave1_period': False,
+            'within_wave3_period': False,
+            'days_until_start': 0,
+            'days_until_end': 0,
+            'start_date': None,
+            'end_date': None
+        })
+
+    current_date = timezone.now()
+    try:
+        start_datetime = timezone.make_aware(
+            timezone.datetime.combine(participant.enrollment_date, timezone.datetime.min.time()),
+            timezone.get_default_timezone()
+        )
+        if settings.TEST_MODE:
+            elapsed_days = (current_date - start_datetime).total_seconds() / settings.TEST_TIME_SCALE
+        else:
+            elapsed_days = (current_date.date() - participant.enrollment_date).days
+        
+        # Validate elapsed_days
+        if elapsed_days < 0 or elapsed_days > 365:
+            # logger.error(f"Invalid elapsed_days {elapsed_days} for participant {participant.participant_id}")
+            elapsed_days = 0
+    except Exception as e:
+        # logger.error(f"Error calculating elapsed_days for participant {participant.participant_id}: {e}")
+        elapsed_days = 0
+
+    # Wave 1: Days 11-20
+    within_wave1_period = 11 <= elapsed_days < 21 and not participant.code_entered
+    # Wave 3: Days 95-104
+    within_wave3_period = 95 <= elapsed_days < 105 and not participant.wave3_code_entered
+
+    context = {
+        'user': request.user,
+        'progress': participant,
+        'within_wave1_period': within_wave1_period,
+        'within_wave3_period': within_wave3_period,
+        'days_until_start': max(0, 11 - elapsed_days),
+        'days_until_end': max(0, 20 - elapsed_days) if elapsed_days < 21 else 0,
+        'start_date': participant.enrollment_date + timedelta(days=10),
+        'end_date': participant.enrollment_date + timedelta(days=20)
+    }
+    # logger.debug(f"Rendering home.html with within_wave1_period={within_wave1_period}, within_wave3_period={within_wave3_period}, elapsed_days={elapsed_days}")
+    return render(request, 'home.html', context)
+@login_required
+def dashboard(request):
+    user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
+    if user_progress and user_progress.eligible and user_progress.consent_given:
+        participant, created = Participant.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'enrollment_date': timezone.now().date(),
+                'code_entered': False,
+                'age': 30,
+                'confirmation_token': str(uuid.uuid4()),
+                'participant_id': f"P{Participant.objects.count() + 1:03d}",
+                'email': request.user.email
+            }
+        )
+    else:
+        participant = None
+    current_date = timezone.now().date()
+    day_11 = participant.enrollment_date + timedelta(days=10) if participant else current_date
+    day_21 = participant.enrollment_date + timedelta(days=20) if participant else current_date
+    day_95 = participant.enrollment_date + timedelta(days=94) if participant else current_date
+    day_104 = participant.enrollment_date + timedelta(days=103) if participant else current_date
+    within_wave1_period = day_11 <= current_date <= day_21 if participant else False
+    within_wave3_period = day_95 <= current_date <= day_104 if participant else False
+    context = {
+        'progress': user_progress,
+        'participant': participant,
+        'within_wave1_period': within_wave1_period,
+        'within_wave3_period': within_wave3_period,
+        'days_until_start_wave1': (day_11 - current_date).days if current_date < day_11 else 0,
+        'days_until_end_wave1': (day_21 - current_date).days if current_date <= day_21 else 0,
+        'start_date_wave1': day_11,
+        'end_date_wave1': day_21,
+        'days_until_start_wave3': (day_95 - current_date).days if current_date < day_95 else 0,
+        'days_until_end_wave3': (day_104 - current_date).days if current_date <= day_104 else 0,
+        'start_date_wave3': day_95,
+        'end_date_wave3': day_104
+    }
+    return render(request, "dashboard.html", context)
+
 
 def exit_screen_not_interested(request):
     if request.method == 'GET':
