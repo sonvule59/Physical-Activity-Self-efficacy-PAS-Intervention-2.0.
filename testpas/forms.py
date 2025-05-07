@@ -4,7 +4,15 @@ from .models import Participant
 from django.contrib.auth.forms import UserCreationForm
 
 class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    username = forms.CharField(max_length=150, required=True, label="Username")
+    # email = forms.EmailField(required=True)
+    email = forms.EmailField(required=True, label="Email Address")
+    ## Add new 05/03/2025
+    password = forms.CharField(widget=forms.PasswordInput, required=True, label="Password")
+    password_confirm = forms.CharField(widget=forms.PasswordInput, required=True, label="Confirm Password")
+    phone_number = forms.CharField(max_length=15, required=True, label="Phone Number")
+    registration_code = forms.CharField(max_length=50, required=True, label="Registration Code")
+
     phone_number = forms.CharField(max_length=15, required=True)
     registration_code = forms.CharField(max_length=10, required=True, label="Registration Code")
 
@@ -13,8 +21,10 @@ class UserRegistrationForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
 
     def clean_username(self):
-        username = self.cleaned_data.get('username').lower()
-        if User.objects.filter(username__iexact=username).exists():
+        username = self.cleaned_data['username'].strip()
+        if not username:
+            raise forms.ValidationError("Username is required.")
+        if User.objects.filter(username=username).exists():
             raise forms.ValidationError("This username is already taken.")
         return username
 
@@ -36,7 +46,14 @@ class UserRegistrationForm(UserCreationForm):
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match")
         return confirm_password
-
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        if password and password_confirm and password != password_confirm:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data
+    
     def save(self, commit=True):
         user = super().save(commit=False)
         user.username = self.cleaned_data['username'].lower()

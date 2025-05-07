@@ -22,7 +22,6 @@ env = environ.Env()
 environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, ".env")
 )
-
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 if not SECRET_KEY:

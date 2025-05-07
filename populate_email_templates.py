@@ -2,7 +2,7 @@ import os
 import sys
 import django
 from django.conf import settings
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testpas.settings')  # Replace 'PAS_Project.settings' with your project's settings module
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testpas.settings')  
 django.setup()
 from testpas.models import EmailTemplate
 

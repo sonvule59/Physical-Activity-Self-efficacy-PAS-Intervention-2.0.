@@ -105,50 +105,6 @@ def create_participant(request):
         return JsonResponse({"message": "User registered successfully! Please complete the eligibility questionnaire."})
     return render(request, "create_participant.html")
 
-# 3️⃣ Questionnaire for Eligibility
-# @login_required
-# def questionnaire(request):
-#     # Use get_or_create to create a Participant instance if one doesn't exist.
-#     participant, created = Participant.objects.get_or_create(
-#         user=request.user,
-#         defaults={
-#             'enrollment_date': timezone.now(),  # or use timezone.now() if you prefer DateTimeField
-#             # You can set other default values if needed
-#             'code_entered': False,
-#         }
-#     )
-#     if request.method == "POST":
-#         form = EligibilityForm(request.POST, instance=participant)
-#         if form.is_valid():
-#             form.save()
-#             # Assuming you have defined a check_eligibility method on the Participant model,
-#             # otherwise implement eligibility checking logic here.
-#             if participant.check_eligibility():
-#                 messages.success(request, "You are eligible! Please provide your consent to proceed.")
-#                 return redirect("consent_form")
-#             else:
-#                 messages.info(request, "Unfortunately, you are not eligible for this study.")
-#                 return redirect("exit_screen_not_eligible")
-#     else:
-#         form = EligibilityForm(instance=participant)
-#     return render(request, "questionnaire.html", {'form': form})
-
-# @login_required
-# def questionnaire(request):
-#     participant = Participant.objects.get(user=request.user)
-#     if request.method == "POST":
-#         form = EligibilityForm(request.POST, instance=participant)
-#         if form.is_valid():
-#             form.save()
-#             if participant.check_eligibility():
-#                 messages.success(request, "You are eligible! Please provide your consent to proceed.")
-#                 return redirect("consent_form")
-#             else:
-#                 messages.info(request, "Unfortunately, you are not eligible for this study.")
-#                 return redirect("exit_screen")
-#     else:
-#         form = EligibilityForm(instance=participant)
-#     return render(request, "questionnaire.html", {'form': form})
 @login_required
 def questionnaire(request):
     if request.method == "POST":
@@ -712,71 +668,6 @@ def home(request):
     }
     # logger.debug(f"Rendering home.html with within_wave1_period={within_wave1_period}, within_wave3_period={within_wave3_period}, elapsed_days={elapsed_days}")
     return render(request, 'home.html', context)
-# @login_required
-# def home(request):
-#     user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
-#     if user_progress and user_progress.eligible and user_progress.consent_given:
-#         participant, created = Participant.objects.get_or_create(
-#             user=request.user,
-#             defaults={
-#                 'enrollment_date': timezone.now().date(),
-#                 'code_entered': False,
-#                 'age': 30,
-#                 'confirmation_token': str(uuid.uuid4()),
-#                 'participant_id': f"P{Participant.objects.count() + 1:03d}",
-#                 'email': request.user.email
-#             }
-#         )
-#     else:
-#         participant = None
-#     current_date = timezone.now()
-#     if settings.TEST_MODE:
-#         elapsed_days = (current_date - timezone.datetime.combine(participant.enrollment_date, timezone.datetime.min.time())).total_seconds() / settings.TEST_TIME_SCALE
-#     else:
-#         elapsed_days = (current_date.date() - participant.enrollment_date).days if participant.enrollment_date else 0
-#     day_11 = participant.enrollment_date + timedelta(days=10) if participant else current_date
-#     day_21 = participant.enrollment_date + timedelta(days=20) if participant else current_date
-#     within_wave1_period = day_11 <= elapsed_days <= day_21 and not participant.code_entered
-#     # within_wave1_period = day_11 <= current_date <= day_21 if participant else False
-#     context = {
-#         'user': request.user,
-#         'progress': participant,
-#         'within_wave1_period': within_wave1_period,
-#         'days_until_start': (day_11 - current_date).days if current_date < day_11 else 0,
-#         'days_until_end': (day_21 - current_date).days if current_date <= day_21 else 0,
-#         'start_date': day_11,
-#         'end_date': day_21
-#     }
-#     print("Rendering home.html with within_wave1_period:", within_wave1_period)
-#     return render(request, 'home.html', context)
-# @login_required
-# def home(request):
-#     participant, created = Participant.objects.get_or_create(
-#         user=request.user,
-#         defaults={
-#             'enrollment_date': timezone.now().date(),
-#             'code_entered': False
-#         }
-#     )
-#     current_date = timezone.now().date()
-    
-#     day_11 = participant.enrollment_date + timedelta(days=10)
-#     day_21 = participant.enrollment_date + timedelta(days=20)
-    
-#     within_wave1_period = day_11 <= current_date <= day_21
-
-#     context = {
-#         'user': request.user,
-#         'progress': participant,
-#         'within_wave1_period': within_wave1_period,
-#         'days_until_start': (day_11 - current_date).days if current_date < day_11 else 0,
-#         'days_until_end': (day_21 - current_date).days if current_date <= day_21 else 0,
-#         'start_date': day_11,
-#         'end_date': day_21
-#     }
-#     print("Rendering home.html with within_wave1_period:", within_wave1_period)
-#     return render(request, 'home.html', context)
-
 # 9️⃣ Login & Logout
 def login_view(request):
     if request.method == "POST":

@@ -23,38 +23,38 @@ from testpas.views import *
 
 app_name = 'testpas'
 urlpatterns = [
-    path('', views.home, name='home'),  # Home page
-    path('dashboard/', views.dashboard, name='dashboard'),  # Dashboard page
-    path('enter-code/', views.enter_code, name='enter_code'),
-    path('code-success/', views.code_success, name='code_success'),
-    path('code-failure/', views.code_failure, name='code_failure'),
-    path('check-day-21/', views.check_day_21, name='check_day_21'),
+    # path('', views.home, name='home'),  # Home page
+    # path('dashboard/', views.dashboard, name='dashboard'),  # Dashboard page
+    # path('enter-code/', views.enter_code, name='enter_code'),
+    # path('code-success/', views.code_success, name='code_success'),
+    # path('code-failure/', views.code_failure, name='code_failure'),
+    # path('check-day-21/', views.check_day_21, name='check_day_21'),
     # path('', views.questionnaire_interest, name="index"),
     path('create-account/', views.create_account, name='create_account'),
-    path('confirm-account/', views.confirm_account, name='confirm_account'),
-    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),  # Default Django login view
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),  # Default Django logout view
-    path('login/', views.login_view, name='login'),
+    # path('confirm-account/', views.confirm_account, name='confirm_account'),
+    # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),  # Default Django login view
+    # path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),  # Default Django logout view
+    # path('login/', views.login_view, name='login'),
     # path('login-with-token/', views.login_with_token, name='login_with_token'),
     # path('logout/', views.logout_view, name='logout'),
-    path('logout/', auth_views.LogoutView.as_view(template_name='logout.html'), name='logout'),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('confirm-account/', views.confirm_account, name='confirm_account'),
+    # path('logout/', auth_views.LogoutView.as_view(template_name='logout.html'), name='logout'),
+    # path('dashboard/', views.dashboard, name='dashboard'),
+    # path('confirm-account/', views.confirm_account, name='confirm_account'),
     
-    path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
-    path('questionnaire/', views.questionnaire, name='questionnaire'), 
-    path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
-    path('consent-form/', views.consent_form, name='consent_form'),
-    path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
-    path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
-    path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
-    path('send_scheduled_email/', views.send_scheduled_email, name='send_scheduled_email'),
-    path('enter-wave-3-code/', views.enter_wave_3_code, name='enter_wave3_code'),
-    path('enter-code/', views.enter_code, name='enter_code'),
-    path('check-day-21/', views.check_day_21, name='check_day_21'),
-    path('code-success/', views.code_success, name='code_success'),
-    path('code-failure/', views.code_failure, name='code_failure'),
-    path('admin/', admin.site.urls),
+    # path('questionnaire-interest/', views.questionnaire_interest, name='questionnaire_interest'),
+    # path('questionnaire/', views.questionnaire, name='questionnaire'), 
+    # path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+    # path('consent-form/', views.consent_form, name='consent_form'),
+    # path('waiting-screen/', views.waiting_screen, name='waiting_screen'),
+    # path('exit-screen-not-interested/', views.exit_screen_not_interested, name='exit_screen_not_interested'),
+    # path('exit-screen-not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
+    # path('send_scheduled_email/', views.send_scheduled_email, name='send_scheduled_email'),
+    # path('enter-wave-3-code/', views.enter_wave_3_code, name='enter_wave3_code'),
+    # path('enter-code/', views.enter_code, name='enter_code'),
+    # path('check-day-21/', views.check_day_21, name='check_day_21'),
+    # path('code-success/', views.code_success, name='code_success'),
+    # path('code-failure/', views.code_failure, name='code_failure'),
+    # path('admin/', admin.site.urls),
     
     # The line `path('', include('config.urls'))` is including the URL patterns defined in the
     # `config.urls` module into the main URL configuration of the `testPAS` project. This allows you
