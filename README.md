@@ -37,7 +37,6 @@ The study follows a 112-day timeline from enrollment:
 - **Group 1 (Intervention)**: Immediate intervention access for 4 weeks
 
 ### 3. Automated Communications
-- 25 different email templates
 - Scheduled email delivery based on enrollment date
 - SMS notification capability (optional)
 - Customizable email content through admin interface
@@ -48,13 +47,6 @@ The study follows a 112-day timeline from enrollment:
 - Daily activity logs
 - Intervention engagement tracking
 
-### 5. Incentive System
-- $5 per survey completion (3 surveys)
-- $35 for Wave 1 activity monitoring
-- $40 for Wave 3 activity monitoring
-- $20 for completing 24+ intervention challenges
-- Total possible: $90 in Amazon gift cards
-
 ## Technical Requirements
 
 ### Prerequisites
@@ -64,22 +56,6 @@ The study follows a 112-day timeline from enrollment:
 - Redis (for Celery task queue)
 - Email server (SMTP)
 - SMS gateway (optional)
-
-### Python Dependencies
-```
-Django==4.2.0
-celery==5.3.0
-django-celery-beat==2.5.0
-psycopg2-binary==2.9.6
-redis==4.5.0
-django-crispy-forms==2.0
-django-environ==0.10.0
-Pillow==9.5.0
-boto3==1.26.0  # For AWS SES email
-twilio==8.2.0  # For SMS (optional)
-pandas==2.0.0  # For data export
-openpyxl==3.1.0  # For Excel export
-```
 
 ## Installation
 
@@ -127,37 +103,6 @@ openpyxl==3.1.0  # For Excel export
    python manage.py runserver
    ```
 
-## Project Structure
-
-```
-pas_intervention/
-├── manage.py
-├── requirements.txt
-├── .env.example
-├── README.md
-├── pas_intervention/          # Main project directory
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── celery.py
-├── apps/
-│   ├── accounts/             # User authentication & registration
-│   ├── eligibility/          # Eligibility screening
-│   ├── surveys/              # Survey management
-│   ├── monitoring/           # Physical activity monitoring
-│   ├── interventions/        # Intervention content & tracking
-│   ├── communications/       # Email/SMS management
-│   ├── randomization/        # Study group assignment
-│   └── reports/              # Data export & reporting
-├── templates/                # HTML templates
-├── static/                   # CSS, JS, images
-├── media/                    # User-uploaded files
-└── locale/                   # Internationalization files
-```
-
-## Configuration
-
 ### Email Settings
 Configure email settings in `.env`:
 ```
@@ -193,15 +138,9 @@ Access the admin interface at `/admin/` to:
 python manage.py test
 ```
 
-### Test with compressed timeline
-The system supports a compressed timeline for testing (112 minutes instead of 112 days):
-```bash
-python manage.py test --settings=pas_intervention.settings.test
-```
-
 ## Data Export
 
-Data can be exported through the admin interface in Excel format, including:
+Data can be exported through the Django admin interface in Excel .csv format, including:
 - Participant registration data
 - Eligibility screening results
 - Survey responses
@@ -262,8 +201,10 @@ Data can be exported through the admin interface in Excel format, including:
 
 For technical support or questions about the system:
 - **Principal Investigator**: Seungmin ("Seung") Lee
+- **Email**: seunglee@iastate.edu
+- **Principal Developer**: Son Vu
 - **Email**: svu23@iastate.edu
-- **Phone**: 517-898-0020
+
 
 ## License
 
@@ -271,4 +212,4 @@ This project is proprietary software for research purposes. All rights reserved.
 
 ## Acknowledgments
 
-Developed for the Obesity and Physical Activity Research Team at Iowa State University.
+Developed for the Obesity and Physical Activity Research Team, PAL Lab, Department of Kinesiology, Iowa State University.
