@@ -274,6 +274,21 @@ class Challenge(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     completed = models.BooleanField(default=False)
+
+class SurveyProgress(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    interest_submitted = models.BooleanField(default=False)
+    interested = models.BooleanField(null=True, blank=True)
+
+    eligibility_submitted = models.BooleanField(default=False)
+    is_eligible = models.BooleanField(null=True, blank=True)
+
+    consent_submitted = models.BooleanField(default=False)
+    consented = models.BooleanField(null=True, blank=True)
+
+    def __str__(self):
+        return f"SurveyProgress for {self.user.username}"
     
 class Token(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE)
