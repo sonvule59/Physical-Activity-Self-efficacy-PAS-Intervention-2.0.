@@ -1,6 +1,6 @@
 import datetime
 from django.db import models, migrations
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.utils import timezone
 from datetime import datetime, timedelta
 from testpas import settings
@@ -28,6 +28,25 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text
 
+class CustomUser(AbstractUser):
+    middle_name = models.CharField(max_length=30, null=True, blank=True)
+    registration_code = models.CharField(max_length=15, null=True, blank=True)
+    consented = models.BooleanField(null=True, blank=True)
+    consent_response = models.TextField(null=True, blank=True)
+
+    # Avoid conflicts with default 'User' model by adding related_name
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="customuser_set",
+        blank=True,
+        help_text="The groups this user belongs to.",
+    )
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="customuser_set",
+        blank=True,
+        help_text="Specific permissions for this user.",
+    )
 class Response(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -276,8 +295,7 @@ class Challenge(models.Model):
     completed = models.BooleanField(default=False)
 
 class SurveyProgress(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     interest_submitted = models.BooleanField(default=False)
     interested = models.BooleanField(null=True, blank=True)
 

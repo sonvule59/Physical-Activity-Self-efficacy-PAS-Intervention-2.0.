@@ -10,7 +10,7 @@ from django.utils.crypto import get_random_string
 import json
 from hashlib import sha256
 from testpas.settings import DEFAULT_FROM_EMAIL
-from testpas.utils import generate_token, validate_token, send_confirmation_email, registerForWave
+# from testpas.utils import generate_token, validate_token, send_confirmation_email
 from .models import *
 from .utils import validate_token
 import uuid
@@ -22,7 +22,7 @@ import datetime
 from twilio.rest import Client
 import pytz
 from .models import Participant, SurveyProgress
-from .forms import CodeEntryForm, CreateAccountForm, LoginForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm
+from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm
 # from .tasks.simulate_user import simulate_user as begin_simulation, get_simulation_elapsed
 import io
 import csv
@@ -80,112 +80,40 @@ def get_current_time():
         return _fake_time
     return timezone.now()
 
-
 def create_account(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-
-            registration_code = data.get('registration-code', '').strip().lower()
-            username = data.get('username', '').strip()
-            first_name = data.get('first-name', '').strip()
-            middle_name = data.get('middle-name', '').strip()
-            last_name = data.get('last-name', '').strip()
-            password = data.get('password', '')
-            password_confirmation = data.get('password-confirmation', '')
-            email = data.get('email', '').strip().lower()
-            phone_number = data.get('phone-number', '').strip()
-
-            if not username:
-                return JsonResponse({'error': 'Username is required.'}, status=400)
-            if not first_name:
-                return JsonResponse({'error': 'First name is required.'}, status=400)
-            if not last_name:
-                return JsonResponse({'error': 'Last name is required.'}, status=400)
-            if any(char.isdigit() for char in first_name):
-                return JsonResponse({'error': 'First name cannot contain numbers.'}, status=400)
-            if any(char.isdigit() for char in last_name):
-                return JsonResponse({'error': 'Last name cannot contain numbers.'}, status=400)
-            if middle_name and any(char.isdigit() for char in middle_name):
-                return JsonResponse({'error': 'Middle name cannot contain numbers.'}, status=400)
-            if registration_code != 'wavepa':
-                return JsonResponse({'error': 'Invalid registration code.'}, status=400)
-            if password != password_confirmation:
-                return JsonResponse({'error': 'Passwords do not match.'}, status=400)
-            if len(password) <= 5 or not any(char.isdigit() for char in password):
-                return JsonResponse({'error': 'Password must be longer than 5 characters and contain at least one number.'}, status=400)
-            if CustomUser.objects.filter(username=username).exists():
-                return JsonResponse({'error': 'Username already taken.'}, status=400)
-
-            user = CustomUser.objects.create_user(
-                username=username, 
-                password=password, 
-                email=email, 
-                registration_code=registration_code,
-                first_name=first_name, 
-                middle_name=middle_name, 
-                last_name=last_name
-            )
-            user.is_active = False
-            user.save()
-
-            participant = Participant.objects.create(
-                user=user,
-                phone_number=phone_number,
-                registration_code=registration_code,
-            )
-            participant.save()
-
-            token, token_hash = generate_token()
-            user_profile, _ = UserProfile.objects.get_or_create(user=user)
-            user_profile.confirmation_token = token_hash
-            user_profile.token_expiration = timezone.now() + timezone.timedelta(hours=24)
-            user_profile.save()
-
-            send_confirmation_email(user, token)
-
-            return JsonResponse({'message': 'Account created successfully. Please check your email to confirm.', 'user': username})
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
-
-    return render(request, 'create_account.html')
-# def create_account(request):
-#     if request.method == "POST":
-#         form = UserRegistrationForm(request.POST)
-#         if form.is_valid():
-#             try:
-#                 user = User.objects.create_user(
-#                     username=form.cleaned_data['username'],
-#                     email=form.cleaned_data['email'],
-#                     password=form.cleaned_data['password']
-#                 )
-#                 participant = Participant.objects.create(
-#                     user=user,
-#                     email=user.email,
-#                     phone_number=form.cleaned_data['phone_number'],
-#                     confirmation_token=str(uuid.uuid4()),
-#                     participant_id=f"P{Participant.objects.count():03d}",
-#                     enrollment_date=timezone.now().date()
-#                 )
-#                 # Send confirmation email
-#                 confirmation_link = f"{settings.BASE_URL}/confirm-account/{participant.confirmation_token}/"
-#                 participant.send_email(
-#                     'account_confirmation',
-#                     extra_context={'confirmation_link': confirmation_link},
-#                     mark_as='sent_confirmation'
-#                 )
-#                 messages.success(request, "Account created. Please check your email to confirm.")
-#                 return redirect("home")
-#             except Exception as e:
-#                 messages.error(request, "Failed to create account. Please try again.")
-#         else:
-#             messages.error(request, "Please correct the errors below.")
-#     else:
-#         form = UserRegistrationForm()
-#     return render(request, "create_account.html", {'form': form})
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password']
+                )
+                participant = Participant.objects.create(
+                    user=user,
+                    email=user.email,
+                    phone_number=form.cleaned_data['phone_number'],
+                    confirmation_token=str(uuid.uuid4()),
+                    participant_id=f"P{Participant.objects.count():03d}",
+                    enrollment_date=timezone.now().date()
+                )
+                # Send confirmation email
+                confirmation_link = f"{settings.BASE_URL}/confirm-account/{participant.confirmation_token}/"
+                participant.send_email(
+                    'account_confirmation',
+                    extra_context={'confirmation_link': confirmation_link},
+                    mark_as='sent_confirmation'
+                )
+                messages.success(request, "Account created. Please check your email to confirm.")
+                return redirect("home")
+            except Exception as e:
+                messages.error(request, "Failed to create account. Please try again.")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = UserRegistrationForm()
+    return render(request, "create_account.html", {'form': form})
 
 # 2️⃣ Confirm Account
 def confirm_account(request):
