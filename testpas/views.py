@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404, redirect
@@ -245,57 +246,109 @@ def consent_form(request):
 
 @login_required
 def home(request):
-    user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
-    participant = Participant.objects.filter(user=request.user).first()
-
-    # Redirect if not eligible or consented
-    if not user_progress or not user_progress.eligible or not user_progress.consent_given or not participant:
-        return render(request, 'home.html', {
-            'user': request.user,
-            'progress': None,
-            'within_wave1_period': False,
-            'within_wave3_period': False,
-            'days_until_start': 0,
-            'days_until_end': 0,
-            'start_date': None,
-            'end_date': None
-        })
-
-    current_date = timezone.now()
+    """Home page - shows appropriate content based on user status"""
+    if not request.user.is_authenticated:
+        return render(request, 'home.html', {'user': None})
+    
+    # Check if user has completed enrollment
+    if not request.user.enrollment_date:
+        return redirect('questionnaire_interest')
+    
+    # Get participant record
     try:
-        start_datetime = timezone.make_aware(
-            timezone.datetime.combine(participant.enrollment_date, timezone.datetime.min.time()),
-            timezone.get_default_timezone()
-        )
-        if settings.TEST_MODE:
-            elapsed_days = (current_date - start_datetime).total_seconds() / settings.TEST_TIME_SCALE
-        else:
-            elapsed_days = (current_date.date() - participant.enrollment_date).days
-        
-        # Validate elapsed_days
-        if elapsed_days < 0 or elapsed_days > 365:
-            # logger.error(f"Invalid elapsed_days {elapsed_days} for participant {participant.participant_id}")
-            elapsed_days = 0
-    except Exception as e:
-        # logger.error(f"Error calculating elapsed_days for participant {participant.participant_id}: {e}")
-        elapsed_days = 0
-
-    # Wave 1: Days 11-20
-    within_wave1_period = 11 <= elapsed_days < 21 and not participant.code_entered
-    # Wave 3: Days 95-104
-    within_wave3_period = 95 <= elapsed_days < 105 and not participant.wave3_code_entered
-
+        participant = Participant.objects.get(user=request.user)
+    except Participant.DoesNotExist:
+        participant = None
+    
+    # Calculate study day
+    study_day = request.user.current_study_day
+    
+    # Determine what to show based on study day
     context = {
         'user': request.user,
-        'progress': participant,
-        'within_wave1_period': within_wave1_period,
-        'within_wave3_period': within_wave3_period,
-        'days_until_start': max(0, 11 - elapsed_days),
-        'days_until_end': max(0, 20 - elapsed_days) if elapsed_days < 21 else 0,
-        'start_date': participant.enrollment_date + timedelta(days=10),
-        'end_date': participant.enrollment_date + timedelta(days=20)
+        'participant': participant,
+        'study_day': study_day,
+        'within_wave1_period': False,
+        'within_wave3_period': False,
     }
+    
+    if participant and study_day:
+        # Wave 1 code entry period (Days 11-20)
+        if 11 <= study_day <= 20 and not participant.code_entered:
+            context['within_wave1_period'] = True
+            context['wave1_start_date'] = request.user.enrollment_date + timedelta(days=10)
+            context['wave1_end_date'] = request.user.enrollment_date + timedelta(days=19)
+            context['wave1_days_remaining'] = 20 - study_day
+        
+        # Wave 3 code entry period (Days 95-104)
+        elif 95 <= study_day <= 104 and not participant.wave3_code_entered:
+            context['within_wave3_period'] = True
+            context['wave3_start_date'] = request.user.enrollment_date + timedelta(days=94)
+            context['wave3_end_date'] = request.user.enrollment_date + timedelta(days=103)
+            context['wave3_days_remaining'] = 104 - study_day
+        
+        # Show intervention access for Group 1 during intervention period
+        if request.user.study_group == 1 and 29 <= study_day <= 56:
+            context['show_intervention_access'] = True
+        
+        # Show intervention access for Group 0 after study
+        elif request.user.study_group == 0 and study_day > 112:
+            context['show_intervention_access'] = True
+    
     return render(request, 'home.html', context)
+
+# def home(request):
+#     user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
+#     participant = Participant.objects.filter(user=request.user).first()
+
+#     # Redirect if not eligible or consented
+#     if not user_progress or not user_progress.eligible or not user_progress.consent_given or not participant:
+#         return render(request, 'home.html', {
+#             'user': request.user,
+#             'progress': None,
+#             'within_wave1_period': False,
+#             'within_wave3_period': False,
+#             'days_until_start': 0,
+#             'days_until_end': 0,
+#             'start_date': None,
+#             'end_date': None
+#         })
+
+#     current_date = timezone.now()
+#     try:
+#         start_datetime = timezone.make_aware(
+#             timezone.datetime.combine(participant.enrollment_date, timezone.datetime.min.time()),
+#             timezone.get_default_timezone()
+#         )
+#         if settings.TEST_MODE:
+#             elapsed_days = (current_date - start_datetime).total_seconds() / settings.TEST_TIME_SCALE
+#         else:
+#             elapsed_days = (current_date.date() - participant.enrollment_date).days
+        
+#         # Validate elapsed_days
+#         if elapsed_days < 0 or elapsed_days > 365:
+#             # logger.error(f"Invalid elapsed_days {elapsed_days} for participant {participant.participant_id}")
+#             elapsed_days = 0
+#     except Exception as e:
+#         # logger.error(f"Error calculating elapsed_days for participant {participant.participant_id}: {e}")
+#         elapsed_days = 0
+
+#     # Wave 1: Days 11-20
+#     within_wave1_period = 11 <= elapsed_days < 21 and not participant.code_entered
+#     # Wave 3: Days 95-104
+#     within_wave3_period = 95 <= elapsed_days < 105 and not participant.wave3_code_entered
+
+#     context = {
+#         'user': request.user,
+#         'progress': participant,
+#         'within_wave1_period': within_wave1_period,
+#         'within_wave3_period': within_wave3_period,
+#         'days_until_start': max(0, 11 - elapsed_days),
+#         'days_until_end': max(0, 20 - elapsed_days) if elapsed_days < 21 else 0,
+#         'start_date': participant.enrollment_date + timedelta(days=10),
+#         'end_date': participant.enrollment_date + timedelta(days=20)
+#     }
+#     return render(request, 'home.html', context)
 @login_required
 def dashboard(request):
     user_progress = UserSurveyProgress.objects.filter(user=request.user).first()

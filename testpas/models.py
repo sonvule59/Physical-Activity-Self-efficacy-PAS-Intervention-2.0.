@@ -117,13 +117,73 @@ class Participant(models.Model):
                 self.confirmation_token = uuid.uuid4().hex
         super().save(*args, **kwargs)
 
+    def send_email(self, template_name, extra_context=None):
+            template = EmailTemplate.objects.get(name=template_name)
+            context = {'participant_id': self.participant_id, 'username': self.user.username}
+            if extra_context:
+                context.update(extra_context)
+            body = template.body.format(**context)
+            try:
+                send_mail(
+                    template.subject,
+                    body,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [self.email or self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
+                    fail_silently=False,
+                )
+                self.email_status = 'sent'
+                self.email_send_date = timezone.now().date()
+                self.save()
+            except Exception as e:
+                self.email_status = 'failed'
+                self.save()
+                raise
+
+    # def send_email(self, template_name, extra_context=None, mark_as=None):
+    #     if mark_as and self.email_status == mark_as:
+    #         return
+    #     try:
+    #         template = EmailTemplate.objects.get(name=template_name)
+    #     except EmailTemplate.DoesNotExist:
+    #         self.email_status = 'failed'
+    #         self.save()
+    #         raise
+    #     context = {'participant_id': self.participant_id, 'username': self.user.username}
+    #     if extra_context:
+    #         context.update(extra_context)
+    #     try:
+    #         body = template.body.format(**context)
+    #         send_mail(
+    #             template.subject,
+    #             body,
+    #             settings.DEFAULT_FROM_EMAIL,
+    #             # FIX 2: Standardized recipients to match PAS document
+    #             [self.email or self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
+    #             fail_silently=False,
+    #         )
+    #         self.email_status = mark_as or 'sent'
+    #         self.email_send_date = timezone.now().date()
+    #         self.save()
+    #     except Exception as e:
+    #         self.email_status = 'failed'
+    #         self.save()
+    #         raise
+
+
     def send_confirmation_email(self):
-        from django.core.mail import send_mail
-        template = EmailTemplate.objects.get(name='account_confirmation')
-        subject = template.subject
-        confirmation_link = f"http://localhost:8000/confirm/{self.confirmation_token}/"
-        message = template.body.format(participant_id=self.participant_id, confirmation_link=confirmation_link)
-        send_mail(subject, message, 'projectpas2024@gmail.com', [self.email])
+        confirmation_link = f"{settings.BASE_URL}/confirm-account/{self.confirmation_token}/"
+        self.send_email(
+            'account_confirmation',
+            extra_context={'confirmation_link': confirmation_link},
+            mark_as='sent_confirmation'
+        )
+    # def send_confirmation_email(self):
+    #     from django.core.mail import send_mail
+    #     template = EmailTemplate.objects.get(name='account_confirmation')
+    #     subject = template.subject
+    #     confirmation_link = f"http://localhost:8000/confirm/{self.confirmation_token}/"
+    #     message = template.body.format(participant_id=self.participant_id, confirmation_link=confirmation_link)
+    #     send_mail(subject, message, 'projectpas2024@gmail.com', [self.email])
 
     def __str__(self):
         return self.participant_id
@@ -139,27 +199,7 @@ class Participant(models.Model):
             start_date=(self.code_entry_date + timedelta(days=1)).strftime('%m/%d/%Y'),
             end_date=(self.code_entry_date + timedelta(days=7)).strftime('%m/%d/%Y')
         )
-    def send_email(self, template_name, extra_context=None):
-            template = EmailTemplate.objects.get(name=template_name)
-            context = {'participant_id': self.participant_id, 'username': self.user.username}
-            if extra_context:
-                context.update(extra_context)
-            body = template.body.format(**context)
-            try:
-                send_mail(
-                    template.subject,
-                    body,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [self.email or self.user.email, 'svu23@iastate.edu', 'projectpas2024@gmail.com'],
-                    fail_silently=False,
-                )
-                self.email_status = 'sent'
-                self.email_send_date = timezone.now().date()
-                self.save()
-            except Exception as e:
-                self.email_status = 'failed'
-                self.save()
-                raise
+    
         
     def send_wave1_survey_return_email(self):
         template = EmailTemplate.objects.get(name='wave1_survey_return')
