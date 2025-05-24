@@ -16,12 +16,12 @@ config/                 # Main project configuration
 ├── urls.py           # Main URL configuration
 └── celery.py         # Celery configuration for scheduled tasks
 
-testpas/              # Your existing app, enhanced
+testpas/              
 ├── models.py         # Updated models for all requirements
 ├── views.py          # Views for all 26 information points
-├── forms.py          # Your existing forms (compatible)
-├── tasks.py          # NEW: Celery tasks for automated emails
-├── urls.py           # NEW: App-specific URLs
+├── forms.py     
+├── tasks.py          # Celery tasks for automated emails
+├── urls.py           # Web App-specific URLs
 └── migrations/       # Including email template data
 ```
 
