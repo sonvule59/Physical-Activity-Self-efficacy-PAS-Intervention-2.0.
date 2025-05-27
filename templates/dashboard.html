@@ -25,7 +25,7 @@
                 <p><strong>Eligible:</strong> {{ progress.eligible }}</p>
                 <p><strong>Consent Given:</strong> {{ progress.consent_given }}</p>
                 <p><strong>Survey Completed:</strong> {{ progress.survey_completed }}</p>
-                <p><strong>Progress Percentage:</strong> {{ progress.progress_percentage|default:"None" }}%</p>
+                <p><strong>Progress Percentage:</strong> {{ progress.progress_percentage|default:"0" }}%</p>
                 <p><strong>Start Time:</strong> {{ progress.start_time }}</p>
                 <p><strong>End Time:</strong> {{ progress.end_time|default:"None" }}</p>
                 <p><strong>Current Phase:</strong> {{ participant.phase|default:"" }}</p>
@@ -42,18 +42,19 @@
         {% block content %}
         <div class="container mt-5">
             <h1>Welcome, {{ user.username }}</h1>
+            <!-- Correct Wave 1 code entry period logic -->
             {% if within_wave1_period %}
                 <div class="alert alert-info">
                     <h4>Wave 1 Code Entry Period Active!</h4>
-                    <p>You can now enter your Wave 1 Physical Activity Code.</p>
-                    <p>Time remaining: {{ days_until_end }} days</p>
+                    <p>Enter your Wave 1 Physical Activity Code.</p>
+                    <p>Time remaining: {{ days_until_end_wave1 }} days</p>
                 </div>
             {% elif days_until_start > 0 %}
                 <div class="alert alert-warning">
                     <h4>Wave 1 Code Entry Period Starting Soon</h4>
-                    <p>You will be able to enter your code in {{ days_until_start }} days.</p>
-                    <p>Start date: {{ start_date }}</p>
-                    <p>End date: {{ end_date }}</p>
+                    <p>You will be able to enter your code in {{ days_until_start_wave1 }} days.</p>
+                    <p>Start date: {{ start_date_wave_1|date:"Y-m-d" }}</p>
+                    <p>End date: {{ end_date_wave1|date:"Y-m-d" }}</p>
                 </div>
             {% else %}
                 <div class="alert alert-secondary">
@@ -67,7 +68,7 @@
         <section id="wave1-code">
             <h2>Enter Wave 1 Physical Activity Code</h2>
             {% if within_wave1_period %}
-                <form method="POST" action="{% url 'enter_code' %}">
+                <form method="POST" action="{% url 'enter_code' wave=1%}">
                     {% csrf_token %}
                     <label for="code">Enter Code:</label>
                     <input type="text" id="code" name="code" required>
@@ -77,7 +78,7 @@
                     <p style="color: red;">{{ code_error }}</p>
                 {% endif %}
             {% else %}
-                <p>This task has expired.</p>
+                <p>This task has expired/not currently Available.</p>
             {% endif %}   
         </section>
 

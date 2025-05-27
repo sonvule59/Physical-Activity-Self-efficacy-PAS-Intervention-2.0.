@@ -174,8 +174,7 @@ class Participant(models.Model):
         confirmation_link = f"{settings.BASE_URL}/confirm-account/{self.confirmation_token}/"
         self.send_email(
             'account_confirmation',
-            extra_context={'confirmation_link': confirmation_link},
-            mark_as='sent_confirmation'
+            extra_context={'confirmation_link': confirmation_link}
         )
     # def send_confirmation_email(self):
     #     from django.core.mail import send_mail

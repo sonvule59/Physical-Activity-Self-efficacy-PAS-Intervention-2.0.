@@ -6,10 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAS 2.0 - Home</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
+    <header>
     <h1>Welcome to PAS 2.0, {{ user.username }}!</h1>
+    </header>
     {% if messages %}
         <ul>
             {% for message in messages %}
@@ -17,6 +19,8 @@
             {% endfor %}
         </ul>
     {% endif %}
+    <!-- FIX 2: Show button for authenticated users -->
+        <p><a href="{% url 'dashboard' %}"><button>Go to Dashboard</button></a></p>
     {% if progress %}
         <p>Thank you for participating in the Physical Activity Self-efficacy (PAS) Intervention 2.0 study.</p>
         {% if within_wave1_period %}
@@ -31,9 +35,15 @@
         {% if days_until_end > 0 %}
             <p>Days until Wave 1 code entry ends: {{ days_until_end }}</p>
         {% endif %}
+        <!-- Add button to dashboard for authenticated users -->
+        <p><a href="{% url 'dashboard' %}"><button>Go to Dashboard</button></a></p>
     {% else %}
         <p>You are not currently enrolled in the study. Please <a href="{% url 'create_account' %}">create an account</a> or contact support.</p>
     {% endif %}
     <p>For assistance, contact Seungmin (“Seung”) Lee at seunglee@iastate.edu or 517-898-0020.</p>
+
+    <footer>
+        <p>© Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
 </body>
 </html>

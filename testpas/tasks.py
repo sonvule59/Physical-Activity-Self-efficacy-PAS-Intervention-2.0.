@@ -1,3 +1,4 @@
+from datetime import timedelta
 from celery import shared_task
 from django.core.mail import send_mail
 from django.core.management import call_command
@@ -77,6 +78,30 @@ def send_scheduled_emails():
         except Exception as e:
             logger.error(f"Error processing participant {participant.participant_id}: {e}")
             continue
+
+@shared_task
+def send_wave3_code_entry_email(participant_id):
+    """Information 23: Physical Activity Monitoring Tomorrow (Wave 3)"""
+    try:
+        participant = Participant.objects.get(id=participant_id)
+        
+        # Calculate dates
+        code_date = participant.wave3_code_entry_date
+        start_date = code_date + timedelta(days=1)
+        end_date = code_date + timedelta(days=7)
+        
+        participant.send_email(
+            'wave3_code_entry',
+            extra_context={
+                'code_date': code_date.strftime('%m/%d/%Y'),
+                'start_date': start_date.strftime('%m/%d/%Y'),
+                'end_date': end_date.strftime('%m/%d/%Y'),
+            }
+        )
+        logger.info(f"Sent Wave 3 code entry email to {participant.participant_id}")
+    except Exception as e:
+        logger.error(f"Error sending Wave 3 code entry email: {str(e)}")
+
 @shared_task
 def send_specific_email(participant_id, template_name, extra_context=None):
     try:
