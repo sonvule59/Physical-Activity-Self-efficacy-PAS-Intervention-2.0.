@@ -49,7 +49,7 @@
                     <p>Enter your Wave 1 Physical Activity Code.</p>
                     <p>Time remaining: {{ days_until_end_wave1 }} days</p>
                 </div>
-            {% elif days_until_start > 0 %}
+            {% elif days_until_start_wave1 > 0 %}
                 <div class="alert alert-warning">
                     <h4>Wave 1 Code Entry Period Starting Soon</h4>
                     <p>You will be able to enter your code in {{ days_until_start_wave1 }} days.</p>
