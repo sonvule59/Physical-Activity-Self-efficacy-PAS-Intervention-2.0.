@@ -29,7 +29,6 @@ EMAIL_TEMPLATES = [
             "Sincerely,\nThe Obesity and Physical Activity Research Team"
         )
     },
-    # FIXED: Updated wave1_code_entry for Information 12
         {
             'name': 'wave1_code_entry',
             'subject': 'Physical Activity Monitoring Tomorrow (Wave 1)',
@@ -44,7 +43,6 @@ EMAIL_TEMPLATES = [
                 'Sincerely,\nThe Obesity and Physical Activity Research Team'
             )
         },
-        # FIXED: Updated wave1_survey_return for Information 13
         {
             'name': 'wave1_survey_return',
             'subject': 'Survey by Today & Return Monitor (Wave 1)',
@@ -59,7 +57,6 @@ EMAIL_TEMPLATES = [
                 'Sincerely,\nThe Obesity and Physical Activity Research Team'
             )
         },
-        # FIXED: Updated wave1_missing_code for Information 14
         {
             'name': 'wave1_missing_code',
             'subject': 'Missing Code Entry (Wave 1)',

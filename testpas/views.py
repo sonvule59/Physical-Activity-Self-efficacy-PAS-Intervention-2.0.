@@ -619,22 +619,15 @@ def exit_screen_declined(request):
 """DEV TIME CONTROLS"""
 @login_required
 def dev_time_controls(request):
+    # if not request.user.is_staff:
+    #     return HttpResponse("Unauthorized", status=403)
     global _fake_time
     if request.method == 'POST':
         days = int(request.POST.get('days', 0))
         _fake_time = timezone.now() + timedelta(days=days)
         return JsonResponse({'status': 'success', 'fake_time': _fake_time.isoformat()})
     return render(request, 'dev_time_controls.html')
-# @login_required
-# def dev_time_controls(request):
-#     if not request.user.is_staff:
-#         return HttpResponse("Unauthorized", status=403)
-#     global _fake_time
-#     if request.method == 'POST':
-#         days = int(request.POST.get('days', 0))
-#         _fake_time = timezone.now() + timedelta(days=days)
-#         return JsonResponse({'status': 'success', 'fake_time': _fake_time.isoformat()})
-#     return render(request, 'dev_time_controls.html')
+
 @login_required
 def dashboard(request):
     user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
@@ -954,12 +947,13 @@ def enter_code(request, wave):
 #         'days_remaining': (day_21 - current_date).days
 #     })
 
-def code_success(request):
-    participant = Participant.objects.get(user=request.user)
-    current_date = timezone.now().date()
-    day_21 = participant.enrollment_date + timedelta(days=20)
-    days_remaining = (day_21 - current_date).days
-    return render(request, 'code_success.html', {'days_remaining': days_remaining})
+def code_success(request, wave):
+    return render(request, 'code_success.html', {'wave': wave})
+    # participant = Participant.objects.get(user=request.user)
+    # current_date = timezone.now().date()
+    # day_21 = participant.enrollment_date + timedelta(days=20)
+    # days_remaining = (day_21 - current_date).days
+    # return render(request, 'code_success.html', {'days_remaining': days_remaining})
 
 def code_failure(request):
     participant = Participant.objects.get(user=request.user)
