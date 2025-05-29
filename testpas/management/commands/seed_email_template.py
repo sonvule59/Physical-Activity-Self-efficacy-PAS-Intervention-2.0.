@@ -16,13 +16,66 @@ EMAIL_TEMPLATES = [
     {
         "name": "wave1_monitor_ready",
         "subject": "Wave 1 Physical Activity Monitoring – Ready",
-        "body": "Dear {participant_id},\n\nIt’s time for the first monitoring period. Please wear the provided device for 7 days.\n\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {participant_id},\n\n"
+            "Your next task is to complete Wave 1 Physical Activity Monitoring.\n\n"
+            "You need to meet with research members within 10 days to complete the physical activity monitoring. "
+            "Within the next few days, research members will contact you to provide a physical activity monitor and instructions for wearing it. "
+            "You will earn an additional $35 in your Amazon electronic gift card account for completing this task. "
+            "You will receive the accrued incentives after this study ends. "
+            "After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n\n"
+            "If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee (Principal Investigator) "
+            "at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\nThe Obesity and Physical Activity Research Team"
+        )
     },
-    {
-        "name": "wave1_code_entry",
-        "subject": "Physical Activity Monitoring Tomorrow (Wave 1)",
-        "body": "Hi {username},\n\nYou have successfully entered the access code for physical activity monitoring. Thank you!\n\nPlease start wearing the monitor tomorrow ({start_date}) for seven consecutive days until {end_date}.\n\nBest,\nPAS 2.0 Team"
-    },
+    # FIXED: Updated wave1_code_entry for Information 12
+        {
+            'name': 'wave1_code_entry',
+            'subject': 'Physical Activity Monitoring Tomorrow (Wave 1)',
+            'body': (
+                'Hi {username},\n\n'
+                'You have successfully entered the access code for physical activity monitoring. Thank you!\n\n'
+                'Please start wearing the monitor tomorrow for seven consecutive days. For example, if you enter the code on {code_date} (Fri), '
+                'please wear the device starting on {start_date} (Sat) and continue wearing it until {end_date} (Fri).\n\n'
+                'To earn $35 in Amazon gift cards, please wear the monitor for at least 4 days, including one weekend day, with at least 10 hours each day. '
+                'For the following seven days, complete the daily log at the end of each day. You will receive your total incentives after the study ends.\n\n'
+                'If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        # FIXED: Updated wave1_survey_return for Information 13
+        {
+            'name': 'wave1_survey_return',
+            'subject': 'Survey by Today & Return Monitor (Wave 1)',
+            'body': (
+                'Hi {username},\n\n'
+                'The timeline for wearing the physical activity monitor is complete for this wave.\n\n'
+                'Your next two tasks are listed below:\n'
+                '1. Please complete a short survey. This task must be done by today and should take approximately 10 minutes to complete.\n'
+                '   Please click the following link to complete the task: [Survey Link Placeholder].\n\n'
+                '2. Please return the monitor. Within a couple of days, research members will contact you to arrange the return.\n\n'
+                'If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+        # FIXED: Updated wave1_missing_code for Information 14
+        {
+            'name': 'wave1_missing_code',
+            'subject': 'Missing Code Entry (Wave 1)',
+            'body': (
+                'Hi {username},\n\n'
+                'You missed the code entry (i.e., no $35 worth of Amazon electronic gift cards). However, you will still have more tasks in the future. '
+                'We will contact you via email, so please regularly check your inbox.\n\n'
+                'If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n'
+                'Sincerely,\nThe Obesity and Physical Activity Research Team'
+            )
+        },
+    # {
+    #     "name": "wave1_code_entry",
+    #     "subject": "Physical Activity Monitoring Tomorrow (Wave 1)",
+    #     "body": "Hi {username},\n\nYou have successfully entered the access code for physical activity monitoring. Thank you!\n\nPlease start wearing the monitor tomorrow ({start_date}) for seven consecutive days until {end_date}.\n\nBest,\nPAS 2.0 Team"
+    # },
     {
         "name": "wave1_survey_return",
         "subject": "Survey by Today & Return Monitor (Wave 1)",

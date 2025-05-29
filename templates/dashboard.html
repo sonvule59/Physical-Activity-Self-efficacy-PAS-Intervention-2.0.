@@ -81,7 +81,63 @@
                 <p>This task has expired/not currently Available.</p>
             {% endif %}   
         </section>
-
+       <h2>Study Dashboard</h2>
+    <!-- FIXED: Display messages for errors or success -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li class="message">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <!-- FIXED: Check enrollment status before showing study content -->
+    {% if progress and progress.eligible and progress.consent_given and participant %}
+        <p>Welcome, {{ participant.user.username }}!</p>
+        <!-- FIXED: Show Wave 1 prompt only during Day 11–20 -->
+        {% if within_wave1_period %}
+            <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
+            <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
+        <!-- FIXED: Show future or expired status clearly -->
+        {% elif progress.day_1 %}
+            {% if days_until_start_wave1 > 0 %}
+                <p>Wave 1 code entry starts on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days away).</p>
+            {% elif days_until_end_wave1 <= 0 %}
+                <p>Wave 1 code entry period has ended.</p>
+            {% endif %}
+        {% endif %}
+        {% if within_wave3_period %}
+            <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
+        {% endif %}
+        <!-- ADDED: Contact information for support -->
+        <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
+    {% else %}
+        <!-- FIXED: Clear message for incomplete enrollment -->
+        <p>Please complete enrollment to view study progress.</p>
+    {% endif %} 
+        <!-- <h2>Study Dashboard</h2>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li class="message">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% if progress and participant %}
+        <p>Welcome, {{ participant.user.username }}!</p>
+        <p class="debug">Study Day: {{ study_day }}</p>
+        {% if within_wave1_period %}
+            <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
+            <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
+        {% else %}
+            <p>Wave 1 code entry is not currently available.</p>
+        {% endif %}
+        {% if within_wave3_period %}
+            <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
+        {% endif %}
+    {% else %}
+        <p>Please complete enrollment to view study progress.</p>
+    {% endif %} -->
+    
         <section id="actions">
             <h2>Actions</h2>
             <ul>

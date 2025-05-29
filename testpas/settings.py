@@ -119,13 +119,16 @@ TEST_TIME_SCALE = float(os.getenv('TEST_TIME_SCALE', '5'))  # 1 day = 1 second (
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Chicago'
 CELERY_ENABLE_UTC = False
 CELERY_BEAT_SCHEDULE = {
-    'send-emails-every-minute': {
-        'task': 'testpas.tasks.send_scheduled_emails',
-        'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
-    },
+    # 'send-emails-every-minute': {
+    #     'task': 'testpas.tasks.send_scheduled_emails',
+    #     'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
+    
 }
 
 # Email settings

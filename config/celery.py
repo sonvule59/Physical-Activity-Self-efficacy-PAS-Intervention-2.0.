@@ -36,6 +36,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testpas.settings')
 
 # Create Celery app instance
 app = Celery('config')
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
 
 # Load configuration from Django settings (e.g., CELERY_BROKER_URL)
 app.config_from_object('django.conf:settings', namespace='CELERY')

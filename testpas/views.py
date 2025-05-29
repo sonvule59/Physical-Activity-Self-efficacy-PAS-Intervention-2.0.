@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
 import json
 from hashlib import sha256
+from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email
 from testpas.settings import DEFAULT_FROM_EMAIL
 # from testpas.utils import generate_token, validate_token, send_confirmation_email
 from .models import *
@@ -23,11 +24,12 @@ import os
 import datetime
 from twilio.rest import Client
 import pytz
-from .models import Participant, SurveyProgress
+from .models import Participant, SurveyProgress, Survey
 from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm
 import io
 import csv
 import zipfile
+from testpas.schedule_emails import schedule_wave1_monitoring_email
 from django.http import HttpResponse
 from django.apps import apps
 from django.db import transaction
@@ -39,6 +41,7 @@ def get_current_time():
     if _fake_time is not None:
         return _fake_time
     return timezone.now()
+
 
 @login_required
 def home(request):
@@ -457,102 +460,304 @@ def send_wave_1_email(user):
 
     send_mail(subject, message, from_email, recipient_list)
 
+# @login_required
+# def consent_form(request):
+#     if not request.user.is_authenticated:
+#         return redirect("login")
+
+#     try:
+#         participant = Participant.objects.get(user=request.user)
+#     except Participant.DoesNotExist:
+#         messages.error(request, "Please create a participant profile.")
+#         return redirect("create_account")
+
+#     progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
+#     if not progress or not progress.eligible:
+#         return redirect("exit_screen_not_eligible")
+
+#     if request.method == "POST":
+#         action = request.POST.get("action")
+#         if not action and 'consent' in request.POST:
+#             consent_value = request.POST.get("consent")
+#             action = "consent" if consent_value == "yes" else "decline" if consent_value == "no" else None
+#             logger.debug(f"Using consent parameter: {consent_value} mapped to action: {action}")
+
+#         if not action:
+#             logger.warning(f"Invalid action {action} in consent_form for {request.user.username}")
+#             messages.error(request, "No valid action specified. Please select Yes or No and submit.")
+#             return render(request, "consent_form.html", {"participant": participant})
+#         try:
+#             if action == "consent":
+#                 # FIXED SNIPPET START: Handle consent action and redirect to dashboard
+#                 participant.enrollment_date = timezone.now().date()
+#                 participant.save()
+#                 progress.consent_given = True
+#                 progress.day_1 = timezone.now().date()
+#                 progress.save()
+#                 try:
+#                     schedule_wave1_monitoring_email.delay(participant.id)
+#                     logger.info(f"Scheduled wave1_monitoring_email for participant {participant.participant_id}")
+#                 except Exception as e:
+#                     logger.error(f"Failed to schedule wave1_monitoring_email for {participant.participant_id}: {e}")
+#                     messages.error(request, "Consent saved, but email scheduling failed. Contact support.")
+#                 # return redirect("dashboard")
+#                 return render(request, "consent_form.html", {"participant": participant})
+#                 # FIXED SNIPPET END
+#             elif action == "decline":
+#                 # FIXED SNIPPET START: Handle decline action and redirect to home
+#                 decline_reason = request.POST.get("decline_reason", "No reason provided")
+#                 progress.eligibility_reason = f"Declined consent: {decline_reason}"
+#                 progress.eligible = False
+#                 progress.save()
+#                 logger.info(f"User {request.user.username} declined consent: {decline_reason}")
+#                 messages.info(request, "You have declined to participate.")
+#                 return redirect("home")
+#                 # FIXED SNIPPET END
+#             else:
+#                 logger.warning(f"Invalid action {action} in consent_form for {request.user.username}")
+#                 messages.error(request, "Invalid action. Please try again.")
+#         except Exception as e:
+#             logger.error(f"Error processing consent form for {request.user.username}: {e}")
+#             messages.error(request, "An error occurred. Please try again or contact support.")
+
+#     return render(request, "consent_form.html", {"participant": participant})
 @login_required
 def consent_form(request):
+    logger.info(f"Consent form accessed by user: {request.user.username}")
     if request.method == "POST":
         form = ConsentForm(request.POST)
+        logger.debug(f"Form data: {request.POST}")
         if form.is_valid():
-            user = request.user
-            user_progress = UserSurveyProgress.objects.get(user=user)
-            user_progress.consent_given = True
-            user_progress.save()
+            logger.info("Form is valid")
+            try:
+                # Update UserSurveyProgress
+                # FIXED: Get or create Survey with title "Eligibility Criteria"
+                survey, _ = Survey.objects.get_or_create(
+                    title="Eligibility Criteria",
+                    defaults={'description': "Survey for eligibility screening", 'created_at': timezone.now()}
+                )
+                # FIXED: Include survey in get_or_create for UserSurveyProgress
+                user_progress, created = UserSurveyProgress.objects.get_or_create(
+                    user=request.user,
+                    survey=survey,  # ADDED: Specify survey
+                    defaults={'consent_given': True, 'eligible' : True, 'day_1': timezone.now().date()}
+                )
+                # user_progress, created = UserSurveyProgress.objects.get_or_create(
+                #     user=request.user,
+                #     survey__title="Eligibility Criteria",
+                #     defaults={'consent_given': True, 'day_1': timezone.now().date()}
+                # )
+                if not created:
+                    user_progress.consent_given = True
+                    user_progress.day_1 = user_progress.day_1 or timezone.now().date()
+                    user_progress.eligible = True
+                    user_progress.save()
+                logger.info(f"UserSurveyProgress updated for {request.user.username}")
 
-            # Send Wave 1 email
-            send_wave_1_email(user)
+                # Get or create Participant
+                participant, created = Participant.objects.get_or_create(
+                    user=request.user,
+                    defaults={
+                        'participant_id': f"P{Participant.objects.count() + 1:03d}",
+                        'email': request.user.email,
+                        'confirmation_token': str(uuid.uuid4()),
+                        'enrollment_date': timezone.now().date(),
+                        'is_confirmed': True,  # ADDED: Ensure confirmed
+                        'engagement_tracked': True
+                    }
+                )
+                logger.info(f"Participant record for {request.user.username}: {participant.participant_id}")
 
-            return redirect("waiting_screen")
+                # Send Information 9 email immediately
+                participant.send_email('wave1_survey_ready')
+                logger.info(f"Wave 1 survey email sent to {participant.email}")
+
+                # Schedule Information 10 email for Day 11
+                eta = timezone.now() + timedelta(seconds=55 if settings.TEST_MODE else 11 * 24 * 60 * 60)
+                send_wave1_monitoring_email.apply_async(
+                    args=[participant.id],
+                    eta=eta
+                )
+                logger.info(f"Wave 1 monitoring email scheduled for {participant.participant_id} at {eta}")
+
+                return redirect("waiting_screen")
+            except Exception as e:
+                logger.error(f"Error processing consent for {request.user.username}: {str(e)}", exc_info=True)
+                messages.error(request, f"Error submitting consent: {str(e)}. Please try again or contact support.")
+                # logger.error(f"Error processing consent for {request.user.username}: {str(e)}")
+                # messages.error(request, f"An error occurred: {str(e)}")
+        else:
+            logger.warning(f"Form invalid for {request.user.username}: {form.errors}")
+            messages.error(request, "Please correct the form errors.")
     else:
         form = ConsentForm()
+        logger.debug("Rendering consent form (GET request)")
     return render(request, "consent_form.html", {'form': form})
+# @login_required
+# def consent_form(request):
+#     if request.method == "POST":
+#         form = ConsentForm(request.POST)
+#         if form.is_valid():
+#             user = request.user
+#             user_progress = Participant.objects.get(user=user)
+#             user_progress.consent_given = True
+#             user_progress.save()
 
+#             # Send Wave 1 email
+#             schedule_wave1_monitoring_email(user_progress.participant_id)
+
+#             return redirect("waiting_screen")
+#     else:
+#         form = ConsentForm()
+#     return render(request, "consent_form.html", {'form': form})
+def exit_screen_not_eligible(request):
+    return render(request, 'exit_screen_not_eligible.html')
+
+def exit_screen_declined(request):
+    return render(request, 'exit_screen_declined.html')
+
+"""DEV TIME CONTROLS"""
 @login_required
+def dev_time_controls(request):
+    global _fake_time
+    if request.method == 'POST':
+        days = int(request.POST.get('days', 0))
+        _fake_time = timezone.now() + timedelta(days=days)
+        return JsonResponse({'status': 'success', 'fake_time': _fake_time.isoformat()})
+    return render(request, 'dev_time_controls.html')
+# @login_required
+# def dev_time_controls(request):
+#     if not request.user.is_staff:
+#         return HttpResponse("Unauthorized", status=403)
+#     global _fake_time
+#     if request.method == 'POST':
+#         days = int(request.POST.get('days', 0))
+#         _fake_time = timezone.now() + timedelta(days=days)
+#         return JsonResponse({'status': 'success', 'fake_time': _fake_time.isoformat()})
+#     return render(request, 'dev_time_controls.html')
 @login_required
 def dashboard(request):
-    """Dashboard page - shows user progress and study status"""
-    #  Wave 1 period calculation and remaining days
-    context = {
-        'user': request.user,
-        'within_wave1_period': False,
-        'within_wave3_period': False,
-        'study_day': 0
-    }
-    current_date = timezone.now().date()
-
     user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
-    if user_progress and user_progress.eligible and user_progress.consent_given:
-        participant, created = Participant.objects.get_or_create(
-            user=request.user,
-            defaults={
-                #  1: Use day_1 for enrollment_date
-                'enrollment_date': user_progress.day_1 if user_progress.day_1 else timezone.now().date(),
-                'code_entered': False,
-                'age': 30,
-                'confirmation_token': str(uuid.uuid4()),
-                'participant_id': f"P{Participant.objects.count() + 1:03d}",
-                'email': request.user.email
-            }
-        )
-        #  2: Update survey completion and progress percentage
-        if created or not user_progress.survey_completed:
-            try:
-                survey = Survey.objects.get(title="Eligibility Criteria")
-                total_questions = survey.questions.count()
-                answered_questions = Response.objects.filter(user=request.user, question__survey=survey).count()
-                if answered_questions >= total_questions:
-                    user_progress.survey_completed = True
-                    user_progress.progress_percentage = 100
-                else:
-                    user_progress.survey_completed = False
-                    user_progress.progress_percentage = (answered_questions / total_questions * 100) if total_questions > 0 else 0
-                user_progress.save()
-            except Survey.DoesNotExist:
-                logger.error("Eligibility survey not found for user %s", request.user.username)
-                user_progress.survey_completed = False
-                user_progress.progress_percentage = 0
-                user_progress.save()
-        # Ensure day_1 is set
-        if not user_progress.day_1:
-            user_progress.day_1 = participant.enrollment_date
-            user_progress.save()
-        context['participant'] = participant
-        context['progress'] = user_progress
-    else:
-        participant = None
-        context['participant'] = None
-        context['progress'] = None
+    participant = Participant.objects.filter(user=request.user).first()
+    current_date = get_current_time().date()
+    within_wave1_period = False
+    within_wave3_period = False
+    days_until_start_wave1 = 0
+    days_until_end_wave1 = 0
+    start_date_wave1 = None
+    end_date_wave1 = None
 
-    #  3: Use day_1 for Wave 1 period calculation
-    if user_progress and user_progress.day_1:
-        day_1 = user_progress.day_1
-        study_day = (current_date - day_1).days + 1
-        context['study_day'] = study_day
-        day_11 = day_1 + timedelta(days=10)
-        day_21 = day_1 + timedelta(days=20)
-        context['within_wave1_period'] = day_11 <= current_date <= day_21 and participant and not participant.code_entered
-        context['days_until_start_wave1'] = max((day_11 - current_date).days, 0)
-        context['days_until_end_wave1'] = max((day_21 - current_date).days, 0) if context['within_wave1_period'] else 0
-        context['start_date_wave1'] = day_11
-        context['end_date_wave1'] = day_21
+    if user_progress and user_progress.eligible and user_progress.consent_given and participant:
+        if not participant.enrollment_date:
+            participant.enrollment_date = user_progress.day_1 or current_date
+            participant.save()
 
-        day_95 = day_1 + timedelta(days=94)
-        day_104 = day_1 + timedelta(days=103)
-        context['within_wave3_period'] = day_95 <= current_date <= day_104 and participant and not participant.wave3_code_entered
-        context['days_until_start_wave3'] = max((day_95 - current_date).days, 0)
-        context['days_until_end_wave3'] = max((day_104 - current_date).days, 0) if context['within_wave3_period'] else 0
-        context['start_date_wave3'] = day_95
-        context['end_date_wave3'] = day_104
+        study_day = (current_date - user_progress.day_1).days + 1
+        day_11 = user_progress.day_1 + timedelta(days=10)
+        day_21 = user_progress.day_1 + timedelta(days=20)
+        day_95 = user_progress.day_1 + timedelta(days=94)
+        day_104 = user_progress.day_1 + timedelta(days=103)
 
-    return render(request, 'dashboard.html', context)
+        within_wave1_period = 11 <= study_day <= 20 and not participant.code_entered
+        within_wave3_period = 95 <= study_day <= 104 and not participant.wave3_code_entered
+        days_until_start_wave1 = max(0, (day_11 - current_date).days)
+        days_until_end_wave1 = max(0, (day_21 - current_date).days)
+        start_date_wave1 = day_11
+        end_date_wave1 = day_21
+
+    context = {
+        'progress': user_progress,
+        'participant': participant,
+        'within_wave1_period': within_wave1_period,
+        'within_wave3_period': within_wave3_period,
+        'days_until_start_wave1': days_until_start_wave1,
+        'days_until_end_wave1': days_until_end_wave1,
+        'start_date_wave1': start_date_wave1,
+        'end_date_wave1': end_date_wave1,
+        'days_until_start_wave3': 0,
+        'days_until_end_wave3': 0,
+        'start_date_wave3': day_95 if user_progress else None,
+        'end_date_wave3': day_104 if user_progress else None,
+        'study_day': study_day if user_progress else 0  # For debugging
+    }
+    return render(request, "dashboard.html", context)
+# @login_required
+# def dashboard(request):
+#     """Dashboard page - shows user progress and study status"""
+#     #  Wave 1 period calculation and remaining days
+#     context = {
+#         'user': request.user,
+#         'within_wave1_period': False,
+#         'within_wave3_period': False,
+#         'study_day': 0
+#     }
+#     current_date = timezone.now().date()
+
+#     user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
+#     if user_progress and user_progress.eligible and user_progress.consent_given:
+#         participant, created = Participant.objects.get_or_create(
+#             user=request.user,
+#             defaults={
+#                 #  1: Use day_1 for enrollment_date
+#                 'enrollment_date': user_progress.day_1 if user_progress.day_1 else timezone.now().date(),
+#                 'code_entered': False,
+#                 'age': 30,
+#                 'confirmation_token': str(uuid.uuid4()),
+#                 'participant_id': f"P{Participant.objects.count() + 1:03d}",
+#                 'email': request.user.email
+#             }
+#         )
+#         #  2: Update survey completion and progress percentage
+#         if created or not user_progress.survey_completed:
+#             try:
+#                 survey = Survey.objects.get(title="Eligibility Criteria")
+#                 total_questions = survey.questions.count()
+#                 answered_questions = Response.objects.filter(user=request.user, question__survey=survey).count()
+#                 if answered_questions >= total_questions:
+#                     user_progress.survey_completed = True
+#                     user_progress.progress_percentage = 100
+#                 else:
+#                     user_progress.survey_completed = False
+#                     user_progress.progress_percentage = (answered_questions / total_questions * 100) if total_questions > 0 else 0
+#                 user_progress.save()
+#             except Survey.DoesNotExist:
+#                 logger.error("Eligibility survey not found for user %s", request.user.username)
+#                 user_progress.survey_completed = False
+#                 user_progress.progress_percentage = 0
+#                 user_progress.save()
+#         # Ensure day_1 is set
+#         if not user_progress.day_1:
+#             user_progress.day_1 = participant.enrollment_date
+#             user_progress.save()
+#         context['participant'] = participant
+#         context['progress'] = user_progress
+#     else:
+#         participant = None
+#         context['participant'] = None
+#         context['progress'] = None
+
+#     #  3: Use day_1 for Wave 1 period calculation
+#     if user_progress and user_progress.day_1:
+#         day_1 = user_progress.day_1
+#         study_day = (current_date - day_1).days + 1
+#         context['study_day'] = study_day
+#         day_11 = day_1 + timedelta(days=10)
+#         day_21 = day_1 + timedelta(days=20)
+#         context['within_wave1_period'] = day_11 <= current_date <= day_21 and participant and not participant.code_entered
+#         context['days_until_start_wave1'] = max((day_11 - current_date).days, 0)
+#         context['days_until_end_wave1'] = max((day_21 - current_date).days, 0) if context['within_wave1_period'] else 0
+#         context['start_date_wave1'] = day_11
+#         context['end_date_wave1'] = day_21
+
+#         day_95 = day_1 + timedelta(days=94)
+#         day_104 = day_1 + timedelta(days=103)
+#         context['within_wave3_period'] = day_95 <= current_date <= day_104 and participant and not participant.wave3_code_entered
+#         context['days_until_start_wave3'] = max((day_95 - current_date).days, 0)
+#         context['days_until_end_wave3'] = max((day_104 - current_date).days, 0) if context['within_wave3_period'] else 0
+#         context['start_date_wave3'] = day_95
+#         context['end_date_wave3'] = day_104
+
+#     return render(request, 'dashboard.html', context)
 # def dashboard(request):
 #     user_progress = UserSurveyProgress.objects.filter(user=request.user).first()
 #     if user_progress and user_progress.eligible and user_progress.consent_given:
@@ -632,27 +837,30 @@ def enter_code(request, wave):
     """Handle code entry for Wave 1 or Wave 3"""
     participant = get_object_or_404(Participant, user=request.user)
     user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
-    if not user_progress:
-        messages.error(request, "No progress recorded. Contact support.")
+    if not user_progress or not user_progress.day_1:
+        messages.error(request, "Enrollment date not set. Contact support.")
         return redirect('home')
-    if not user_progress.day_1:
-        user_progress.day_1 = participant.enrollment_date if participant.enrollment_date else timezone.now().date()
-        user_progress.save()
-    current_date = timezone.now().date()
-    study_day = (current_date - user_progress.day_1).days + 1
+    # if not user_progress:
+    #     messages.error(request, "No progress recorded. Contact support.")
+    #     return redirect('home')
+    # if not user_progress.day_1:
+    #     user_progress.day_1 = participant.enrollment_date if participant.enrollment_date else timezone.now().date()
+    #     user_progress.save()
+    # current_date = timezone.now().date()
+    # study_day = (current_date - user_progress.day_1).days + 1
     # if user_progress and user_progress.day_1:
     #     current_date = timezone.now().date()
     #     study_day = (current_date - user_progress.day_1).days + 1
     # else:
     #     messages.error(request, "Enrollment date not set. Contact support.")
     #     return redirect('home')
-    
+    current_date = timezone.now().date()
+    study_day = (current_date - user_progress.day_1).days + 1
     if wave == 1:
         # Check if within Wave 1 window (Days 11-20)
         if not (11 <= study_day <= 20):
             messages.error(request, "Code entry is not available at this time.")
             return redirect('home')
-        
         if participant.code_entered:
             messages.info(request, "You have already entered the code for Wave 1.")
             return redirect('home')
@@ -662,7 +870,6 @@ def enter_code(request, wave):
         if not (95 <= study_day <= 104):
             messages.error(request, "Code entry is not available at this time.")
             return redirect('home')
-        
         if participant.wave3_code_entered:
             messages.info(request, "You have already entered the code for Wave 3.")
             return redirect('home')
@@ -672,22 +879,29 @@ def enter_code(request, wave):
         if form.is_valid():
             code = form.cleaned_data['code'].strip().lower()
             
-            if code == settings.REGISTRATION_CODE.lower():
+            # if code == settings.REGISTRATION_CODE.lower():
+            if code == 'wavepa':
                 if wave == 1:
                     participant.code_entered = True
                     participant.code_entry_date = timezone.now().date()
                     participant.save()
+                    send_wave1_code_entry_email.delay(participant.id)
+                    messages.success(request, "Code entered successfully!")
+                    return redirect('code_success', wave=wave)
+                    # participant.code_entered = True
+                    # participant.code_entry_date = timezone.now().date()
+                    # participant.save()
                     
                     # Send Information 12 email
-                    send_wave1_code_entry_email.delay(participant.id)
+                    # send_wave1_code_entry_email.delay(participant.id)
                     
                 elif wave == 3:
                     participant.wave3_code_entered = True
                     participant.wave3_code_entry_date = timezone.now().date()
                     participant.save()
-                    
-                    # Send Information 23 email
-                    send_wave3_code_entry_email.delay(participant.id)
+                    # send_wave3_code_entry_email.delay(participant.id)
+                    messages.success(request, "Code entered successfully!")
+                    return redirect('code_success', wave=wave)
                 
                 messages.success(request, "Code entered successfully!")
                 return redirect('code_success', wave=wave)

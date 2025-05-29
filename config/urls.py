@@ -51,7 +51,7 @@ urlpatterns = [
     
     # Information 7: Exit Screens
     # path('exit/not-interested/', views.exit_not_interested, name='exit_not_interested'),
-    # path('exit/not-eligible/', views.exit_not_eligible, name='exit_not_eligible'),
+    path('exit/not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
     # path('exit/declined/', views.exit_declined, name='exit_declined'),
     
     # Information 8: Waiting Screen
@@ -60,6 +60,7 @@ urlpatterns = [
     # Information 11 & 22: Code Entry
     path('enter-code/<int:wave>/', views.enter_code, name='enter_code'),
     path('code-success/<int:wave>/', views.code_success, name='code_success'),
+    path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
     
     # Surveys (Information 9, 18, 20)
     # path('survey/wave<int:wave>/', views.survey_view, name='survey'),
