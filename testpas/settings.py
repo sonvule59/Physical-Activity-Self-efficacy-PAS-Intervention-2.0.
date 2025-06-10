@@ -23,7 +23,7 @@ environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, ".env")
 )
 SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = True
+DEBUG = False   # Set to True for development, False for production
 if not SECRET_KEY:
     raise ValueError("The SECRET_KEY setting must not be empty.")
 
@@ -113,7 +113,8 @@ TIME_ZONE = 'America/Chicago'
 # Celery settings
 
 # Testing Configuration
-TEST_MODE = os.getenv('TEST_MODE', 'False') == 'True'
+# TEST_MODE = os.getenv('TEST_MODE')
+TEST_MODE=True
 # TEST_TIME_SCALE = 10  # 1 day = 10 seconds for testing
 TEST_TIME_SCALE = float(os.getenv('TEST_TIME_SCALE', '5'))  # 1 day = 1 second (or set to 60 for minutes)
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -148,7 +149,6 @@ DEFAULT_FROM_EMAIL = 'vuleson59@gmail.com'
 # # WSGI_APPLICATION = "testpas.wsgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
 
-DEBUG = True
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

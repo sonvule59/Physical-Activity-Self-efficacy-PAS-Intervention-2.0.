@@ -46,6 +46,7 @@ def get_current_time():
 @login_required
 def home(request):
     """Home page - shows appropriate content based on user status"""
+    day_1 = 0
     if not request.user.is_authenticated:
         return render(request, 'home.html', {'user': None})
     context = {'user': request.user, 'within_wave1_period': False, 'within_wave3_period': False, 'study_day': 0}
@@ -101,26 +102,6 @@ def home(request):
             context['within_wave1_period'] = False
             context['within_wave3_period'] = False
             #  END
-        #     if not participant.enrollment_date:
-        #         messages.info(request, "Please complete your enrollment.")
-        #         return redirect("create_participant")
-        #     # Additional logic for enrolled users
-        #     return render(request, "home.html", {"participant": participant})
-        # except Participant.DoesNotExist:
-        #     #  2: Handle missing Participant
-        #     messages.error(request, "Please create a participant profile.")
-        #     return redirect("create_participant")
-
-    # Check if user has completed enrollment
-    # if not request.user.enrollment_date:
-    #     return redirect('questionnaire_interest')
-    
-    # # Get participant record
-    # try:
-    #     participant = Participant.objects.get(user=request.user)
-    # except Participant.DoesNotExist:
-    #     participant = None
-    
     # Calculate study day
     study_day = (current_date - day_1).days + 1
     
@@ -521,6 +502,8 @@ def send_wave_1_email(user):
 #             messages.error(request, "An error occurred. Please try again or contact support.")
 
 #     return render(request, "consent_form.html", {"participant": participant})
+"""Information 6: (Website) IRB Consent Form
+Participants should be able to access the IRB consent form on the website."""
 @login_required
 def consent_form(request):
     logger.info(f"Consent form accessed by user: {request.user.username}")
@@ -639,24 +622,29 @@ def dashboard(request):
     days_until_end_wave1 = 0
     start_date_wave1 = None
     end_date_wave1 = None
-
+    study_day = 0
+    day_11 = None
+    day_21 = None
+    day_95 = None
+    day_104 = None
+    # day_1 = progress.day_1 if progress.day_1 else participant.enrollment_date if participant.enrollment_date else current_date
     if user_progress and user_progress.eligible and user_progress.consent_given and participant:
         if not participant.enrollment_date:
             participant.enrollment_date = user_progress.day_1 or current_date
             participant.save()
+        if user_progress.day_1 is not None:
+            study_day = (current_date - user_progress.day_1).days + 1
+            day_11 = user_progress.day_1 + timedelta(days=10)
+            day_21 = user_progress.day_1 + timedelta(days=20)
+            day_95 = user_progress.day_1 + timedelta(days=94)
+            day_104 = user_progress.day_1 + timedelta(days=103)
 
-        study_day = (current_date - user_progress.day_1).days + 1
-        day_11 = user_progress.day_1 + timedelta(days=10)
-        day_21 = user_progress.day_1 + timedelta(days=20)
-        day_95 = user_progress.day_1 + timedelta(days=94)
-        day_104 = user_progress.day_1 + timedelta(days=103)
-
-        within_wave1_period = 11 <= study_day <= 20 and not participant.code_entered
-        within_wave3_period = 95 <= study_day <= 104 and not participant.wave3_code_entered
-        days_until_start_wave1 = max(0, (day_11 - current_date).days)
-        days_until_end_wave1 = max(0, (day_21 - current_date).days)
-        start_date_wave1 = day_11
-        end_date_wave1 = day_21
+            within_wave1_period = 11 <= study_day <= 20 and not participant.code_entered
+            within_wave3_period = 95 <= study_day <= 104 and not participant.wave3_code_entered
+            days_until_start_wave1 = max(0, (day_11 - current_date).days)
+            days_until_end_wave1 = max(0, (day_21 - current_date).days)
+            start_date_wave1 = day_11
+            end_date_wave1 = day_21
 
     context = {
         'progress': user_progress,
