@@ -40,7 +40,7 @@ urlpatterns = [
     path('questionnaire/', views.questionnaire, name='questionnaire'),
     
     # Information 4: Interest Screening
-    path('questionnaire/interest/', views.questionnaire_interest, name='questionnaire_interest'),
+    # path('questionnaireinterest/', views.questionnaire_interest, name='questionnaire_interest'),
     
     # Information 5: Eligibility Screening
     # path('questionnaire/eligibility/', views.eligibility_screening, name='eligibility_screening'),

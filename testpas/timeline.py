@@ -1,6 +1,8 @@
 import datetime
 
 def get_day_difference(start_time, now=None):
+    """ Calculate the difference in days between two datetime objects.
+        If `now` is not provided, it defaults to the current time."""
     now = now or datetime.datetime.now()
     return (now - start_time).days
 

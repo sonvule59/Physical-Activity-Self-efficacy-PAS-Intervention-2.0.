@@ -2,19 +2,74 @@ from datetime import timedelta
 from celery import shared_task
 from django.core.mail import send_mail
 from django.core.management import call_command
-from django.apps import apps  # Import apps to use get_model
+from django.apps import apps
+from psutil import users  # Import apps to use get_model
 # from .views import get_current_time
 from testpas import settings
 from django.utils import timezone
 import random
 from testpas.models import Participant, EmailTemplate
 import logging
+from .models import User
 logger = logging.getLogger(__name__)
-def get_current_time():
-    global _fake_time
-    if _fake_time is not None:
-        return _fake_time
-    return timezone.now()
+
+from .timeline import get_timeline_day
+### Jun 11: Add in run_daily_timeline_checks task among other tasks
+@shared_task
+def run_daily_timeline_checks():
+    for user in User.objects.all():
+        daily_timeline_check(user)
+
+def daily_timeline_check(user):
+    seconds_per_day = getattr(settings, 'SECONDS_PER_DAY', 86400)
+    compressed = getattr(settings, 'TIME_COMPRESSION', False)
+
+    today = get_timeline_day(user, compressed=compressed, seconds_per_day=seconds_per_day)
+
+    if today == 1:
+        send_mail(
+            "Wave 1 Survey Ready",
+            f"Hi {user.username}, do this task...",
+            "from@example.com",
+            [user.email]
+        )
+    elif today == 11:
+        send_mail(
+            "Wave 1 Monitor Ready",
+            f"Hi {user.username}, do this task...",
+            "from@example.com",
+            [user.email]
+        )
+    elif today == 21 and not user.wave1_code_entered:
+        send_mail(
+            "Missed Wave 1 Code Entry",
+            f"Hi {user.username}, ...",
+            "from@example.com",
+            [user.email]
+        )
+    elif today == 29 and user.randomized_group is None:
+        user.randomized_group = random.choice([0, 1])
+        user.save()
+        if user.randomized_group == 0:
+            send_mail(
+                "Intervention Access Later",
+                f"Hi {user.username}, you will receive access after the study ends.",
+                "from@example.com",
+                [user.email]
+            )
+        else:
+            send_mail(
+                "Intervention Access Immediately",
+                f"Hi {user.username}, you now have immediate access to the intervention.",
+                "from@example.com",
+                [user.email]
+            )
+### END Jun 11: Add in run_daily_timeline_checks task among other tasks
+# def get_current_time():
+#     global _fake_time
+#     if _fake_time is not None:
+#         return _fake_time
+#     return timezone.now()
 @shared_task
 def send_scheduled_emails():
     now = timezone.now()
@@ -43,7 +98,7 @@ def send_scheduled_emails():
             # Information 10: Day 11
             if elapsed >= 11 and elapsed < 21 and not participant.code_entry_date and participant.email_status != 'sent_wave1_monitor':
                 logger.info(f"Attempting to send wave1_monitor_ready to {participant.email}")
-                participant.send_email('wave1_monitor_ready', mark_as='sent_wave1_monitor')
+                participant.send_email('wave1_monitor_ready')
             # Information 14: Day 21
             if elapsed >= 21 and not participant.code_entered and participant.email_status != 'sent_wave1_missing':
                 send_time = now.replace(hour=7, minute=0, second=0, microsecond=0)
@@ -237,11 +292,11 @@ def send_wave1_code_entry_email(participant_id):
 #     except Exception as e:
 #         logger.error(f"Error sending wave1_code_entry for participant {participant_id}: {str(e)}")
 @shared_task
-def send_specific_email(participant_id, template_name, extra_context=None, mark_as=None):
+def send_specific_email(participant_id, template_name, extra_context=None):
     try:
         participant = Participant.objects.get(id=participant_id)
         logger.info(f"Attempting to send {template_name} to {participant.email}")
-        participant.send_email(template_name, extra_context, mark_as)
+        participant.send_email(template_name, extra_context)
         logger.info(f"Sent {template_name} to {participant.email}")
     except Participant.DoesNotExist:
         logger.error(f"Participant {participant_id} not found for {template_name}")
