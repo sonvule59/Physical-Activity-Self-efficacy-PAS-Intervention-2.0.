@@ -23,12 +23,12 @@ environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, ".env")
 )
 SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = False   # Set to True for development, False for production
+DEBUG = True   # Set to True for development, False for production
 if not SECRET_KEY:
     raise ValueError("The SECRET_KEY setting must not be empty.")
 
 
-TEST_MODE = False  # Set to True for 112-minute testing mode
+# TEST_MODE = False  # Set to True for 112-minute testing mode
 BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local development if not set
 LOGIN_URL = '/login/'  # Default login URL for the application
 

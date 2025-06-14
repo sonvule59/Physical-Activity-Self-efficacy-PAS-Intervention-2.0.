@@ -441,141 +441,136 @@ def send_wave_1_email(user):
 
     send_mail(subject, message, from_email, recipient_list)
 
-# @login_required
-# def consent_form(request):
-#     if not request.user.is_authenticated:
-#         return redirect("login")
-
-#     try:
-#         participant = Participant.objects.get(user=request.user)
-#     except Participant.DoesNotExist:
-#         messages.error(request, "Please create a participant profile.")
-#         return redirect("create_account")
-
-#     progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
-#     if not progress or not progress.eligible:
-#         return redirect("exit_screen_not_eligible")
-
-#     if request.method == "POST":
-#         action = request.POST.get("action")
-#         if not action and 'consent' in request.POST:
-#             consent_value = request.POST.get("consent")
-#             action = "consent" if consent_value == "yes" else "decline" if consent_value == "no" else None
-#             logger.debug(f"Using consent parameter: {consent_value} mapped to action: {action}")
-
-#         if not action:
-#             logger.warning(f"Invalid action {action} in consent_form for {request.user.username}")
-#             messages.error(request, "No valid action specified. Please select Yes or No and submit.")
-#             return render(request, "consent_form.html", {"participant": participant})
-#         try:
-#             if action == "consent":
-#                 # FIXED SNIPPET START: Handle consent action and redirect to dashboard
-#                 participant.enrollment_date = timezone.now().date()
-#                 participant.save()
-#                 progress.consent_given = True
-#                 progress.day_1 = timezone.now().date()
-#                 progress.save()
-#                 try:
-#                     schedule_wave1_monitoring_email.delay(participant.id)
-#                     logger.info(f"Scheduled wave1_monitoring_email for participant {participant.participant_id}")
-#                 except Exception as e:
-#                     logger.error(f"Failed to schedule wave1_monitoring_email for {participant.participant_id}: {e}")
-#                     messages.error(request, "Consent saved, but email scheduling failed. Contact support.")
-#                 # return redirect("dashboard")
-#                 return render(request, "consent_form.html", {"participant": participant})
-#                 # FIXED SNIPPET END
-#             elif action == "decline":
-#                 # FIXED SNIPPET START: Handle decline action and redirect to home
-#                 decline_reason = request.POST.get("decline_reason", "No reason provided")
-#                 progress.eligibility_reason = f"Declined consent: {decline_reason}"
-#                 progress.eligible = False
-#                 progress.save()
-#                 logger.info(f"User {request.user.username} declined consent: {decline_reason}")
-#                 messages.info(request, "You have declined to participate.")
-#                 return redirect("home")
-#                 # FIXED SNIPPET END
-#             else:
-#                 logger.warning(f"Invalid action {action} in consent_form for {request.user.username}")
-#                 messages.error(request, "Invalid action. Please try again.")
-#         except Exception as e:
-#             logger.error(f"Error processing consent form for {request.user.username}: {e}")
-#             messages.error(request, "An error occurred. Please try again or contact support.")
-
-#     return render(request, "consent_form.html", {"participant": participant})
 """Information 6: (Website) IRB Consent Form
 Participants should be able to access the IRB consent form on the website."""
 @login_required
 def consent_form(request):
-    logger.info(f"Consent form accessed by user: {request.user.username}")
     if request.method == "POST":
+        # FIXED SNIPPET START: Set day_1 and trigger timeline
+        logger.debug(f"Consent form POST data for {request.user.username}: {dict(request.POST)}")
         form = ConsentForm(request.POST)
-        logger.debug(f"Form data: {request.POST}")
         if form.is_valid():
-            logger.info("Form is valid")
+            user = request.user
             try:
-                # Update UserSurveyProgress
-                # FIXED: Get or create Survey with title "Eligibility Criteria"
-                survey, _ = Survey.objects.get_or_create(
-                    title="Eligibility Criteria",
-                    defaults={'description': "Survey for eligibility screening", 'created_at': timezone.now()}
-                )
-                # FIXED: Include survey in get_or_create for UserSurveyProgress
-                user_progress, created = UserSurveyProgress.objects.get_or_create(
-                    user=request.user,
-                    survey=survey,  # ADDED: Specify survey
-                    defaults={'consent_given': True, 'eligible' : True, 'day_1': timezone.now().date()}
-                )
-                # user_progress, created = UserSurveyProgress.objects.get_or_create(
-                #     user=request.user,
-                #     survey__title="Eligibility Criteria",
-                #     defaults={'consent_given': True, 'day_1': timezone.now().date()}
-                # )
-                if not created:
-                    user_progress.consent_given = True
-                    user_progress.day_1 = user_progress.day_1 or timezone.now().date()
-                    user_progress.eligible = True
-                    user_progress.save()
-                logger.info(f"UserSurveyProgress updated for {request.user.username}")
+                user_progress = UserSurveyProgress.objects.get(user=user, survey__title="Eligibility Criteria")
+                if not user_progress.eligible:
+                    logger.warning(f"User {user.username} not eligible")
+                    messages.error(request, "You are not eligible to participate.")
+                    return redirect("testpas:exit_not_eligible")
+            except UserSurveyProgress.DoesNotExist:
+                logger.error(f"No UserSurveyProgress found for {user.username}")
+                messages.error(request, "No eligibility record found. Please contact support.")
+                return render(request, "consent_form.html", {"form": form})
 
-                # Get or create Participant
-                participant, created = Participant.objects.get_or_create(
-                    user=request.user,
-                    defaults={
-                        'participant_id': f"P{Participant.objects.count() + 1:03d}",
-                        'email': request.user.email,
-                        'confirmation_token': str(uuid.uuid4()),
-                        'enrollment_date': timezone.now().date(),
-                        'is_confirmed': True,  # ADDED: Ensure confirmed
-                        'engagement_tracked': True
-                    }
-                )
-                logger.info(f"Participant record for {request.user.username}: {participant.participant_id}")
+            try:
+                participant = Participant.objects.get(user=user)
+            except Participant.DoesNotExist:
+                logger.error(f"No Participant found for {user.username}")
+                messages.error(request, "Please create a participant profile.")
+                return redirect("create_participant")
 
-                # Send Information 9 email immediately
-                participant.send_email('wave1_survey_ready')
-                logger.info(f"Wave 1 survey email sent to {participant.email}")
-
-                # Schedule Information 10 email for Day 11
-                eta = timezone.now() + timedelta(seconds=55 if settings.TEST_MODE else 11 * 24 * 60 * 60)
-                send_wave1_monitoring_email.apply_async(
-                    args=[participant.id],
-                    eta=eta
-                )
-                logger.info(f"Wave 1 monitoring email scheduled for {participant.participant_id} at {eta}")
-
-                return redirect("waiting_screen")
+            user_progress.consent_given = True
+            user_progress.day_1 = timezone.now().date()  # Set day_1
+            try:
+                user_progress.save()
+                logger.debug(f"Saved progress for {user.username}: consent_given=True, day_1={user_progress.day_1}")
             except Exception as e:
-                logger.error(f"Error processing consent for {request.user.username}: {str(e)}", exc_info=True)
-                messages.error(request, f"Error submitting consent: {str(e)}. Please try again or contact support.")
-                # logger.error(f"Error processing consent for {request.user.username}: {str(e)}")
-                # messages.error(request, f"An error occurred: {str(e)}")
+                logger.error(f"Failed to save progress for {user.username}: {e}")
+                messages.error(request, "Failed to save consent data. Please try again.")
+                return render(request, "consent_form.html", {"form": form})
+
+            # Trigger timeline automation
+            try:
+                schedule_timeline_emails.delay(participant.id)
+                logger.info(f"Triggered timeline email scheduling for participant {participant.participant_id} (ID: {participant.id})")
+            except Exception as e:
+                logger.error(f"Failed to trigger timeline email scheduling for {participant.participant_id}: {e}")
+                messages.warning(request, "Consent saved, but email scheduling failed. Contact support.")
+
+            logger.info(f"Consent processed successfully for {user.username}")
+            return redirect("dashboard")
         else:
-            logger.warning(f"Form invalid for {request.user.username}: {form.errors}")
-            messages.error(request, "Please correct the form errors.")
+            logger.warning(f"Form invalid for {user.username}: {form.errors}")
+            messages.error(request, "Please select Yes or No to proceed.")
+            return render(request, "consent_form.html", {"form": form})
+        # FIXED SNIPPET END
     else:
         form = ConsentForm()
-        logger.debug("Rendering consent form (GET request)")
+        logger.debug(f"Rendering consent_form for {request.user.username}")
+
     return render(request, "consent_form.html", {'form': form})
+# @login_required
+# def consent_form(request):
+#     logger.info(f"Consent form accessed by user: {request.user.username}")
+#     if request.method == "POST":
+#         form = ConsentForm(request.POST)
+#         logger.debug(f"Form data: {request.POST}")
+#         if form.is_valid():
+#             logger.info("Form is valid")
+#             try:
+#                 # Update UserSurveyProgress
+#                 # FIXED: Get or create Survey with title "Eligibility Criteria"
+#                 survey, _ = Survey.objects.get_or_create(
+#                     title="Eligibility Criteria",
+#                     defaults={'description': "Survey for eligibility screening", 'created_at': timezone.now()}
+#                 )
+#                 # FIXED: Include survey in get_or_create for UserSurveyProgress
+#                 user_progress, created = UserSurveyProgress.objects.get_or_create(
+#                     user=request.user,
+#                     survey=survey,  # ADDED: Specify survey
+#                     defaults={'consent_given': True, 'eligible' : True, 'day_1': timezone.now().date()}
+#                 )
+#                 # user_progress, created = UserSurveyProgress.objects.get_or_create(
+#                 #     user=request.user,
+#                 #     survey__title="Eligibility Criteria",
+#                 #     defaults={'consent_given': True, 'day_1': timezone.now().date()}
+#                 # )
+#                 if not created:
+#                     user_progress.consent_given = True
+#                     user_progress.day_1 = user_progress.day_1 or timezone.now().date()
+#                     user_progress.eligible = True
+#                     user_progress.save()
+#                 logger.info(f"UserSurveyProgress updated for {request.user.username}")
+
+#                 # Get or create Participant
+#                 participant, created = Participant.objects.get_or_create(
+#                     user=request.user,
+#                     defaults={
+#                         'participant_id': f"P{Participant.objects.count() + 1:03d}",
+#                         'email': request.user.email,
+#                         'confirmation_token': str(uuid.uuid4()),
+#                         'enrollment_date': timezone.now().date(),
+#                         'is_confirmed': True,  # ADDED: Ensure confirmed
+#                         'engagement_tracked': True
+#                     }
+#                 )
+#                 logger.info(f"Participant record for {request.user.username}: {participant.participant_id}")
+
+#                 # Send Information 9 email immediately
+#                 participant.send_email('wave1_survey_ready')
+#                 logger.info(f"Wave 1 survey email sent to {participant.email}")
+
+#                 # Schedule Information 10 email for Day 11
+#                 eta = timezone.now() + timedelta(seconds=55 if settings.TEST_MODE else 11 * 24 * 60 * 60)
+#                 send_wave1_monitoring_email.apply_async(
+#                     args=[participant.id],
+#                     eta=eta
+#                 )
+#                 logger.info(f"Wave 1 monitoring email scheduled for {participant.participant_id} at {eta}")
+
+#                 return redirect("waiting_screen")
+#             except Exception as e:
+#                 logger.error(f"Error processing consent for {request.user.username}: {str(e)}", exc_info=True)
+#                 messages.error(request, f"Error submitting consent: {str(e)}. Please try again or contact support.")
+#                 # logger.error(f"Error processing consent for {request.user.username}: {str(e)}")
+#                 # messages.error(request, f"An error occurred: {str(e)}")
+#         else:
+#             logger.warning(f"Form invalid for {request.user.username}: {form.errors}")
+#             messages.error(request, "Please correct the form errors.")
+#     else:
+#         form = ConsentForm()
+#         logger.debug("Rendering consent form (GET request)")
+#     return render(request, "consent_form.html", {'form': form})
 # @login_required
 # def consent_form(request):
 #     if request.method == "POST":

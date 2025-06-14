@@ -30,21 +30,21 @@ def daily_timeline_check(user):
         send_mail(
             "Wave 1 Survey Ready",
             f"Hi {user.username}, do this task...",
-            "from@example.com",
+            "vuleson59@gmail.com",
             [user.email]
         )
     elif today == 11:
         send_mail(
             "Wave 1 Monitor Ready",
             f"Hi {user.username}, do this task...",
-            "from@example.com",
+            "vuleson59@gmail.com",
             [user.email]
         )
     elif today == 21 and not user.wave1_code_entered:
         send_mail(
             "Missed Wave 1 Code Entry",
             f"Hi {user.username}, ...",
-            "from@example.com",
+            "vuleson59@gmail.com",
             [user.email]
         )
     elif today == 29 and user.randomized_group is None:
@@ -54,14 +54,14 @@ def daily_timeline_check(user):
             send_mail(
                 "Intervention Access Later",
                 f"Hi {user.username}, you will receive access after the study ends.",
-                "from@example.com",
+                "vuleson59@gmail.com",
                 [user.email]
             )
         else:
             send_mail(
                 "Intervention Access Immediately",
                 f"Hi {user.username}, you now have immediate access to the intervention.",
-                "from@example.com",
+                "vuleson59@gmail.com",
                 [user.email]
             )
 ### END Jun 11: Add in run_daily_timeline_checks task among other tasks
