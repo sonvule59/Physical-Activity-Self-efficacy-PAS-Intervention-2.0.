@@ -10,6 +10,8 @@ from django.utils import timezone
 import random
 from testpas.models import Participant, EmailTemplate
 import logging
+
+from testpas.views import get_current_time
 from .models import User
 logger = logging.getLogger(__name__)
 
@@ -120,11 +122,7 @@ def send_scheduled_emails():
                 else:
                     elapsed_code = (now.date() - participant.code_entry_date).days
                 if elapsed_code >= 8 and participant.email_status != 'sent_wave1_survey_return':
-                    send_wave1_survey_return_email.delay(participant.id)
-            # elif elapsed >= 21 and not participant.code_entered and participant.email_status != 'sent_wave1_missing':
-            #     logger.info(f"Attempting to send wave1_missing_code to {participant.email}")
-            #     participant.send_email('wave1_missing_code', mark_as='sent_wave1_missing')
-            # # Information 15-17: Day 29
+                    send_wave1_survey_return_email(participant.participant_id)
             # elif 29 <= elapsed < 57 and not participant.group_assigned and participant.email_status != 'sent_intervention':
             #     participant.group = random.randint(0, 1)
             #     participant.group_assigned = True
@@ -169,7 +167,7 @@ def send_wave1_survey_return_email(participant_id):
             logger.info(f"Skipping wave1_survey_return for {participant.email}: already sent")
             return
         # Schedule 8 days after code_entry_date at 7 AM CT
-        now = get_current_time()
+        now = timezone.now()
         send_time = now.replace(hour=7, minute=0, second=0, microsecond=0)
         if now.hour >= 7:
             send_time += timedelta(days=1)
@@ -216,6 +214,10 @@ def send_wave3_code_entry_email(participant_id):
         
         # Calculate dates
         code_date = participant.wave3_code_entry_date
+        if not code_date:
+            logger.error(f"No Wave 3 code entry date for participant {participant_id}")
+            return
+            
         start_date = code_date + timedelta(days=1)
         end_date = code_date + timedelta(days=7)
         
@@ -241,10 +243,13 @@ def send_wave1_code_entry_email(participant_id):
             logger.info(f"Skipping wave1_code_entry for {participant.email}: already sent")
             return
         code_date = participant.code_entry_date
+        if not code_date:
+            logger.error(f"No code entry date for participant {participant_id}")
+            return
         start_date = code_date + timedelta(days=1)
         end_date = code_date + timedelta(days=7)
         # Send immediately at 7 AM CT
-        now = get_current_time()
+        now = timezone.now()
         send_time = now.replace(hour=7, minute=0, second=0, microsecond=0)
         if now.hour >= 7:
             send_time += timedelta(days=1)
@@ -291,7 +296,7 @@ def send_wave1_code_entry_email(participant_id):
 #         logger.error(f"Participant {participant_id} not found for wave1_code_entry")
 #     except Exception as e:
 #         logger.error(f"Error sending wave1_code_entry for participant {participant_id}: {str(e)}")
-@shared_task
+""" @shared_task
 def send_specific_email(participant_id, template_name, extra_context=None):
     try:
         participant = Participant.objects.get(id=participant_id)
@@ -301,7 +306,7 @@ def send_specific_email(participant_id, template_name, extra_context=None):
     except Participant.DoesNotExist:
         logger.error(f"Participant {participant_id} not found for {template_name}")
     except Exception as e:
-        logger.error(f"Error sending {template_name} for participant {participant_id}: {e}")
+        logger.error(f"Error sending {template_name} for participant {participant_id}: {e}") """
 # @shared_task
 # def send_specific_email(participant_id, template_name, extra_context=None):
 #     try:
@@ -366,6 +371,63 @@ def send_specific_email(participant_id, template_name, extra_context=None):
 @shared_task
 def run_randomization():
     call_command('randomize_participants')
+
+# @shared_task
+# def schedule_timeline_emails(participant_id):
+#     """Schedule all timeline emails for a participant based on their enrollment date."""
+#     try:
+#         participant = Participant.objects.get(id=participant_id)
+#         if not participant.is_confirmed:
+#             logger.info(f"Skipping timeline email scheduling for {participant.participant_id}: not confirmed")
+#             return
+
+#         # Get the enrollment date
+#         enrollment_date = participant.enrollment_date
+#         if not enrollment_date:
+#             logger.error(f"No enrollment date for {participant.participant_id}")
+#             return
+
+#         # Schedule Wave 1 monitoring email (Day 11)
+#         send_wave1_monitoring_email.apply_async(
+#             (participant_id,),
+#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=10), timezone.datetime.min.time().replace(hour=7))
+#         )
+
+#         # Schedule Wave 1 code entry reminder (Day 21)
+#         send_wave1_code_entry_email.apply_async(
+#             (participant_id,),
+#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=20), timezone.datetime.min.time().replace(hour=7))
+#         )
+
+#         # Schedule Wave 2 survey email (Day 57)
+#         send_specific_email.apply_async(
+#             (participant_id, 'wave2_survey_ready'),
+#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=56), timezone.datetime.min.time().replace(hour=7))
+#         )
+
+#         # Schedule Wave 2 no monitoring email (Day 67)
+#         send_specific_email.apply_async(
+#             (participant_id, 'wave2_no_monitoring'),
+#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=66), timezone.datetime.min.time().replace(hour=7))
+#         )
+
+#         # Schedule Wave 3 survey email (Day 85)
+#         send_specific_email.apply_async(
+#             (participant_id, 'wave3_survey_ready'),
+#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=84), timezone.datetime.min.time().replace(hour=7))
+#         )
+
+#         # Schedule Wave 3 monitoring email (Day 95)
+#         send_specific_email.apply_async(
+#             (participant_id, 'wave3_monitoring_ready'),
+#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=94), timezone.datetime.min.time().replace(hour=7))
+#         )
+
+#         logger.info(f"Scheduled all timeline emails for participant {participant.participant_id}")
+#     except Participant.DoesNotExist:
+#         logger.error(f"Participant {participant_id} not found for timeline email scheduling")
+#     except Exception as e:
+#         logger.error(f"Error scheduling timeline emails for participant {participant_id}: {str(e)}")
 
 # def schedule_email(participant_entry):
 #     from datetime import timedelta
