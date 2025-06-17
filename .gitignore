@@ -195,3 +195,5 @@ celerybeat-schedule.*.db-shm
 celerybeat.pid.*.db-shm
 celerybeat-schedule.*.db-wal
 celerybeat.pid.*.db-wal
+static/.DS_Store
+

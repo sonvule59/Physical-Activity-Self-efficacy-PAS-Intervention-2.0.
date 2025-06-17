@@ -7,7 +7,7 @@ class Command(BaseCommand):
     help = 'Seeds eligibility survey and questions'
 
     def handle(self, *args, **kwargs):
-        # FIX 1: Create eligibility survey
+        #  Create eligibility survey
         survey, created = Survey.objects.get_or_create(
             title="Eligibility Criteria",
             defaults={"description": "Survey to determine participant eligibility"}
@@ -15,7 +15,7 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(self.style.SUCCESS("Created eligibility survey"))
 
-        # FIX 2: Create eligibility questions
+        # Create eligibility questions
         questions = [
             {
                 "question_text": (

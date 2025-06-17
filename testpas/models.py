@@ -139,37 +139,6 @@ class Participant(models.Model):
                 self.save()
                 raise
 
-    # def send_email(self, template_name, extra_context=None, mark_as=None):
-    #     if mark_as and self.email_status == mark_as:
-    #         return
-    #     try:
-    #         template = EmailTemplate.objects.get(name=template_name)
-    #     except EmailTemplate.DoesNotExist:
-    #         self.email_status = 'failed'
-    #         self.save()
-    #         raise
-    #     context = {'participant_id': self.participant_id, 'username': self.user.username}
-    #     if extra_context:
-    #         context.update(extra_context)
-    #     try:
-    #         body = template.body.format(**context)
-    #         send_mail(
-    #             template.subject,
-    #             body,
-    #             settings.DEFAULT_FROM_EMAIL,
-    #             # FIX 2: Standardized recipients to match PAS document
-    #             [self.email or self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
-    #             fail_silently=False,
-    #         )
-    #         self.email_status = mark_as or 'sent'
-    #         self.email_send_date = timezone.now().date()
-    #         self.save()
-    #     except Exception as e:
-    #         self.email_status = 'failed'
-    #         self.save()
-    #         raise
-
-
     def send_confirmation_email(self):
         confirmation_link = f"{settings.BASE_URL}/confirm-account/{self.confirmation_token}/"
         self.send_email(

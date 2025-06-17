@@ -11,8 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
 import json
 from hashlib import sha256
-from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email, schedule_timeline_emails
+from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email
 from testpas.settings import DEFAULT_FROM_EMAIL
+from testpas.schedule_emails import schedule_wave1_monitoring_email
 # from testpas.utils import generate_token, validate_token, send_confirmation_email
 from .models import *
 from .utils import validate_token
@@ -431,7 +432,7 @@ def consent_form(request):
 
             # Trigger timeline automation
             try:
-                schedule_timeline_emails.delay(participant.id)
+                schedule_wave1_monitoring_email.delay(participant.id)
                 logger.info(f"Triggered timeline email scheduling for participant {participant.participant_id} (ID: {participant.id})")
             except Exception as e:
                 logger.error(f"Failed to trigger timeline email scheduling for {participant.participant_id}: {e}")
