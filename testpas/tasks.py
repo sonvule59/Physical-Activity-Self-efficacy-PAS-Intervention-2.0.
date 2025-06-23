@@ -50,7 +50,7 @@ def daily_timeline_check(user):
     # Info 13 – 8 days after code entry: Survey & Return Monitor
     if participant.code_entry_date:
         code_day = get_timeline_day(user.date_joined + timezone.timedelta(days=participant.code_entry_date), compressed=compressed, seconds_per_day=seconds_per_day)
-        if today == code_day + 8 and participant.email_status != 'sent_wave1_survey_return':
+        if code_day is not None and today == code_day + 8 and participant.email_status != 'sent_wave1_survey_return':
             participant.send_email("wave1_survey_return")
             participant.email_status = 'sent_wave1_survey_return'
             participant.save()
@@ -62,12 +62,7 @@ def daily_timeline_check(user):
             participant.send_email("intervention_access_later")
         else:
             participant.send_email("intervention_access_now")
-### END Jun 11: Add in run_daily_timeline_checks task among other tasks
-# def get_current_time():
-#     global _fake_time
-#     if _fake_time is not None:
-#         return _fake_time
-#     return timezone.now()
+
 # @shared_task
 # def send_scheduled_emails():
 #     now = timezone.now()
@@ -292,28 +287,6 @@ def send_wave1_code_entry_email(participant_id):
 #         logger.error(f"Participant {participant_id} not found for wave1_code_entry")
 #     except Exception as e:
 #         logger.error(f"Error sending wave1_code_entry for participant {participant_id}: {str(e)}")
-""" @shared_task
-def send_specific_email(participant_id, template_name, extra_context=None):
-    try:
-        participant = Participant.objects.get(id=participant_id)
-        logger.info(f"Attempting to send {template_name} to {participant.email}")
-        participant.send_email(template_name, extra_context)
-        logger.info(f"Sent {template_name} to {participant.email}")
-    except Participant.DoesNotExist:
-        logger.error(f"Participant {participant_id} not found for {template_name}")
-    except Exception as e:
-        logger.error(f"Error sending {template_name} for participant {participant_id}: {e}") """
-# @shared_task
-# def send_specific_email(participant_id, template_name, extra_context=None):
-#     try:
-#         participant = Participant.objects.get(id=participant_id)
-#         logger.info(f"Attempting to send {template_name} to {participant.email}")
-#         participant.send_email(template_name, extra_context)
-#         logger.info(f"Sent {template_name} to {participant.email}")
-#     except Participant.DoesNotExist:
-#         logger.error(f"Participant {participant_id} not found for {template_name}")
-#     except Exception as e:
-#         logger.error(f"Error sending {template_name} for participant {participant_id}: {e}")
 # def send_scheduled_emails():
 #     now = timezone.now()
 #     participants = Participant.objects.filter(is_confirmed=True, engagement_tracked=True)

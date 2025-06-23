@@ -21,7 +21,7 @@ __pycache__/
 swaks
 # C extensions
 *.so
-
+.vscode/
 # Distribution / packaging
 .Python
 build/
@@ -197,3 +197,4 @@ celerybeat-schedule.*.db-wal
 celerybeat.pid.*.db-wal
 static/.DS_Store
 
+dump.rdb

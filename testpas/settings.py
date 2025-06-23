@@ -131,7 +131,10 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
     
 }
+TIME_COMPRESSION = True
 
+# Define how many seconds represent one simulated "day"
+SECONDS_PER_DAY = 15 # Use 86400 for real-world days
 # Email settings
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
