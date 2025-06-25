@@ -115,8 +115,10 @@ TIME_ZONE = 'America/Chicago'
 # Testing Configuration
 # TEST_MODE = os.getenv('TEST_MODE')
 TEST_MODE=True
+TIME_COMPRESSION = True
+SECONDS_PER_DAY = 15 # Use 86400 for real-world days
 # TEST_TIME_SCALE = 10  # 1 day = 10 seconds for testing
-TEST_TIME_SCALE = float(os.getenv('TEST_TIME_SCALE', '5'))  # 1 day = 1 second (or set to 60 for minutes)
+# TEST_TIME_SCALE = float(os.getenv('TEST_TIME_SCALE', '5'))  # 1 day = 1 second (or set to 60 for minutes)
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
@@ -126,15 +128,21 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Chicago'
 CELERY_ENABLE_UTC = False
 CELERY_BEAT_SCHEDULE = {
-    # 'send-emails-every-minute': {
-    #     'task': 'testpas.tasks.send_scheduled_emails',
-    #     'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
-    
+    'run-timeline-checks': {
+        'task': 'testpas.tasks.run_daily_timeline_checks',
+        'schedule': 15.0 if TIME_COMPRESSION else 86400.0,
+    },
 }
-TIME_COMPRESSION = True
+# CELERY_BEAT_SCHEDULE = {
+#     # 'send-emails-every-minute': {
+#     #     'task': 'testpas.tasks.send_scheduled_emails',
+#     #     'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
+    
+# }
+
 
 # Define how many seconds represent one simulated "day"
-SECONDS_PER_DAY = 15 # Use 86400 for real-world days
+
 # Email settings
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -198,3 +198,4 @@ celerybeat.pid.*.db-wal
 static/.DS_Store
 
 dump.rdb
+testpas/management/.DS_Store

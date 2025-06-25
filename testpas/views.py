@@ -637,6 +637,28 @@ def enter_code(request, wave):
 #         'days_remaining': (day_21 - current_date).days
 #     })
 
+def download_data(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="pas_data.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Participant ID', 'Username', 'Email', 'Phone Number', 'Registration Code',
+        'Confirmation Date', 'Interest Submitted', 'Interested', 'Eligibility Submitted',
+        'Is Eligible', 'Consent Submitted', 'Consented', 'Wave 1 Code Entered',
+        'Wave 1 Code Date', 'Group', 'Wave 3 Code Entered', 'Wave 3 Code Date'
+    ])
+    participants = Participant.objects.all()
+    for p in participants:
+        survey_progress = SurveyProgress.objects.filter(user=p.user).first()
+        writer.writerow([
+            p.participant_id, p.user.username, p.email, p.phone_number, 'wavepa',
+            p.is_confirmed and p.token_expiration or '', survey_progress and survey_progress.interest_submitted or False,
+            survey_progress and survey_progress.interested or False, survey_progress and survey_progress.eligibility_submitted or False,
+            survey_progress and survey_progress.is_eligible or False, survey_progress and survey_progress.consent_submitted or False,
+            survey_progress and survey_progress.consented or False, p.code_entered, p.code_entry_date,
+            p.group, p.wave3_code_entered, p.wave3_code_entry_date
+        ])
+    return response
 def code_success(request, wave):
     return render(request, 'code_success.html', {'wave': wave})
     # participant = Participant.objects.get(user=request.user)
