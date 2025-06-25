@@ -3,7 +3,10 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.core.management import call_command
 from django.apps import apps
-from psutil import users  # Import apps to use get_model
+# The above code is importing the `users` module from the `utils` package in the current directory. It
+# is using the relative import syntax (`from .utils import users`) to access the `users` module within
+# the `utils` package.
+# from .utils import users  # Import apps to use get_model
 # from .views import get_current_time
 from testpas import settings
 from django.utils import timezone
@@ -32,7 +35,11 @@ def daily_timeline_check(user):
     today = get_timeline_day(user, compressed=compressed, seconds_per_day=seconds_per_day)
     participant = getattr(user, 'participant', None)
     if not participant:
+        print(f"[SKIP] No participant for user {user.id}")
         return
+    
+    print(f"[CHECK] User {user.id}, Day {today}, Status: {participant.email_status}")
+
     # Info 9 – Day 1: Wave 1 Online Survey Ready
     if today == 1 and participant.email_status != 'sent_wave1_survey':
         participant.send_email("wave1_survey_ready")

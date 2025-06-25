@@ -74,8 +74,13 @@ class UserSurveyProgress(models.Model):
     consent_given = models.BooleanField(default=False)  # Whether consent has been provided
     progress_percentage = models.IntegerField(null=True, blank=True)  # Percentage of survey completed
 
-    def __str__(self):
-        return f"{self.user} - {self.survey} - {self.progress}%"
+    ### Jun 25: Add in email log
+    email_log = models.TextField(default="", blank=True) 
+    ### Jun 25: Add in email log date
+    date_joined = models.DateTimeField(auto_now_add=True)
+    
+    # def __str__(self):
+    #     return f"{self.user} - {self.survey} - {self.progress}%"
 
     def __str__(self):
         return self.user.username
@@ -90,6 +95,8 @@ class Participant(models.Model):
     enrollment_date = models.DateField(default=timezone.now)
     code_entered = models.BooleanField(default=False)
     code_entry_date = models.DateField(null=True, blank=True)
+    ### Jun 25: Add in code entry day
+    code_entry_day = models.IntegerField(null=True, blank=True)
     email_send_date = models.DateField(null=True, blank=True)  # store email send date
     email_status = models.CharField(max_length=50, default='pending')
     phone_number = models.CharField(max_length=15, null=True, blank=True)
@@ -153,8 +160,8 @@ class Participant(models.Model):
     #     message = template.body.format(participant_id=self.participant_id, confirmation_link=confirmation_link)
     #     send_mail(subject, message, 'projectpas2024@gmail.com', [self.email])
 
-    def __str__(self):
-        return self.participant_id
+    # def __str__(self):
+    #     return self.participant_id
     def __str__(self):
         return self.user.username
     
@@ -163,9 +170,9 @@ class Participant(models.Model):
         template = EmailTemplate.objects.get(name='wave1_code_entry')
         message = template.body.format(
             username=self.user.username,
-            code_date=self.code_entry_date.strftime('%m/%d/%Y'),
-            start_date=(self.code_entry_date + timedelta(days=1)).strftime('%m/%d/%Y'),
-            end_date=(self.code_entry_date + timedelta(days=7)).strftime('%m/%d/%Y')
+            code_date=self.code_entry_date.strftime('%m/%d/%Y') if self.code_entry_date else '',
+            start_date=(self.code_entry_date + timedelta(days=1)).strftime('%m/%d/%Y') if self.code_entry_date else '',
+            end_date=(self.code_entry_date + timedelta(days=7)).strftime('%m/%d/%Y') if self.code_entry_date else ''
         )
     
         
@@ -183,27 +190,27 @@ class Participant(models.Model):
         self.email_send_date = timezone.now().date()
         self.save()
 
-    def send_wave2_survey_email(self):
-        template = EmailTemplate.objects.get(name='wave2_survey_ready')
-        subject = template.subject
-        message = template.body.format(participant_id=self.participant_id)
-        try:
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
-                fail_silently=False,
-            )
-            self.email_status = 'sent'
-            self.email_send_date = timezone.now().date()
-            self.save()
-            return True
-        except Exception as e:
-            print(f"Wave 2 email error: {str(e)}")
-            self.email_status = 'failed'
-            self.save()
-            return False
+    # def send_wave2_survey_email(self):
+    #     template = EmailTemplate.objects.get(name='wave2_survey_ready')
+    #     subject = template.subject
+    #     message = template.body.format(participant_id=self.participant_id)
+    #     try:
+    #         send_mail(
+    #             subject,
+    #             message,
+    #             settings.DEFAULT_FROM_EMAIL,
+    #             [self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
+    #             fail_silently=False,
+    #         )
+    #         self.email_status = 'sent'
+    #         self.email_send_date = timezone.now().date()
+    #         self.save()
+    #         return True
+    #     except Exception as e:
+    #         print(f"Wave 2 email error: {str(e)}")
+    #         self.email_status = 'failed'
+    #         self.save()
+            # return False
     def send_missing_code_email(self):  # Info 14
         template = EmailTemplate.objects.get(name='wave1_missing_code')
         message = template.body.format(username=self.user.username)
@@ -243,12 +250,30 @@ class Participant(models.Model):
         self.save()
 
     def send_wave3_code_entry_email(self):  # Info 23
-        template = EmailTemplate.objects.get(name='wave3_code_entry')
-        message = template.body.format(participant_id=self.participant_id, code_date=self.wave3_code_entry_date.strftime('%m/%d/%Y'), start_date=(self.wave3_code_entry_date + timezone.timedelta(days=1)).strftime('%m/%d/%Y'), end_date=(self.wave3_code_entry_date + timezone.timedelta(days=7)).strftime('%m/%d/%Y'))
-        send_mail(template.subject, message, settings.DEFAULT_FROM_EMAIL, [self.user.email, 'vuleson59@gmail.com'], fail_silently=False)
-        self.email_status = 'sent'
-        self.email_send_date = timezone.now().date()
-        self.save()
+        try:
+            template = EmailTemplate.objects.get(name='wave3_code_entry')
+            message = template.body.format(
+                participant_id=self.participant_id, 
+                code_date=self.wave3_code_entry_date.strftime('%m/%d/%Y') if self.wave3_code_entry_date else '', 
+                start_date=(self.wave3_code_entry_date + timezone.timedelta(days=1)).strftime('%m/%d/%Y') if self.wave3_code_entry_date else '', 
+                end_date=(self.wave3_code_entry_date + timezone.timedelta(days=7)).strftime('%m/%d/%Y') if self.wave3_code_entry_date else ''
+            )
+            send_mail(
+                template.subject, 
+                message, 
+                settings.DEFAULT_FROM_EMAIL, 
+                [self.user.email, 'vuleson59@gmail.com'], 
+                fail_silently=False
+            )
+            self.email_status = 'sent'
+            self.email_send_date = timezone.now().date()
+            self.save()
+            return True
+        except Exception as e:
+            print(f"Wave 3 code entry email error: {str(e)}")
+            self.email_status = 'failed'
+            self.save()
+            return False
 
     def send_study_end_email(self):  # Info 24
         template = EmailTemplate.objects.get(name='study_end')

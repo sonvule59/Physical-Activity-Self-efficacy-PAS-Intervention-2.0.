@@ -12,7 +12,7 @@ from django.utils.crypto import get_random_string
 import json
 from hashlib import sha256
 from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email
-from testpas.settings import DEFAULT_FROM_EMAIL
+# from testpas.settings import DEFAULT_FROM_EMAIL
 from testpas.schedule_emails import schedule_wave1_monitoring_email
 # from testpas.utils import generate_token, validate_token, send_confirmation_email
 from .models import *
@@ -34,6 +34,9 @@ from testpas.schedule_emails import schedule_wave1_monitoring_email
 from django.http import HttpResponse
 from django.apps import apps
 from django.db import transaction
+
+from .timeline import get_timeline_day
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 _fake_time = None
@@ -391,13 +394,12 @@ def send_wave_1_email(user):
     recipient_list = [user.email, "vuleson59@gmail.com"] 
 
     send_mail(subject, message, from_email, recipient_list)
-
+    
 """Information 6: (Website) IRB Consent Form
 Participants should be able to access the IRB consent form on the website."""
 @login_required
 def consent_form(request):
     if request.method == "POST":
-        # FIXED SNIPPET START: Set day_1 and trigger timeline
         logger.debug(f"Consent form POST data for {request.user.username}: {dict(request.POST)}")
         form = ConsentForm(request.POST)
         if form.is_valid():
@@ -413,15 +415,19 @@ def consent_form(request):
                 messages.error(request, "No eligibility record found. Please contact support.")
                 return render(request, "consent_form.html", {"form": form})
 
-            try:
-                participant = Participant.objects.get(user=user)
-            except Participant.DoesNotExist:
-                logger.error(f"No Participant found for {user.username}")
-                messages.error(request, "Please create a participant profile.")
-                return redirect("create_participant")
+            participant, created = Participant.objects.get_or_create(user=user)
+            if created:
+                logger.info(f"Created Participant for {user.username}")
 
+            # Jun 25: Add in store timeline day instead of date 
+            user_progress.day_1 = timezone.now().date()
             user_progress.consent_given = True
-            user_progress.day_1 = timezone.now().date()  # Set day_1
+            # user_progress.day_1 = get_timeline_day(
+            #     user,
+            #     compressed=settings.TIME_COMPRESSION,
+            #     seconds_per_day=settings.SECONDS_PER_DAY
+            # )
+            # end Jun 25
             try:
                 user_progress.save()
                 logger.debug(f"Saved progress for {user.username}: consent_given=True, day_1={user_progress.day_1}")
@@ -440,8 +446,12 @@ def consent_form(request):
 
             logger.info(f"Consent processed successfully for {user.username}")
             return redirect("dashboard")
+        else:
+            logger.warning(f"Consent form invalid for {request.user.username}: {form.errors}")
+            messages.error(request, "Please correct the errors below.")
+            return render(request, "consent_form.html", {"form": form})
+    else:
         form = ConsentForm()
-        logger.debug(f"Rendering consent_form for {request.user.username}")
         return render(request, "consent_form.html", {'form': form})
 
 # INFORMATION 10: Exit Screen for Not Eligible
@@ -523,22 +533,10 @@ def enter_code(request, wave):
     if not user_progress or not user_progress.day_1:
         messages.error(request, "Enrollment date not set. Contact support.")
         return redirect('home')
-    # if not user_progress:
-    #     messages.error(request, "No progress recorded. Contact support.")
-    #     return redirect('home')
-    # if not user_progress.day_1:
-    #     user_progress.day_1 = participant.enrollment_date if participant.enrollment_date else timezone.now().date()
-    #     user_progress.save()
-    # current_date = timezone.now().date()
-    # study_day = (current_date - user_progress.day_1).days + 1
-    # if user_progress and user_progress.day_1:
-    #     current_date = timezone.now().date()
-    #     study_day = (current_date - user_progress.day_1).days + 1
-    # else:
-    #     messages.error(request, "Enrollment date not set. Contact support.")
-    #     return redirect('home')
+
     current_date = timezone.now().date()
     study_day = (current_date - user_progress.day_1).days + 1
+    
     if wave == 1:
         # Check if within Wave 1 window (Days 11-20)
         if not (11 <= study_day <= 20):
@@ -565,10 +563,17 @@ def enter_code(request, wave):
             # if code == settings.REGISTRATION_CODE.lower():
             if code == 'wavepa':
                 if wave == 1:
+                    # Jun 25: Add in store timeline day instead of date 
                     participant.code_entered = True
-                    participant.code_entry_date = timezone.now().date()
+                    participant.code_entry_day = get_timeline_day(
+                        request.user,
+                        compressed=settings.TIME_COMPRESSION,
+                        seconds_per_day=settings.SECONDS_PER_DAY
+                    )
+                    # end Jun 25
                     participant.save()
-                    send_wave1_code_entry_email.delay(participant.id)
+                    # send_wave1_code_entry_email.delay(participant.id)
+                    send_wave1_code_entry_email(participant.participant_id)
                     messages.success(request, "Code entered successfully!")
                     return redirect('code_success', wave=wave)
                     # participant.code_entered = True
