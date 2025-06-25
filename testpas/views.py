@@ -121,15 +121,15 @@ def home(request):
         # Wave 1 code entry period (Days 11-20)
         if 11 <= study_day <= 20 and not participant.code_entered:
             context['within_wave1_period'] = True
-            context['wave1_start_date'] = request.user.enrollment_date + timedelta(days=10)
-            context['wave1_end_date'] = request.user.enrollment_date + timedelta(days=19)
+            context['wave1_start_date'] = participant.enrollment_date + timedelta(days=10)
+            context['wave1_end_date'] = participant.enrollment_date + timedelta(days=19)
             context['wave1_days_remaining'] = 20 - study_day
         
         # Wave 3 code entry period (Days 95-104)
         elif 95 <= study_day <= 104 and not participant.wave3_code_entered:
             context['within_wave3_period'] = True
-            context['wave3_start_date'] = request.user.enrollment_date + timedelta(days=94)
-            context['wave3_end_date'] = request.user.enrollment_date + timedelta(days=103)
+            context['wave3_start_date'] = participant.enrollment_date + timedelta(days=94)
+            context['wave3_end_date'] = participant.enrollment_date + timedelta(days=103)
             context['wave3_days_remaining'] = 104 - study_day
         
         # Show intervention access for Group 1 during intervention period
@@ -432,24 +432,18 @@ def consent_form(request):
 
             # Trigger timeline automation
             try:
-                schedule_wave1_monitoring_email.delay(participant.id)
-                logger.info(f"Triggered timeline email scheduling for participant {participant.participant_id} (ID: {participant.id})")
+                schedule_wave1_monitoring_email(participant.participant_id)
+                logger.info(f"Triggered timeline email scheduling for participant {participant.participant_id}")
             except Exception as e:
                 logger.error(f"Failed to trigger timeline email scheduling for {participant.participant_id}: {e}")
                 messages.warning(request, "Consent saved, but email scheduling failed. Contact support.")
 
             logger.info(f"Consent processed successfully for {user.username}")
             return redirect("dashboard")
-        else:
-            logger.warning(f"Form invalid for {user.username}: {form.errors}")
-            messages.error(request, "Please select Yes or No to proceed.")
-            return render(request, "consent_form.html", {"form": form})
-        # FIXED SNIPPET END
-    else:
         form = ConsentForm()
         logger.debug(f"Rendering consent_form for {request.user.username}")
+        return render(request, "consent_form.html", {'form': form})
 
-    return render(request, "consent_form.html", {'form': form})
 # INFORMATION 10: Exit Screen for Not Eligible
 def exit_screen_not_eligible(request):
     return render(request, 'exit_screen_not_eligible.html')
