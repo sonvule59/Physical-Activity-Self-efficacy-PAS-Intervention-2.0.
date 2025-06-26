@@ -19,8 +19,6 @@
             <h2>Register to Get Started</h2>
             <form id="create-account-form" action="{% url 'create_account' %}" method="post" onsubmit="createAccount(event)">
                 {% csrf_token %}
-                <label for="registration_code">Registration Code*</label>
-                <input type="text" id="registration_code" name="registration_code" required><br><br>
                 <label for="username">ID (no case-sensitive)*</label>
                 <input type="text" id="username" name="username" required><br><br>
                 <label for="password">Password (case-sensitive)*</label>

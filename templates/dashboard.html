@@ -43,7 +43,7 @@
         <div class="container mt-5">
             <h1>Welcome, {{ user.username }}</h1>
             <!-- Correct Wave 1 code entry period logic -->
-            {% if within_wave1_period %}
+            <!-- {% if within_wave1_period %}
                 <div class="alert alert-info">
                     <h4>Wave 1 Code Entry Period Active!</h4>
                     <p>Enter your Wave 1 Physical Activity Code.</p>
@@ -61,11 +61,11 @@
                     <h4>Wave 1 Code Entry Period Ended</h4>
                     <p>The code entry period has ended.</p>
                 </div>
-            {% endif %}
+            {% endif %} -->
         </div>
         {% endblock %}
 
-        <section id="wave1-code">
+        <!-- <section id="wave1-code">
             <h2>Enter Wave 1 Physical Activity Code</h2>
             {% if within_wave1_period %}
                 <form method="POST" action="{% url 'enter_code' wave=1%}">
@@ -80,7 +80,7 @@
             {% else %}
                 <p>This task has expired/not currently Available.</p>
             {% endif %}   
-        </section>
+        </section> -->
        <h2>Study Dashboard</h2>
     <!-- FIXED: Display messages for errors or success -->
     {% if messages %}
@@ -93,11 +93,32 @@
     <!-- FIXED: Check enrollment status before showing study content -->
     {% if progress and progress.eligible and progress.consent_given and participant %}
         <p>Welcome, {{ participant.user.username }}!</p>
-        <!-- FIXED: Show Wave 1 prompt only during Day 11–20 -->
-        {% if within_wave1_period %}
+        <!-- Show Wave 1 prompt only during Day 11–20 -->
+        {% if progress.day_1 %}
+            {% if within_wave1_period %}
+                <div class="alert alert-info">
+                    <h3>Wave 1 Code Entry</h3>
+                    <p>To begin physical activity monitoring, enter your access code.</p>
+                    <p>Code entry is open until <strong>{{ end_date_wave1 }}</strong> ({{ days_until_end_wave1 }} days remaining).</p>
+                    <a href="{% url 'enter_code' 1 %}" class="btn btn-primary">Enter Code</a>
+                </div>
+            {% elif days_until_start_wave1 > 0 %}
+                <div class="alert alert-warning">
+                    <p>Wave 1 code entry opens on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days from today).</p>
+                </div>
+            {% elif days_until_end_wave1 <= 0 %}
+                <div class="alert alert-secondary">
+                    <p>Wave 1 code entry period has ended.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+ 
+
+        
+       <!--  {% if within_wave1_period %}
             <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
             <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
-        <!-- FIXED: Show future or expired status clearly -->
+
         {% elif progress.day_1 %}
             {% if days_until_start_wave1 > 0 %}
                 <p>Wave 1 code entry starts on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days away).</p>
@@ -107,7 +128,7 @@
         {% endif %}
         {% if within_wave3_period %}
             <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
-        {% endif %}
+        {% endif %} -->
         <!-- ADDED: Contact information for support -->
         <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
     {% else %}

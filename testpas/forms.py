@@ -9,7 +9,7 @@ class UserRegistrationForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput, required=True, label="Password")
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=True, label="Confirm Password")
     phone_number = forms.CharField(max_length=15, required=True, label="Phone Number")
-    registration_code = forms.CharField(max_length=50, required=True, label="Registration Code")
+    # registration_code = forms.CharField(max_length=50, required=True, label="Registration Code")
 
     # Validate unique username
     def clean_username(self):
@@ -32,12 +32,11 @@ class UserRegistrationForm(forms.Form):
         #     raise forms.ValidationError("This email is already in use.")
         return email
 
-    # FIX 3: Validate registration code
-    def clean_registration_code(self):
-        code = self.cleaned_data['registration_code'].lower()
-        if code != 'wavepa':
-            raise forms.ValidationError("Invalid registration code.")
-        return code
+    # def clean_registration_code(self):
+    #     code = self.cleaned_data['registration_code'].lower()
+    #     if code != 'wavepa':
+    #         raise forms.ValidationError("Invalid registration code.")
+    #     return code
 
     # FIX 4: Validate password confirmation
     def clean(self):
