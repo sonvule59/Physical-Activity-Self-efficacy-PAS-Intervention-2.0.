@@ -89,8 +89,8 @@ def generate_confirmation_token():
     return uuid.uuid4().hex
 
 class Participant(models.Model):
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     age = models.IntegerField(null=True, blank=True)
     enrollment_date = models.DateField(default=timezone.now)
     code_entered = models.BooleanField(default=False)
