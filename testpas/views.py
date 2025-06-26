@@ -438,7 +438,8 @@ def consent_form(request):
 
             # Trigger timeline automation
             try:
-                schedule_wave1_monitoring_email(participant.participant_id)
+                # schedule_wave1_monitoring_email(participant.participant_id)
+                schedule_wave1_monitoring_email(participant.id)
                 logger.info(f"Triggered timeline email scheduling for participant {participant.participant_id}")
             except Exception as e:
                 logger.error(f"Failed to trigger timeline email scheduling for {participant.participant_id}: {e}")

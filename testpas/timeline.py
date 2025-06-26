@@ -17,6 +17,10 @@ def get_day_difference_compressed(start_time, now=None, seconds_per_day=86400):
     now = now or tz_now()
     if is_naive(start_time):
         start_time = make_aware(start_time)
+    if isinstance(start_time, datetime.date) and not isinstance(start_time, datetime.datetime):
+        # Promote date to datetime at midnight
+        start_time = datetime.datetime.combine(start_time, datetime.time.min)
+        start_time = make_aware(start_time)
     seconds_elapsed = (now - start_time).total_seconds()
     return int(seconds_elapsed // seconds_per_day)
 

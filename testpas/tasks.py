@@ -55,12 +55,19 @@ def daily_timeline_check(user):
         participant.save()
 
     # Info 13 – 8 days after code entry: Survey & Return Monitor
-    if participant.code_entry_date:
-        code_day = get_timeline_day(user.date_joined + timezone.timedelta(days=participant.code_entry_date), compressed=compressed, seconds_per_day=seconds_per_day)
-        if code_day is not None and today == code_day + 8 and participant.email_status != 'sent_wave1_survey_return':
+    if participant.code_entry_day is not None:
+        code_day = participant.code_entry_day  # Use stored timeline day directly
+        if today == code_day + 8 and participant.email_status != 'sent_wave1_survey_return':
+            print(f"[SEND] Info 13 to user {user.id}")
             participant.send_email("wave1_survey_return")
             participant.email_status = 'sent_wave1_survey_return'
             participant.save()
+    # if participant.code_entry_date:
+    #     code_day = get_timeline_day(user.date_joined + timezone.timedelta(days=participant.code_entry_date), compressed=compressed, seconds_per_day=seconds_per_day)
+    #     if code_day is not None and today == code_day + 8 and participant.email_status != 'sent_wave1_survey_return':
+    #         participant.send_email("wave1_survey_return")
+    #         participant.email_status = 'sent_wave1_survey_return'
+    #         participant.save()
 
     # Info 15 – Day 29: Randomization
     if today == 29 and participant.randomized_group is None:
