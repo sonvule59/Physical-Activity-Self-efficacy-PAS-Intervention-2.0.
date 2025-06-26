@@ -438,8 +438,7 @@ def consent_form(request):
 
             # Trigger timeline automation
             try:
-                # schedule_wave1_monitoring_email(participant.participant_id)
-                schedule_wave1_monitoring_email(participant.id)
+                schedule_wave1_monitoring_email(participant.pk)
                 logger.info(f"Triggered timeline email scheduling for participant {participant.participant_id}")
             except Exception as e:
                 logger.error(f"Failed to trigger timeline email scheduling for {participant.participant_id}: {e}")
@@ -496,14 +495,17 @@ def dashboard(request):
             participant.enrollment_date = user_progress.day_1 or current_date
             participant.save()
         if user_progress.day_1 is not None:
-            study_day = (current_date - user_progress.day_1).days + 1
+            study_day = get_timeline_day(
+                request.user,
+                compressed=settings.TIME_COMPRESSION,
+                seconds_per_day=settings.SECONDS_PER_DAY)
             day_11 = user_progress.day_1 + timedelta(days=10)
             day_21 = user_progress.day_1 + timedelta(days=20)
             day_95 = user_progress.day_1 + timedelta(days=94)
             day_104 = user_progress.day_1 + timedelta(days=103)
 
-            within_wave1_period = 11 <= study_day <= 20 and not participant.code_entered
-            within_wave3_period = 95 <= study_day <= 104 and not participant.wave3_code_entered
+            within_wave1_period = study_day is not None and 11 <= study_day <= 20 and not participant.code_entered
+            within_wave3_period = study_day is not None and 95 <= study_day <= 104 and not participant.wave3_code_entered
             days_until_start_wave1 = max(0, (day_11 - current_date).days)
             days_until_end_wave1 = max(0, (day_21 - current_date).days)
             start_date_wave1 = day_11

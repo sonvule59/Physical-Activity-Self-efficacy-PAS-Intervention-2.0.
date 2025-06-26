@@ -89,13 +89,13 @@ EMAIL_TEMPLATES = [
     {
         "name": "intervention_access_later",
         "subject": "Intervention Access Later",
-        "body": "Dear {username},\n\nYou have been assigned to Group 0. You will receive intervention access later.\n{login_link}\n\nBest,\nPAS 2.0 Team"
-        # "body": "Dear {participant_id},\n\nYou have been assigned to Group 0. You will receive intervention access later.\n{login_link}\n\nBest,\nPAS 2.0 Team"
+        "body": "Dear {username},\n\nYou have been assigned to Group 0. You will receive intervention access later.\nBest,\nPAS 2.0 Team"
+        # "body": "Dear {participant_id},\n\nYou have been assigned to Group 0. You will receive intervention access later.\nBest,\nPAS 2.0 Team"
     },
     {
         "name": "intervention_access_immediate",
         "subject": "Intervention Access Immediately",
-        "body": "Dear {username},\n\nYou have been assigned to Group 1. You now have immediate access to the intervention.\n{login_link}\n\nBest,\nPAS 2.0 Team"
+        "body": "Dear {username},\n\nYou have been assigned to Group 1. You now have immediate access to the intervention.\nBest,\nPAS 2.0 Team"
     },
     {
         "name": "wave2_survey_ready",
@@ -130,7 +130,7 @@ EMAIL_TEMPLATES = [
     {
         "name": "wave3_missing_code",
         "subject": "Missing Code Entry (Study End)",
-        "body": "Dear {username},\n\nYou missed the Wave 3 code entry. No further action is required.\n{login_link}\n\nBest,\nPAS 2.0 Team"
+        "body": "Dear {username},\n\nYou missed the Wave 3 code entry. No further action is required.\nBest,\nPAS 2.0 Team"
     },
     {
         "name": "study_end",

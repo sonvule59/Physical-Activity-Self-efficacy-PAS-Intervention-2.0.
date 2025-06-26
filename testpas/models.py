@@ -115,7 +115,7 @@ class Participant(models.Model):
     email = models.EmailField(null=True, blank=True)  
     wave3_code_entered = models.BooleanField(default=False)  # New field for Wave 3
     wave3_code_entry_date = models.DateField(null=True, blank=True)
-    
+    randomized_group = models.IntegerField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.confirmation_token:

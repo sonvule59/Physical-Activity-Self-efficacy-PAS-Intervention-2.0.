@@ -32,7 +32,9 @@ def daily_timeline_check(user):
     seconds_per_day = getattr(settings, 'SECONDS_PER_DAY', 86400)
     compressed = getattr(settings, 'TIME_COMPRESSION', False)
 
-    today = get_timeline_day(user, compressed=compressed, seconds_per_day=seconds_per_day)
+    # today = get_timeline_day(user, compressed=compressed, seconds_per_day=seconds_per_day)
+    today = get_timeline_day(user, compressed=settings.TIME_COMPRESSION, seconds_per_day=settings.SECONDS_PER_DAY)
+    # end Jun 25
     participant = getattr(user, 'participant', None)
     if not participant:
         print(f"[SKIP] No participant for user {user.id}")
@@ -70,12 +72,32 @@ def daily_timeline_check(user):
     #         participant.save()
 
     # Info 15 – Day 29: Randomization
+
+    """The above Python code is checking if today is the 29th day of the month and if the participant's
+    # randomized_group is None. If these conditions are met, it then randomizes the participant, sets
+    # the randomized_group, and saves the changes.
+    Information 15: (Website) Double-Blind Randomization
+·  	On Day 29, randomize (i.e., equal chance of being assigned to either group) the participants into either Group 0 (usual care group [i.e., control group]) or Group 1 (intervention group) at 7 AM Central Time (CT).
+·  	Group 0 (i.e., the usual care group) will be given the access to the intervention after the data collection is done from Day 113. 
+    There will be no expiration date for the access for Group 0. We will not track their engagement with the intervention (e.g., the number of challenges completed) from Group 0.
+·  	Group 1 (i.e., the intervention group) will be given the access to the intervention from Day 29 to Day 56. We will track their engagement with the intervention (e.g., the number of challenges completed) from Group 1.
+    """
+    # Info 15 – Day 29: Randomization
+    # On Day 29, randomize participants into Group 0 (control) or Group 1 (intervention) if not already randomized.
     if today == 29 and participant.randomized_group is None:
-        participant.randomize()  # Assuming this sets randomized_group and saves
+        import random
+        participant.randomized_group = random.choice([0, 1])
+        participant.save()
+
         if participant.randomized_group == 0:
-            participant.send_email("intervention_access_later")
-        else:
-            participant.send_email("intervention_access_now")
+            participant.send_email("intervention_access_later", extra_context={
+                "username": user.username
+            })
+        elif participant.randomized_group == 1:
+            participant.send_email("intervention_access_immediate", extra_context={
+                "username": user.username,
+                "login_link": settings.LOGIN_URL if hasattr(settings, "LOGIN_URL") else "https://your-login-page.com" ## to be updated with the actual login page in production.
+            })
 
 # @shared_task
 # def send_scheduled_emails():
