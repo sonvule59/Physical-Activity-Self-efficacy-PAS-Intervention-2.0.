@@ -2,7 +2,7 @@
 from celery import shared_task
 from django.utils import timezone
 from django.conf import settings
-from testpas.models import Participant
+from testpas.models import Participant, UserSurveyProgress
 from testpas.tasks import send_wave1_monitoring_email
 import logging
 from datetime import timedelta
@@ -15,11 +15,11 @@ def schedule_wave1_monitoring_email(participant_id):
     """Schedule Wave 1 Physical Activity Monitoring email for Day 11 or 11 minutes in test mode."""
     try:
         participant = Participant.objects.get(id=participant_id)
-        if not participant.is_confirmed or not participant.user.usersurveyprogress_set.filter(survey__title="Eligibility Criteria", consent_given=True).exists():
+        if not participant.is_confirmed or not UserSurveyProgress.objects.filter(user=participant.user, survey__title="Eligibility Criteria", consent_given=True).exists():
             logger.info(f"Skipping Wave 1 monitoring email for {participant.participant_id}: not confirmed or not consented")
             return
         
-        progress = participant.user.usersurveyprogress_set.filter(survey__title="Eligibility Criteria").first()
+        progress = UserSurveyProgress.objects.filter(user=participant.user, survey__title="Eligibility Criteria").first()
         if not progress or not progress.day_1:
             logger.error(f"No day_1 set for {participant.participant_id}")
             return
@@ -35,7 +35,7 @@ def schedule_wave1_monitoring_email(participant_id):
             send_time = timezone.now() + timedelta(minutes=minutes_to_add)
         
         # Schedule email
-        send_wave1_monitoring_email.apply_async((participant_id,), eta=send_time)
+        send_wave1_monitoring_email(participant_id)
         logger.info(f"Scheduled Wave 1 monitoring email for {participant.participant_id} at {send_time}")
     except Participant.DoesNotExist:
         logger.error(f"Participant {participant_id} not found for scheduling")

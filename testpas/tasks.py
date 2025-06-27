@@ -78,9 +78,11 @@ def daily_timeline_check(user):
     # the randomized_group, and saves the changes.
     Information 15: (Website) Double-Blind Randomization
 ·  	On Day 29, randomize (i.e., equal chance of being assigned to either group) the participants into either Group 0 (usual care group [i.e., control group]) or Group 1 (intervention group) at 7 AM Central Time (CT).
-·  	Group 0 (i.e., the usual care group) will be given the access to the intervention after the data collection is done from Day 113. 
+·  
+	    Group 0 (i.e., the usual care group) will be given the access to the intervention after the data collection is done from Day 113. 
     There will be no expiration date for the access for Group 0. We will not track their engagement with the intervention (e.g., the number of challenges completed) from Group 0.
-·  	Group 1 (i.e., the intervention group) will be given the access to the intervention from Day 29 to Day 56. We will track their engagement with the intervention (e.g., the number of challenges completed) from Group 1.
+
+    ·  	Group 1 (i.e., the intervention group) will be given the access to the intervention from Day 29 to Day 56. We will track their engagement with the intervention (e.g., the number of challenges completed) from Group 1.
     """
     # Info 15 – Day 29: Randomization
     # On Day 29, randomize participants into Group 0 (control) or Group 1 (intervention) if not already randomized.

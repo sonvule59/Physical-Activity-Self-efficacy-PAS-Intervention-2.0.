@@ -95,7 +95,22 @@ EMAIL_TEMPLATES = [
     {
         "name": "intervention_access_immediate",
         "subject": "Intervention Access Immediately",
-        "body": "Dear {username},\n\nYou have been assigned to Group 1. You now have immediate access to the intervention.\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {username},\n\n"
+            "Your access to the online physical activity intervention will begin immediately. "
+            "You may access the online physical activity intervention whenever you wish throughout approximately 4 weeks.\n\n"
+            "· Please log in from the following website: (***Login link placeholder, will be updated in production***)\n"
+            "· Your ID is: {username}. If you forgot your password, you may reset it on the website.\n\n"
+            "If you complete at least 24 post-introductory challenges during the 4 weeks, you will earn an additional $20 "
+            "in your Amazon electronic gift card account. Thoughtfully completing at least 24 post-introductory challenges "
+            "may take approximately 2 hours. You will receive the accrued incentives after this study ends.\n\n"
+            "We will also email you again in approximately 4 weeks for the next task (i.e., completing an online survey set). "
+            "Please regularly check your inbox. You will receive the accrued incentives after this study ends.\n\n"
+            "If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee "
+            "(Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\n\n"
+            "The Obesity and Physical Activity Research Team"
+    )
     },
     {
         "name": "wave2_survey_ready",
