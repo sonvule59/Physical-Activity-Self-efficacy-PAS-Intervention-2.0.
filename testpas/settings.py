@@ -116,7 +116,7 @@ TIME_ZONE = 'America/Chicago'
 # TEST_MODE = os.getenv('TEST_MODE')
 TEST_MODE=True
 TIME_COMPRESSION = True
-SECONDS_PER_DAY = 15 # Use 86400 for real-world days
+SECONDS_PER_DAY = 5 # Use 86400 for real-world days
 # TEST_TIME_SCALE = 10  # 1 day = 10 seconds for testing
 # TEST_TIME_SCALE = float(os.getenv('TEST_TIME_SCALE', '5'))  # 1 day = 1 second (or set to 60 for minutes)
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

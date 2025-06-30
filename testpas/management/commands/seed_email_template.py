@@ -115,13 +115,29 @@ EMAIL_TEMPLATES = [
     {
         "name": "wave2_survey_ready",
         "subject": "Wave 2 Online Survey Set – Ready",
-        "body": "Dear {username},\n\nYour Wave 2 online survey is now available. Please complete it soon.\n\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {username},\n\n"
+            "Your next task is to complete the Wave 2 Online Survey Set within 10 days. You will earn $5 in your Amazon electronic gift card account for completing this task. "
+            "You will receive the accrued incentives after this study ends. After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n"
+            "· Please click the following link to complete the task: [a link that will be updated by researchers].\n\n"
+            "If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee (Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\n"
+            "The Obesity and Physical Activity Research Team"
+        )
     },
-    {
+        {
         "name": "wave2_no_monitoring",
         "subject": "No Wave 2 Physical Activity Monitoring",
-        "body": "Dear {username},\n\nThere is no physical activity monitoring for Wave 2. Just complete the survey.\n\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {username},\n\n"
+            "There is no Wave 2 Physical Activity Monitoring.\n\n"
+            "We will email you again in approximately 4 weeks for the next task (i.e., completing an online survey set). Please regularly check your inbox. You will receive the accrued incentives after this study ends.\n\n"
+            "If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee (Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\n"
+            "The Obesity and Physical Activity Research Team"
+        )
     },
+
     {
         "name": "wave3_survey_ready",
         "subject": "Wave 3 Online Survey Set – Ready",

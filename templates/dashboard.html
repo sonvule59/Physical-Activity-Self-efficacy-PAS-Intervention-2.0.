@@ -42,45 +42,9 @@
         {% block content %}
         <div class="container mt-5">
             <h1>Welcome, {{ user.username }}</h1>
-            <!-- Correct Wave 1 code entry period logic -->
-            <!-- {% if within_wave1_period %}
-                <div class="alert alert-info">
-                    <h4>Wave 1 Code Entry Period Active!</h4>
-                    <p>Enter your Wave 1 Physical Activity Code.</p>
-                    <p>Time remaining: {{ days_until_end_wave1 }} days</p>
-                </div>
-            {% elif days_until_start_wave1 > 0 %}
-                <div class="alert alert-warning">
-                    <h4>Wave 1 Code Entry Period Starting Soon</h4>
-                    <p>You will be able to enter your code in {{ days_until_start_wave1 }} days.</p>
-                    <p>Start date: {{ start_date_wave_1|date:"Y-m-d" }}</p>
-                    <p>End date: {{ end_date_wave1|date:"Y-m-d" }}</p>
-                </div>
-            {% else %}
-                <div class="alert alert-secondary">
-                    <h4>Wave 1 Code Entry Period Ended</h4>
-                    <p>The code entry period has ended.</p>
-                </div>
-            {% endif %} -->
         </div>
         {% endblock %}
 
-        <!-- <section id="wave1-code">
-            <h2>Enter Wave 1 Physical Activity Code</h2>
-            {% if within_wave1_period %}
-                <form method="POST" action="{% url 'enter_code' wave=1%}">
-                    {% csrf_token %}
-                    <label for="code">Enter Code:</label>
-                    <input type="text" id="code" name="code" required>
-                    <button type="submit">Submit</button>
-                </form>
-                {% if code_error %}
-                    <p style="color: red;">{{ code_error }}</p>
-                {% endif %}
-            {% else %}
-                <p>This task has expired/not currently Available.</p>
-            {% endif %}   
-        </section> -->
        <h2>Study Dashboard</h2>
     <!-- FIXED: Display messages for errors or success -->
     {% if messages %}
@@ -95,6 +59,36 @@
         <p>Welcome, {{ participant.user.username }}!</p>
         <!-- Show Wave 1 prompt only during Day 11–20 -->
         {% if progress.day_1 %}
+            {% if 11 <= study_day <= 20 and not participant.code_entered %}
+                <section id="wave1-code-entry">
+                    <div class="alert alert-info">
+                        <h3>Wave 1 Physical Activity Code Entry</h3>
+                        <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
+                        <p>Please enter the code below:</p>
+                        <form method="POST" action="{% url 'enter_code' wave=1 %}">
+                            {% csrf_token %}
+                            <label for="code">Code:</label>
+                            <input type="text" id="code" name="code" required>
+                            <button type="submit">Submit</button>
+                        </form>
+                        {% if code_error %}
+                            <p style="color:red;">{{ code_error }}</p>
+                        {% endif %}
+                        <p><em>If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</em></p>
+                    </div>
+                </section>
+            {% elif study_day < 11 %}
+                <div class="alert alert-warning">
+                    <p>Wave 1 code entry opens on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days from today).</p>
+                </div>
+            {% elif study_day > 20 or participant.code_entered %}
+                <div class="alert alert-secondary">
+                    <p>The Wave 1 code entry period has ended.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- {% if progress.day_1 %}
             {% if within_wave1_period %}
                 <div class="alert alert-info">
                     <h3>Wave 1 Code Entry</h3>
@@ -111,7 +105,7 @@
                     <p>Wave 1 code entry period has ended.</p>
                 </div>
             {% endif %}
-        {% endif %}
+        {% endif %} -->
  
 
         

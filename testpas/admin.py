@@ -13,9 +13,11 @@ class ParticipantAdmin(admin.ModelAdmin):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="pas_study_data.csv"'
         writer = csv.writer(response)
+
+        
         writer.writerow([
             'Participant ID', 'Username', 'Email', 'Phone Number', 'Enrollment Date', 'Eligible', 'Consent Given',
-            'Decline Reason', 'Survey Progress (%)', 'Survey Responses', 'Wave 1 Code Entered', 'Wave 1 Code Entry Date',
+            'Decline Reason', 'Survey Progress (%)', 'Survey Responses', 'Day 1 Date', 'Current Study Day', 'Wave 1 Code Entered', 'Wave 1 Code Entry Date',
             'Group', 'Intervention Start', 'Intervention End', 'Wave 3 Code Entered', 'Wave 3 Code Entry Date'
         ])
         for participant in queryset:
@@ -24,6 +26,9 @@ class ParticipantAdmin(admin.ModelAdmin):
             response_str = '; '.join([f"{q}: {a}" for q, a in responses]) if responses else 'N/A'
             progress_percentage = progress.progress if progress and progress.progress is not None else 'N/A'
 
+            day_1 = progress.day_1 if progress and progress.day_1 else 'N/A'
+            study_day = (now().date() - progress.day_1).days + 1 if progress and progress.day_1 else 'N/A'
+    
             writer.writerow([
                 participant.participant_id,
                 participant.user.username,

@@ -205,53 +205,6 @@ def create_account(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
     return render(request, "create_account.html", {'form': form})
-# def create_account(request):
-#     """Handle account creation with registration code"""
-#     if request.method == 'POST':
-#         form = UserRegistrationForm(request.POST)
-#         if form.is_valid():
-#             try:
-#                 with transaction.atomic():
-#                     # Create user
-#                     user = form.save(commit=False)
-#                     user.registration_code = form.cleaned_data['registration_code']
-#                     user.phone_number = form.cleaned_data['phone_number']
-#                     user.full_name = form.cleaned_data.get('full_name', '')
-#                     user.save()
-                    
-#                     # Create participant record
-#                     participant = Participant.objects.create(
-#                         user=user,
-#                         participant_id=f"P{Participant.objects.count() + 1:03d}",
-#                         email=user.email,
-#                         confirmation_token=str(uuid.uuid4()),  # Generate token directly
-#                     )
-#                     # Send confirmation email (Information 3)
-#                     confirmation_link = f"{settings.SITE_URL}/confirm/{participant.confirmation_token}/"
-#                     participant.send_email(
-#                         'account_confirmation',
-#                         extra_context={
-#                             'confirmation_link': confirmation_link,
-#                             'username': user.username,  # Add username to context
-#                         }
-#                     )
-#                     messages.success(
-#                         request,
-#                         "Account created successfully! Please check your email to activate your account."
-#                     )
-#                     return redirect('login')
-                    
-#             except Exception as e:
-#                 logger.error(f"Error creating account: {str(e)}")
-#                 messages.error(request, f"An error occurred: {str(e)}")
-#                 # Don't redirect, show the form again with error
-#         else:
-#             # Form is not valid, it will show errors
-#             logger.error(f"Form errors: {form.errors}")
-#     else:
-#         form = UserRegistrationForm()
-    
-#     return render(request, 'create_account.html', {'form': form})
 
 """Information 3: Email Confirmation to Activate Account"""
 @csrf_exempt
@@ -422,11 +375,14 @@ def consent_form(request):
             # Jun 25: Add in store timeline day instead of date 
             user_progress.day_1 = timezone.now().date()
             user_progress.consent_given = True
-            # user_progress.day_1 = get_timeline_day(
-            #     user,
-            #     compressed=settings.TIME_COMPRESSION,
-            #     seconds_per_day=settings.SECONDS_PER_DAY
-            # )
+            user_progress.save()
+
+            # participant.send_email("wave1_survey_ready", extra_context={"username": user.username})
+            if not participant.wave1_survey_email_sent:
+                participant.send_email("wave1_survey_ready", extra_context={"username": user.username})
+                participant.wave1_survey_email_sent = True
+                participant.save()
+
             # end Jun 25
             try:
                 user_progress.save()
@@ -597,7 +553,10 @@ def enter_code(request, wave):
                 messages.success(request, "Code entered successfully!")
                 return redirect('code_success', wave=wave)
             else:
-                messages.error(request, "Incorrect code. Please try again.")
+                return render(request, "dashboard.html", { "form": form,  "code_error": "Incorrect code. Please try again.",
+   # Include other context vars needed on the dashboard
+})
+                # messages.error(request, "Incorrect code. Please try again.")
     else:
         form = CodeEntryForm()
     

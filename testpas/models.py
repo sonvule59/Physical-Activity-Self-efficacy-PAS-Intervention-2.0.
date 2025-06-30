@@ -113,6 +113,9 @@ class Participant(models.Model):
     intervention_end_date = models.DateTimeField(null=True, blank=True)
     engagement_tracked = models.BooleanField(default=False)
     email = models.EmailField(null=True, blank=True)  
+    wave1_survey_email_sent = models.BooleanField(default=False)
+    wave2_survey_email_sent = models.BooleanField(default=False)
+    wave2_monitoring_notice_sent = models.BooleanField(default=False)
     wave3_code_entered = models.BooleanField(default=False)  # New field for Wave 3
     wave3_code_entry_date = models.DateField(null=True, blank=True)
     randomized_group = models.IntegerField(null=True, blank=True)

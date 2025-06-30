@@ -3,11 +3,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.core.management import call_command
 from django.apps import apps
-# The above code is importing the `users` module from the `utils` package in the current directory. It
-# is using the relative import syntax (`from .utils import users`) to access the `users` module within
-# the `utils` package.
-# from .utils import users  # Import apps to use get_model
-# from .views import get_current_time
+
 from testpas import settings
 from django.utils import timezone
 import random
@@ -73,16 +69,17 @@ def daily_timeline_check(user):
 
     # Info 15 – Day 29: Randomization
 
-    """The above Python code is checking if today is the 29th day of the month and if the participant's
+    """
+    The following Python code is checking if today is the 29th day of the month and if the participant's
     # randomized_group is None. If these conditions are met, it then randomizes the participant, sets
     # the randomized_group, and saves the changes.
     Information 15: (Website) Double-Blind Randomization
-·  	On Day 29, randomize (i.e., equal chance of being assigned to either group) the participants into either Group 0 (usual care group [i.e., control group]) or Group 1 (intervention group) at 7 AM Central Time (CT).
-·  
+ 	On Day 29, randomize (i.e., equal chance of being assigned to either group) the participants into either Group 0 (usual care group [i.e., control group]) or Group 1 (intervention group) at 7 AM Central Time (CT).
+ 
 	    Group 0 (i.e., the usual care group) will be given the access to the intervention after the data collection is done from Day 113. 
     There will be no expiration date for the access for Group 0. We will not track their engagement with the intervention (e.g., the number of challenges completed) from Group 0.
 
-    ·  	Group 1 (i.e., the intervention group) will be given the access to the intervention from Day 29 to Day 56. We will track their engagement with the intervention (e.g., the number of challenges completed) from Group 1.
+    	Group 1 (i.e., the intervention group) will be given the access to the intervention from Day 29 to Day 56. We will track their engagement with the intervention (e.g., the number of challenges completed) from Group 1.
     """
     # Info 15 – Day 29: Randomization
     # On Day 29, randomize participants into Group 0 (control) or Group 1 (intervention) if not already randomized.
@@ -101,6 +98,32 @@ def daily_timeline_check(user):
                 "login_link": settings.LOGIN_URL if hasattr(settings, "LOGIN_URL") else "https://your-login-page.com" ## to be updated with the actual login page in production.
             })
 
+    """
+    Information 18: Day 57: Wave 2 Survey Ready
+    (Email) Wave 2 Online Survey Set – Ready. On Day 57, send this email to every participant from any group.  
+    """
+    if today == 57 and not participant.wave2_survey_email_sent:
+        participant.send_email(
+            "wave2_survey_ready",
+            extra_context={
+                # "participant_id": participant.participant_id,
+                "username": participant.user.username,
+            }
+        )
+        participant.wave2_survey_email_sent = True
+        participant.save()
+
+    # Day 67 – Send No Wave 2 Monitoring Email
+    if today == 67 and not participant.wave2_monitoring_notice_sent:
+        participant.send_email(
+            "wave2_no_monitoring",
+            extra_context={
+                # "participant_id": participant.participant_id,
+                "username": participant.user.username,
+            }
+        )
+        participant.wave2_monitoring_notice_sent = True
+        participant.save()
 # @shared_task
 # def send_scheduled_emails():
 #     now = timezone.now()
@@ -378,66 +401,3 @@ def send_wave1_code_entry_email(participant_id):
 @shared_task
 def run_randomization():
     call_command('randomize_participants')
-
-# @shared_task
-# def schedule_timeline_emails(participant_id):
-#     """Schedule all timeline emails for a participant based on their enrollment date."""
-#     try:
-#         participant = Participant.objects.get(id=participant_id)
-#         if not participant.is_confirmed:
-#             logger.info(f"Skipping timeline email scheduling for {participant.participant_id}: not confirmed")
-#             return
-
-#         # Get the enrollment date
-#         enrollment_date = participant.enrollment_date
-#         if not enrollment_date:
-#             logger.error(f"No enrollment date for {participant.participant_id}")
-#             return
-
-#         # Schedule Wave 1 monitoring email (Day 11)
-#         send_wave1_monitoring_email.apply_async(
-#             (participant_id,),
-#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=10), timezone.datetime.min.time().replace(hour=7))
-#         )
-
-#         # Schedule Wave 1 code entry reminder (Day 21)
-#         send_wave1_code_entry_email.apply_async(
-#             (participant_id,),
-#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=20), timezone.datetime.min.time().replace(hour=7))
-#         )
-
-#         # Schedule Wave 2 survey email (Day 57)
-#         send_specific_email.apply_async(
-#             (participant_id, 'wave2_survey_ready'),
-#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=56), timezone.datetime.min.time().replace(hour=7))
-#         )
-
-#         # Schedule Wave 2 no monitoring email (Day 67)
-#         send_specific_email.apply_async(
-#             (participant_id, 'wave2_no_monitoring'),
-#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=66), timezone.datetime.min.time().replace(hour=7))
-#         )
-
-#         # Schedule Wave 3 survey email (Day 85)
-#         send_specific_email.apply_async(
-#             (participant_id, 'wave3_survey_ready'),
-#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=84), timezone.datetime.min.time().replace(hour=7))
-#         )
-
-#         # Schedule Wave 3 monitoring email (Day 95)
-#         send_specific_email.apply_async(
-#             (participant_id, 'wave3_monitoring_ready'),
-#             eta=timezone.datetime.combine(enrollment_date + timedelta(days=94), timezone.datetime.min.time().replace(hour=7))
-#         )
-
-#         logger.info(f"Scheduled all timeline emails for participant {participant.participant_id}")
-#     except Participant.DoesNotExist:
-#         logger.error(f"Participant {participant_id} not found for timeline email scheduling")
-#     except Exception as e:
-#         logger.error(f"Error scheduling timeline emails for participant {participant_id}: {str(e)}")
-
-# def schedule_email(participant_entry):
-#     from datetime import timedelta
-#     send_date = participant_entry.entry_date + timedelta(days=0)
-#     send_date = send_date.replace(hour=0, minute=0, second=10, microsecond=0)
-#     send_scheduled_email_task.apply_async((participant_entry.participant_id,), eta=send_date)
