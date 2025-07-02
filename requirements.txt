@@ -20,3 +20,4 @@ freezegun
 twilio
 redis
 sendgrid-django
+python-dotenv
