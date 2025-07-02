@@ -283,6 +283,7 @@ def create_participant(request):
         return JsonResponse({"message": "User registered successfully! Please complete the eligibility questionnaire."})
     return render(request, "create_participant.html")
 
+"""Information 4: Eligibility Questionnaire"""
 @login_required
 def questionnaire(request):
     if request.method == "POST":
