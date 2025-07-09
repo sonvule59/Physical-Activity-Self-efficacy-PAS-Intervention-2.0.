@@ -5,12 +5,10 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
-from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
-import json
 from hashlib import sha256
 from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email
 # from testpas.settings import DEFAULT_FROM_EMAIL
@@ -29,9 +27,7 @@ import pytz
 from .models import Participant, SurveyProgress, Survey, UserSurveyProgress
 from django.db.models import Model
 from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm
-import io
 import csv
-import zipfile
 from testpas.schedule_emails import schedule_wave1_monitoring_email
 from django.http import HttpResponse
 from django.apps import apps
@@ -47,7 +43,6 @@ def get_current_time():
     if _fake_time is not None:
         return _fake_time
     return timezone.now()
-
 
 @login_required
 def home(request):
@@ -224,21 +219,7 @@ def confirm_account(request, token):
         messages.success(request, "Account confirmed successfully.")
     
     return redirect("questionnaire_interest")
-    # token_value = request.GET.get("token", "").strip()
-    # if not token_value:
-    #     return JsonResponse({"error": "Token not found."}, status=400)
 
-    # try:
-    #     token = Token.objects.get(token=token_value)
-    #     user = token.recipient
-    #     user.is_active = True
-    #     user.save()
-    #     token.used = True
-    #     token.save()
-    #     login(request, user)  # Auto-login after confirmation
-    #     return redirect("/questionnaire/?token=" + token_value)
-    # except Token.DoesNotExist:
-    #     return JsonResponse({"error": "Invalid or expired token."}, status=400)
     
 """Information 3
 Once participants create an account, they should be able to reset their password on the login page if they forget it."""
@@ -570,42 +551,6 @@ def enter_code(request, wave):
     }
     
     return render(request, 'monitoring/enter_code.html', context)
-# @login_required
-# def enter_code(request):
-#     participant = Participant.objects.get(user=request.user)
-#     current_date = timezone.now().date()
-
-#     day_11 = participant.enrollment_date + timedelta(days=10)
-#     day_21 = participant.enrollment_date + timedelta(days=20)
-
-#     if current_date < day_11:
-#         messages.error(request, "You cannot enter the code before Day 11.")
-#         return redirect('home')
-
-#     if current_date > day_21:
-#         messages.error(request, "The time window for entering the code has passed.")
-#         return redirect('home')
-
-#     if request.method == 'POST':
-#         form = CodeEntryForm(request.POST)
-#         if form.is_valid():
-#             code = form.cleaned_data['code'].strip().lower()
-#             if code == 'wavepa':
-#                 participant.code_entered = True
-#                 participant.code_entry_date = current_date
-#                 participant.save()
-#                 participant.send_code_entry_email()
-#                 messages.success(request, "Code entered successfully!")
-#                 return redirect('code_success')
-#             else:
-#                 messages.error(request, "Incorrect code. Please try again.")
-#     else:
-#         form = CodeEntryForm()
-
-#     return render(request, 'enter_code.html', {
-#         'form': form,
-#         'days_remaining': (day_21 - current_date).days
-#     })
 
 def download_data(request):
     response = HttpResponse(content_type='text/csv')

@@ -32,12 +32,6 @@ class UserRegistrationForm(forms.Form):
         #     raise forms.ValidationError("This email is already in use.")
         return email
 
-    # def clean_registration_code(self):
-    #     code = self.cleaned_data['registration_code'].lower()
-    #     if code != 'wavepa':
-    #         raise forms.ValidationError("Invalid registration code.")
-    #     return code
-
     # FIX 4: Validate password confirmation
     def clean(self):
         cleaned_data = super().clean()
@@ -197,21 +191,6 @@ class EligibilityForm(forms.ModelForm):
     
 class CodeEntryForm(forms.Form):
     code = forms.CharField(label='Enter Code', max_length=100)
-
-# class UserRegistrationForm(forms.ModelForm):
-#     password = forms.CharField(widget=forms.PasswordInput)
-#     confirm_password = forms.CharField(widget=forms.PasswordInput)
-
-#     class Meta:
-#         model = User
-#         fields = ['username', 'email', 'password']
-
-#     def clean_confirm_password(self):
-#         password = self.cleaned_data.get('password')
-#         confirm_password = self.cleaned_data.get('confirm_password')
-#         if password and confirm_password and password != confirm_password:
-#             raise forms.ValidationError("Passwords do not match")
-#         return confirm_password
 
 class UserLoginForm(forms.Form):
     username = forms.CharField()
