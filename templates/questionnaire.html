@@ -17,7 +17,7 @@
             <h2>Please answer the following questions to determine eligibility</h2>
             <form id="questionnaire-form" action="" method="POST">
                 {% csrf_token %}
-                <input type="hidden" id="user-id" name="user-id" value="{{ user_id }}">
+                <!-- <input type="hidden" id="user-id" name="user-id" value="{{ user_id }}">
                 <input type="hidden" id="token" name="token" value="{{ token }}">
                 <input type="hidden" id="email" name="email" value="{{ email }}">
                 <input type="hidden" id="first-name" name="first-name" value="{{ first_name }}">
@@ -26,7 +26,7 @@
                 <input type="hidden" id="phone-number" name="phone-number" value="{{ phone_number }}">  
                 <input type="hidden" id="registration-code" name="registration-code" value="{{ registration_code }}">
                 <input type="hidden" id="password" name="password" value="{{ password }}">
-                <input type="hidden" id="password-confirmation" name="password-confirmation" value="{{ password_confirmation }}">
+                <input type="hidden" id="password-confirmation" name="password-confirmation" value="{{ password_confirmation }}"> -->
 
                 <label for="age">1. What is your age?</label><br>
                 <input type="number" id="age" name="age" min="0" required><br><br>

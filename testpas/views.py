@@ -1,4 +1,5 @@
 # type: ignore
+from bz2 import compress
 import logging
 from django.urls import reverse
 from django.utils import timezone
@@ -19,7 +20,8 @@ from .utils import validate_token
 import uuid
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.conf import settings
+# from django.conf import settings
+from testpas.settings import *
 import os
 import datetime
 from twilio.rest import Client
@@ -32,17 +34,18 @@ from testpas.schedule_emails import schedule_wave1_monitoring_email
 from django.http import HttpResponse
 from django.apps import apps
 from django.db import transaction
+from testpas.utils import get_current_time
 
 from .timeline import get_timeline_day
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
-_fake_time = None
-def get_current_time():
-    global _fake_time
-    if _fake_time is not None:
-        return _fake_time
-    return timezone.now()
+# _fake_time = None
+# def get_current_time():
+#     global _fake_time
+#     if _fake_time is not None:
+#         return _fake_time
+#     return timezone.now()
 
 @login_required
 def home(request):
@@ -150,6 +153,9 @@ def create_account(request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             try:
+                # Clear any existing session data to prevent user confusion
+                request.session.flush()
+                
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     email=form.cleaned_data['email'],
@@ -228,13 +234,18 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        print(f"[DEBUG] Login attempt for username: {username}")
+        
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            print(f"[DEBUG] Authentication successful for user: {user.username}")
             login(request, user)
             next_url = request.GET.get('next', 'dashboard')  # Redirect to next URL or dashboard
+            print(f"[DEBUG] Redirecting to: {next_url}")
             return redirect(next_url)
             # return redirect('dashboard')  # Redirect to the dashboard after successful login
         else:
+            print(f"[DEBUG] Authentication failed for username: {username}")
             messages.error(request, 'Invalid username or password.')
             return render(request, 'login.html')
     return render(request, 'login.html')
@@ -315,7 +326,7 @@ def questionnaire(request):
             return redirect(reverse("exit_screen_not_eligible"))
     return render(request, "questionnaire.html")
 def send_wave_1_email(user):
-    subject = "Wave 1 Online Survey Set – Ready"
+    subject = "Wave 1 Online Survey Set - Ready"
     message = f"""
     Hi {user.username},
 
@@ -357,7 +368,7 @@ def consent_form(request):
                 logger.info(f"Created Participant for {user.username}")
 
             # Jun 25: Add in store timeline day instead of date 
-            user_progress.day_1 = timezone.now().date()
+            user_progress.day_1 = timezone.now().date()  # Reset to today's date
             user_progress.consent_given = True
             user_progress.save()
 
@@ -415,8 +426,30 @@ def dev_time_controls(request):
 
 @login_required
 def dashboard(request):
+    # Add debugging information
+    print(f"[DEBUG] Dashboard accessed by user: {request.user.username}")
+    print(f"[DEBUG] User ID: {request.user.id}")
+    print(f"[DEBUG] User is authenticated: {request.user.is_authenticated}")
+    
     user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
     participant = Participant.objects.filter(user=request.user).first()
+    
+    # Add more debugging
+    if participant:
+        print(f"[DEBUG] Participant found: {participant.participant_id}")
+        print(f"[DEBUG] Participant user: {participant.user.username}")
+    else:
+        print(f"[DEBUG] No participant found for user {request.user.username}")
+    
+    # Add enrollment status debugging
+    if user_progress:
+        print(f"[DEBUG] User progress found:")
+        print(f"[DEBUG] - Eligible: {user_progress.eligible}")
+        print(f"[DEBUG] - Consent given: {user_progress.consent_given}")
+        print(f"[DEBUG] - Day 1: {user_progress.day_1}")
+    else:
+        print(f"[DEBUG] No user progress found for user {request.user.username}")
+    
     current_date = get_current_time().date()
     within_wave1_period = False
     within_wave3_period = False
@@ -435,10 +468,25 @@ def dashboard(request):
             participant.enrollment_date = user_progress.day_1 or current_date
             participant.save()
         if user_progress.day_1 is not None:
-            study_day = get_timeline_day(
-                request.user,
-                compressed=settings.TIME_COMPRESSION,
-                seconds_per_day=settings.SECONDS_PER_DAY)
+            # study_day = get_timeline_day(
+            #     request.user,
+            #     compressed=settings.TIME_COMPRESSION,
+            #     seconds_per_day=settings.SECONDS_PER_DAY)
+            # Fix: Use corrected timeline calculation
+            now = get_current_time()
+            day_1_datetime = timezone.make_aware(
+                timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
+                timezone.get_current_timezone()
+            )
+            
+            if settings.TIME_COMPRESSION:
+                # Use compressed timeline calculation
+                seconds_elapsed = (now - day_1_datetime).total_seconds()
+                study_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
+            else:
+                # Use real timeline calculation
+                study_day = (now.date() - user_progress.day_1).days + 1
+            
             day_11 = user_progress.day_1 + timedelta(days=10)
             day_21 = user_progress.day_1 + timedelta(days=20)
             day_95 = user_progress.day_1 + timedelta(days=94)
@@ -452,6 +500,7 @@ def dashboard(request):
             end_date_wave1 = day_21
 
     context = {
+        'user': request.user,  # Explicitly pass the current user
         'progress': user_progress,
         'participant': participant,
         'within_wave1_period': within_wave1_period,
@@ -464,7 +513,8 @@ def dashboard(request):
         'days_until_end_wave3': 0,
         'start_date_wave3': day_95 if user_progress else None,
         'end_date_wave3': day_104 if user_progress else None,
-        'study_day': study_day if user_progress else 0  # For debugging
+        'study_day': study_day if user_progress else 0,  # For debugging
+        'needs_consent': user_progress and user_progress.eligible and not user_progress.consent_given,  # New flag
     }
     return render(request, "dashboard.html", context)
 # INFORMATION 11 & 22: Enter Code
@@ -477,13 +527,52 @@ def enter_code(request, wave):
         messages.error(request, "Enrollment date not set. Contact support.")
         return redirect('home')
 
-    current_date = timezone.now().date()
-    study_day = (current_date - user_progress.day_1).days + 1
+    """----------------------This is real time. Turn this one ON in production----------------------------------"""
+    # current_date = timezone.now().date()
+    # study_day = (current_date - user_progress.day_1).days + 1
+    """---------------------------------------------------------------------------------------------------------"""
+    
+    """----------------------This is TIME COMPRESSION TESTING. Turn this one OFF in production------------------"""
+    now = get_current_time()
+    # study_day = get_timeline_day(
+    #     request.user,
+    #     now=now,
+    #     compressed=settings.TIME_COMPRESSION,
+    #     seconds_per_day=settings.SECONDS_PER_DAY,
+    # )
+    # Fix: Use user_progress.day_1 instead of user.date_joined for timeline calculation
+    if user_progress and user_progress.day_1:
+        # Convert day_1 date to datetime for timeline calculation
+        day_1_datetime = timezone.make_aware(
+            timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
+            timezone.get_current_timezone()
+        )
+        
+        if settings.TIME_COMPRESSION:
+            # Use compressed timeline calculation
+            seconds_elapsed = (now - day_1_datetime).total_seconds()
+            study_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
+        else:
+            # Use real timeline calculation
+            study_day = (now.date() - user_progress.day_1).days + 1
+    else:
+        study_day = 1  # Default to day 1 if no day_1 set
+    
+    """---------------------------------------------------------------------------------------------------------"""
+    
+    # Add debugging
+    print(f"[DEBUG] Enter code - Wave: {wave}")
+    print(f"[DEBUG] Study day: {study_day}")
+    print(f"[DEBUG] Day 1: {user_progress.day_1}")
+    print(f"[DEBUG] Current time: {now}")
+    print(f"[DEBUG] Time compression: {settings.TIME_COMPRESSION}")
+    print(f"[DEBUG] Seconds per day: {settings.SECONDS_PER_DAY}")
     
     if wave == 1:
         # Check if within Wave 1 window (Days 11-20)
+        print(f"[DEBUG] Wave 1 check: 11 <= {study_day} <= 20 = {11 <= study_day <= 20}")
         if not (11 <= study_day <= 20):
-            messages.error(request, "Code entry is not available at this time.")
+            messages.error(request, f"Code entry is not available at this time. Current study day: {study_day}, required: 11-20")
             return redirect('home')
         if participant.code_entered:
             messages.info(request, "You have already entered the code for Wave 1.")
@@ -491,8 +580,9 @@ def enter_code(request, wave):
             
     elif wave == 3:
         # Check if within Wave 3 window (Days 95-104)
+        print(f"[DEBUG] Wave 3 check: 95 <= {study_day} <= 104 = {95 <= study_day <= 104}")
         if not (95 <= study_day <= 104):
-            messages.error(request, "Code entry is not available at this time.")
+            messages.error(request, f"Code entry is not available at this time. Current study day: {study_day}, required: 95-104")
             return redirect('home')
         if participant.wave3_code_entered:
             messages.info(request, "You have already entered the code for Wave 3.")
@@ -508,11 +598,26 @@ def enter_code(request, wave):
                 if wave == 1:
                     # Jun 25: Add in store timeline day instead of date 
                     participant.code_entered = True
-                    participant.code_entry_day = get_timeline_day(
-                        request.user,
-                        compressed=settings.TIME_COMPRESSION,
-                        seconds_per_day=settings.SECONDS_PER_DAY
-                    )
+                    # participant.code_entry_day = get_timeline_day(
+                    #     request.user,
+                    #     compressed=settings.TIME_COMPRESSION,
+                    #     seconds_per_day=settings.SECONDS_PER_DAY
+                    # )
+                    # Fix: Use corrected timeline calculation for code_entry_day
+                    if user_progress and user_progress.day_1:
+                        day_1_datetime = timezone.make_aware(
+                            timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
+                            timezone.get_current_timezone()
+                        )
+                        
+                        if settings.TIME_COMPRESSION:
+                            seconds_elapsed = (now - day_1_datetime).total_seconds()
+                            participant.code_entry_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
+                        else:
+                            participant.code_entry_day = (now.date() - user_progress.day_1).days + 1
+                    else:
+                        participant.code_entry_day = 1
+                    
                     # end Jun 25
                     participant.save()
                     # send_wave1_code_entry_email.delay(participant.id)
@@ -596,5 +701,9 @@ def waiting_screen(request):
     return render(request, "waiting_screen.html")
 
 def logout_view(request):
-    logout (request)
+    print(f"[DEBUG] Logging out user: {request.user.username}")
+    logout(request)
+    # Clear all session data
+    request.session.flush()
+    print(f"[DEBUG] Session cleared, redirecting to login")
     return redirect('login')  # Redirect to the login page after logout

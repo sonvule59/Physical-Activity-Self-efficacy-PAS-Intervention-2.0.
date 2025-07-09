@@ -42,3 +42,10 @@ def validate_token(token, user_profile):
     """Validate the token for the user profile."""
     token_hash = sha256(token.encode()).hexdigest()
     return Participant.confirmation_token == token_hash and Participant.token_expiration >= datetime.datetime.now()
+
+_fake_time = None
+def get_current_time():
+    global _fake_time
+    if _fake_time is not None:
+        return _fake_time
+    return timezone.now()

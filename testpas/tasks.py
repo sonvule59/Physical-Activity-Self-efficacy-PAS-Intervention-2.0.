@@ -1,20 +1,17 @@
+from bz2 import compress
 from datetime import timedelta
 from celery import shared_task
 from django.core.mail import send_mail
 from django.core.management import call_command
-from django.apps import apps
-
 from testpas import settings
 from django.utils import timezone
 import random
 from testpas.models import Participant, EmailTemplate
 import logging
 from testpas.management.commands.seed_email_template import EMAIL_TEMPLATES
-
-# from testpas.views import get_current_time
+from testpas.utils import get_current_time
 from .models import User
 logger = logging.getLogger(__name__)
-
 from .timeline import get_timeline_day
 ### Jun 11: Add in run_daily_timeline_checks task among other tasks
 @shared_task
@@ -28,15 +25,24 @@ def daily_timeline_check(user):
     seconds_per_day = getattr(settings, 'SECONDS_PER_DAY', 86400)
     compressed = getattr(settings, 'TIME_COMPRESSION', False)
 
-    # today = get_timeline_day(user, compressed=compressed, seconds_per_day=seconds_per_day)
-    today = get_timeline_day(user, compressed=settings.TIME_COMPRESSION, seconds_per_day=settings.SECONDS_PER_DAY)
-    # end Jun 25
+    """----------------------This is real time. Turn this one ON in production----------------------------------"""
+    # today = get_timeline_day(user, compressed=settings.TIME_COMPRESSION, seconds_per_day=settings.SECONDS_PER_DAY)
+    """---------------------------------------------------------------------------------------------------------"""
+    
+    """----------------------This is TIME COMPRESSION TESTING. Turn this one OFF in production------------------"""
+    now = get_current_time()
+    today = get_timeline_day(
+        user, 
+        now=now,
+        compressed=compressed,
+        seconds_per_day=seconds_per_day,
+        )
+    """---------------------------------------------------------------------------------------------------------"""
     participant = getattr(user, 'participant', None)
     if not participant:
         print(f"[SKIP] No participant for user {user.id}")
         return
     # study_day = get_timeline_day(user, compressed=settings.TIME_COMPRESSION, seconds_per_day=settings.SECONDS_PER_DAY)
-
     print(f"[CHECK] User {user.id}, Day {today}, Status: {participant.email_status}")
 
     # Info 9 – Day 1: Wave 1 Online Survey Ready

@@ -4,12 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
     <header>
         <h1>Welcome to PAS Intervention</h1>
+        <!-- Add prominent logout button in header -->
+        <div style="text-align: right; margin-top: 10px;">
+            <a href="{% url 'logout' %}" style="background-color: #dc3545; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Sign Out</a>
+        </div>
     </header>
 
     <main>
@@ -17,6 +24,8 @@
             <h2>User Information</h2>
             <p><strong>Username:</strong> {{ user.username }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>User ID:</strong> {{ user.id }}</p>
+            <p><strong>Authenticated:</strong> {{ user.is_authenticated }}</p>
         </section>
 
         <section id="survey-progress">
@@ -33,6 +42,18 @@
                     <p><strong>Monitoring Start Date:</strong> {{ participant.monitoring_start_date }}</p> 
                 {% else %}
                     <p><strong>Monitoring Start Date:</strong> Not Available</p>
+                {% endif %}
+                
+                <!-- NEW: Enrollment Status Summary -->
+                <h3>Enrollment Status</h3>
+                {% if progress.eligible and progress.consent_given %}
+                    <p style="color: green;"><strong>✅ Fully Enrolled</strong></p>
+                {% elif progress.eligible and not progress.consent_given %}
+                    <p style="color: orange;"><strong>⚠️ Eligible - Pending Consent</strong></p>
+                {% elif not progress.eligible %}
+                    <p style="color: red;"><strong>❌ Not Eligible</strong></p>
+                {% else %}
+                    <p style="color: gray;"><strong>⏳ In Progress</strong></p>
                 {% endif %}
             {% else %}
                 <p>No progress recorded yet.</p>
@@ -54,8 +75,15 @@
             {% endfor %}
         </ul>
     {% endif %}
-    <!-- FIXED: Check enrollment status before showing study content -->
-    {% if progress and progress.eligible and progress.consent_given and participant %}
+    
+    <!-- NEW: Show enrollment status and next steps -->
+    {% if needs_consent %}
+        <div class="alert alert-info">
+            <h3>Enrollment Status: Eligible - Pending Consent</h3>
+            <p>Congratulations! You have been found eligible for the study. To complete your enrollment, please provide your consent.</p>
+            <p><a href="{% url 'consent_form' %}" class="btn btn-primary">Complete Consent Form</a></p>
+        </div>
+    {% elif progress and progress.eligible and progress.consent_given and participant %}
         <p>Welcome, {{ participant.user.username }}!</p>
         <!-- Show Wave 1 prompt only during Day 11–20 -->
         {% if progress.day_1 %}
@@ -128,6 +156,9 @@
     {% else %}
         <!-- FIXED: Clear message for incomplete enrollment -->
         <p>Please complete enrollment to view study progress.</p>
+        {% if not progress %}
+            <p><a href="{% url 'questionnaire' %}">Complete Eligibility Questionnaire</a></p>
+        {% endif %}
     {% endif %} 
         <!-- <h2>Study Dashboard</h2>
     {% if messages %}
@@ -156,7 +187,7 @@
         <section id="actions">
             <h2>Actions</h2>
             <ul>
-                <li><a href="/logout/">Logout</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
             </ul>
         </section>
     </main>

@@ -1,9 +1,11 @@
 import datetime
 from django.utils.timezone import make_aware, is_naive, now as tz_now
+from testpas.utils import get_current_time
 
 def get_day_difference(start_time, now=None):
     """ Calculate the difference in days between two datetime objects.
-        If `now` is not provided, it defaults to the current time."""
+        If `now` is not provided, it defaults to the current time.
+        If no explicit now was passed, use the fake‐time clock"""
     ### Jun 25: Add in timezone aware datetime objects
     now = now or tz_now()
     if is_naive(start_time):
