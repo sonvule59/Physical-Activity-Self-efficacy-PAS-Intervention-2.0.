@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-from re import DEBUG
+
 import environ
 from dotenv import load_dotenv
 load_dotenv()

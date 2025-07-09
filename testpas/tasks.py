@@ -35,7 +35,8 @@ def daily_timeline_check(user):
     if not participant:
         print(f"[SKIP] No participant for user {user.id}")
         return
-    
+    # study_day = get_timeline_day(user, compressed=settings.TIME_COMPRESSION, seconds_per_day=settings.SECONDS_PER_DAY)
+
     print(f"[CHECK] User {user.id}, Day {today}, Status: {participant.email_status}")
 
     # Info 9 – Day 1: Wave 1 Online Survey Ready
