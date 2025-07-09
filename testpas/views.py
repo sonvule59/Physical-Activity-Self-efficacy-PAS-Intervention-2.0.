@@ -1,3 +1,4 @@
+# type: ignore
 import logging
 from django.urls import reverse
 from django.utils import timezone
@@ -25,7 +26,8 @@ import os
 import datetime
 from twilio.rest import Client
 import pytz
-from .models import Participant, SurveyProgress, Survey
+from .models import Participant, SurveyProgress, Survey, UserSurveyProgress
+from django.db.models import Model
 from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm
 import io
 import csv

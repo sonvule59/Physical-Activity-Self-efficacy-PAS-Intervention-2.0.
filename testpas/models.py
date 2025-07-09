@@ -1,3 +1,4 @@
+# type: ignore
 import datetime
 from django.db import models, migrations
 from django.contrib.auth.models import User, AbstractUser
