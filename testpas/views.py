@@ -36,7 +36,7 @@ from django.apps import apps
 from django.db import transaction
 from testpas.utils import get_current_time
 
-from .timeline import get_timeline_day
+from .timeline import get_timeline_day, get_study_day
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -474,19 +474,24 @@ def dashboard(request):
         #     compressed=settings.TIME_COMPRESSION,
         #     seconds_per_day=settings.SECONDS_PER_DAY
         # )
-            now = get_current_time()
-            day_1_datetime = timezone.make_aware(
-                timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
-                timezone.get_current_timezone()
+            # now = get_current_time()
+            # day_1_datetime = timezone.make_aware(
+            #     timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
+            #     timezone.get_current_timezone()
+            # )
+            study_day = get_study_day(
+                user_progress.day_1,
+                now=get_current_time(),
+                compressed=settings.TIME_COMPRESSION,
+                seconds_per_day=settings.SECONDS_PER_DAY
             )
-            
-            if settings.TIME_COMPRESSION:
-                # Use compressed timeline calculation
-                seconds_elapsed = (now - day_1_datetime).total_seconds()
-                study_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
-            else:
-                # Use real timeline calculation
-                study_day = (now.date() - user_progress.day_1).days + 1
+            # if settings.TIME_COMPRESSION:
+            #     # Use compressed timeline calculation
+            #     seconds_elapsed = (now - day_1_datetime).total_seconds()
+            #     study_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
+            # else:
+            #     # Use real timeline calculation
+            #     study_day = (now.date() - user_progress.day_1).days + 1
             
             day_11 = user_progress.day_1 + timedelta(days=10)
             day_21 = user_progress.day_1 + timedelta(days=20)

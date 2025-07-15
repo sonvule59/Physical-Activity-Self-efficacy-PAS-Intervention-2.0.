@@ -1,4 +1,4 @@
-from bz2 import compress
+# from bz2 import compress
 from datetime import timedelta
 from celery import shared_task
 from django.core.mail import send_mail
@@ -120,6 +120,10 @@ def daily_timeline_check(user):
         participant.wave2_survey_email_sent = True
         participant.save()
 
+    """
+    Information 21: Day 67 – Send No Wave 2 Monitoring Email
+    (Email) Wave 2 No Monitoring Email – Ready. On Day 67, send this email to every participant from any group.  
+    """
     # Day 67 – Send No Wave 2 Monitoring Email
     if today == 67 and not participant.wave2_monitoring_notice_sent:
         participant.send_email(
@@ -130,6 +134,27 @@ def daily_timeline_check(user):
             }
         )
         participant.wave2_monitoring_notice_sent = True
+        participant.save()
+
+    """
+    Information 22: Day 85: Wave 3 Survey Ready
+    (Email) Wave 3 Online Survey Set – Ready. On Day 85, send this email to every participant from any group.  
+    """
+    if today == 85 and not participant.wave3_survey_email_sent:
+        participant.send_email(
+            "wave3_survey_ready", 
+            extra_context={
+                "username": user.username})
+        participant.wave3_survey_email_sent = True
+        participant.save()
+
+    """
+    Information 23: Day 95: Wave 3 Monitoring Ready
+    (Email) Wave 3 Physical Activity Monitoring Ready. On Day 95, send this email to every participant from any group.  
+    """
+    if today == 95 and not participant.wave3_monitor_ready_sent:
+        participant.send_email("wave3_monitoring_ready", extra_context={"username": user.username})
+        participant.wave3_monitor_ready_sent = True
         participant.save()
 @shared_task
 def send_wave1_survey_return_email(participant_id):

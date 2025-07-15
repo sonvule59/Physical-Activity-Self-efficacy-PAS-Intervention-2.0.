@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 import csv
 from .models import Participant, UserSurveyProgress, Response, EmailTemplate
+from django.utils import timezone
 
 @admin.register(Participant)
 class ParticipantAdmin(admin.ModelAdmin):
@@ -27,7 +28,7 @@ class ParticipantAdmin(admin.ModelAdmin):
             progress_percentage = progress.progress if progress and progress.progress is not None else 'N/A'
 
             day_1 = progress.day_1 if progress and progress.day_1 else 'N/A'
-            study_day = (now().date() - progress.day_1).days + 1 if progress and progress.day_1 else 'N/A'
+            study_day = (timezone.now().date() - progress.day_1).days + 1 if progress and progress.day_1 else 'N/A'
     
             writer.writerow([
                 participant.participant_id,
@@ -37,7 +38,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                 participant.enrollment_date,
                 progress.eligible if progress else 'N/A',
                 progress.consent_given if progress else 'N/A',
-                progress.decline_reason if progress and not progress.consent_given else '',
+                '',  # Remove decline_reason since it doesn't exist in the model
                 progress_percentage,  # New column for survey progress
                 response_str,         # Survey answers
                 participant.code_entered,
@@ -50,7 +51,7 @@ class ParticipantAdmin(admin.ModelAdmin):
             ])
         return response
 
-    export_study_data.short_description = "Export PAS study data (Info 2-6, 11, 15, 22)"
+    export_study_data.short_description = "Export PAS study data (Info 2-6, 11, 15, 22)" # type: ignore
 
 admin.site.register(UserSurveyProgress)
 admin.site.register(Response)
