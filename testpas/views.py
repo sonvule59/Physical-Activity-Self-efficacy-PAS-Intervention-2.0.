@@ -433,7 +433,7 @@ def dashboard(request):
     
     user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
     participant = Participant.objects.filter(user=request.user).first()
-    
+    progress_percentage = 0  # Default if not eligible or study_day not set
     # Add more debugging
     if participant:
         print(f"[DEBUG] Participant found: {participant.participant_id}")
@@ -462,6 +462,7 @@ def dashboard(request):
     day_21 = None
     day_95 = None
     day_104 = None
+    
     # day_1 = progress.day_1 if progress.day_1 else participant.enrollment_date if participant.enrollment_date else current_date
     if user_progress and user_progress.eligible and user_progress.consent_given and participant:
         if not participant.enrollment_date:
@@ -494,16 +495,31 @@ def dashboard(request):
             #     study_day = (now.date() - user_progress.day_1).days + 1
             
             day_11 = user_progress.day_1 + timedelta(days=10)
+            print(f"[DEBUG] Day 11: {day_11}")
             day_21 = user_progress.day_1 + timedelta(days=20)
+            print(f"[DEBUG] Day 21: {day_21}")
             day_95 = user_progress.day_1 + timedelta(days=94)
+            print(f"[DEBUG] Day 95: {day_95}")
             day_104 = user_progress.day_1 + timedelta(days=103)
+            print(f"[DEBUG] Day 104: {day_104}")
+
+            # ----  Study progress percentage ----
+            total_study_days = 113  # Set this to your full study duration
+            progress_percentage = min(int((study_day / total_study_days) * 100), 100)
+            print(f"[DEBUG] Progress percentage: {progress_percentage}")
 
             within_wave1_period = study_day is not None and 11 <= study_day <= 20 and not participant.code_entered
+            print(f"[DEBUG] Within wave 1 period: {within_wave1_period}")
             within_wave3_period = study_day is not None and 95 <= study_day <= 104 and not participant.wave3_code_entered
+            print(f"[DEBUG] Within wave 3 period: {within_wave3_period}")
             days_until_start_wave1 = max(0, (day_11 - current_date).days)
             days_until_end_wave1 = max(0, (day_21 - current_date).days)
+            print(f"[DEBUG] Days until start wave 1: {days_until_start_wave1}")
+            print(f"[DEBUG] Days until end wave 1: {days_until_end_wave1}")
             start_date_wave1 = day_11
             end_date_wave1 = day_21
+            print(f"[DEBUG] Start date wave 1: {start_date_wave1}")
+            print(f"[DEBUG] End date wave 1: {end_date_wave1}")
 
     context = {
         'user': request.user,  # Explicitly pass the current user
@@ -521,6 +537,7 @@ def dashboard(request):
         'end_date_wave3': day_104 if user_progress else None,
         'study_day': study_day if user_progress else 0,  # For debugging
         'needs_consent': user_progress and user_progress.eligible and not user_progress.consent_given,  # New flag
+        'progress_percentage': progress_percentage,
     }
     return render(request, "dashboard.html", context)
 # INFORMATION 11 & 22: Enter Code

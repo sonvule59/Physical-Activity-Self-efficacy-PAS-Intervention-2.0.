@@ -117,8 +117,14 @@ class Participant(models.Model):
     wave1_survey_email_sent = models.BooleanField(default=False)
     wave2_survey_email_sent = models.BooleanField(default=False)
     wave2_monitoring_notice_sent = models.BooleanField(default=False)
+    ## Wave 3
+    wave3_survey_email_sent = models.BooleanField(default=False)
     wave3_code_entered = models.BooleanField(default=False)  # New field for Wave 3
     wave3_code_entry_date = models.DateField(null=True, blank=True)
+    wave3_monitor_ready_sent = models.BooleanField(default=False)
+    wave3_missing_code_sent = models.BooleanField(default=False)
+    wave3_survey_monitor_return_sent = models.BooleanField(default=False)
+    wave3_survey_monitor_return_date = models.DateField(null=True, blank=True)
     randomized_group = models.IntegerField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
