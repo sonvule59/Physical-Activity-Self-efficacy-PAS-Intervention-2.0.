@@ -87,7 +87,7 @@
         <p>Welcome, {{ participant.user.username }}!</p>
         <!-- Show Wave 1 prompt only during Day 11–20 -->
         {% if progress.day_1 %}
-            {% if 11 <= study_day <= 20 and not participant.code_entered %}
+            {% if within_wave1_period %}
                 <section id="wave1-code-entry">
                     <div class="alert alert-info">
                         <h3>Wave 1 Physical Activity Code Entry</h3>

@@ -372,11 +372,11 @@ def consent_form(request):
             user_progress.consent_given = True
             user_progress.save()
 
-            # participant.send_email("wave1_survey_ready", extra_context={"username": user.username})
-            if not participant.wave1_survey_email_sent:
-                participant.send_email("wave1_survey_ready", extra_context={"username": user.username})
-                participant.wave1_survey_email_sent = True
-                participant.save()
+            # Remove duplicate email sending - let the timeline system handle it
+            # if not participant.wave1_survey_email_sent:
+            #     participant.send_email("wave1_survey_ready", extra_context={"username": user.username})
+            #     participant.wave1_survey_email_sent = True
+            #     participant.save()
 
             # end Jun 25
             try:
@@ -468,11 +468,12 @@ def dashboard(request):
             participant.enrollment_date = user_progress.day_1 or current_date
             participant.save()
         if user_progress.day_1 is not None:
-            # study_day = get_timeline_day(
-            #     request.user,
-            #     compressed=settings.TIME_COMPRESSION,
-            #     seconds_per_day=settings.SECONDS_PER_DAY)
-            # Fix: Use corrected timeline calculation
+            # Fix: Use corrected timeline calculationstudy_day = get_timeline_day(
+        #     request.user,
+        #     now=get_current_time(),
+        #     compressed=settings.TIME_COMPRESSION,
+        #     seconds_per_day=settings.SECONDS_PER_DAY
+        # )
             now = get_current_time()
             day_1_datetime = timezone.make_aware(
                 timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),

@@ -12,6 +12,23 @@ def get_day_difference(start_time, now=None):
         start_time = make_aware(start_time)
     return (now - start_time).days
 
+def get_study_day(start_date, now=None, compressed=False, seconds_per_day=86400):
+    """
+    start_date: the anchor date (should be user_progress.day_1, a date)
+    now: current datetime (use get_current_time())
+    compressed: use time compression?
+    """
+    if not start_date:
+        return 0
+    now = now or tz_now()
+    if isinstance(start_date, datetime.date) and not isinstance(start_date, datetime.datetime):
+        start_date = datetime.datetime.combine(start_date, datetime.time.min)
+        start_date = make_aware(start_date)
+    seconds_elapsed = (now - start_date).total_seconds()
+    if compressed:
+        return int(seconds_elapsed // seconds_per_day) + 1
+    else:
+        return (now.date() - start_date.date()).days + 1
 def get_day_difference_compressed(start_time, now=None, seconds_per_day=86400):
     """86400 seconds = 1 real-world day (24 hours * 60 minutes * 60 seconds). We can adjust this for testing purposes. We will do this
     this way to make sure it works."""
