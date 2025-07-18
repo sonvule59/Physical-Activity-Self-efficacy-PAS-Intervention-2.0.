@@ -703,12 +703,12 @@ def download_data(request):
         ])
     return response
 def code_success(request, wave):
-    return render(request, 'code_success.html', {'wave': wave})
-    # participant = Participant.objects.get(user=request.user)
-    # current_date = timezone.now().date()
-    # day_21 = participant.enrollment_date + timedelta(days=20)
-    # days_remaining = (day_21 - current_date).days
-    # return render(request, 'code_success.html', {'days_remaining': days_remaining})
+    # return render(request, 'code_success.html', {'wave': wave})
+    participant = Participant.objects.get(user=request.user)
+    current_date = timezone.now().date()
+    day_21 = participant.enrollment_date + timedelta(days=20)
+    days_remaining = (day_21 - current_date).days
+    return render(request, 'code_success.html', {'days_remaining': days_remaining})
 
 def code_failure(request):
     participant = Participant.objects.get(user=request.user)
