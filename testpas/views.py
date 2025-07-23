@@ -216,7 +216,8 @@ def confirm_account(request, token):
     if not participant:
         messages.error(request, "Invalid or expired confirmation token.")
         return redirect("create_account")
-    
+    print(f"[DEBUG] Participant found: {participant.participant_id}")
+    print(f"[DEBUG] Participant is confirmed: {participant.is_confirmed}")
     if participant.is_confirmed:
         messages.info(request, "Account already confirmed.")
     else:
@@ -293,7 +294,6 @@ def questionnaire(request):
         willing_monitor = answers.get("comply_monitoring", "").strip().lower() == "yes"
         willing_contact = answers.get("respond_contacts", "").strip().lower() == "yes"
         bmi = (weight / (height ** 2)) * 703 if height > 0 else 0
-
         print(f"Age: {age}, BMI: {bmi:.2f}, Device: {access_to_device}, No Other Study: {willing_no_other_study}")
         print(f"Monitor: {willing_monitor}, Contact: {willing_contact}")
 
@@ -310,7 +310,6 @@ def questionnaire(request):
         survey = Survey.objects.first()
         if not survey:
             return JsonResponse({"error": "No survey available. Contact support."}, status=500)
-
         user_progress, created = UserSurveyProgress.objects.get_or_create(
             user=user,
             survey=survey,
@@ -325,6 +324,7 @@ def questionnaire(request):
         else:
             return redirect(reverse("exit_screen_not_eligible"))
     return render(request, "questionnaire.html")
+
 def send_wave_1_email(user):
     subject = "Wave 1 Online Survey Set - Ready"
     message = f"""
@@ -677,7 +677,6 @@ def enter_code(request, wave):
         'wave': wave,
         'days_remaining': 20 - study_day if wave == 1 else 104 - study_day,
     }
-    
     return render(request, 'monitoring/enter_code.html', context)
 
 def download_data(request):
@@ -702,6 +701,7 @@ def download_data(request):
             p.group, p.wave3_code_entered, p.wave3_code_entry_date
         ])
     return response
+
 def code_success(request, wave):
     # return render(request, 'code_success.html', {'wave': wave})
     participant = Participant.objects.get(user=request.user)
