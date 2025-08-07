@@ -1,0 +1,135 @@
+<!--create_account.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Account</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Create Your Account</h1>
+    </header>
+    
+    <main>
+        <section id="create-account">
+            <h2>Register to Get Started</h2>
+            <!-- FIX: Use form action to POST to create_account view -->
+            <form id="create-account-form" action="{% url 'create_account' %}" method="post" onsubmit="createAccount(event)">
+                <!-- FIX: Add CSRF token explicitly for non-AJAX fallback -->
+                {% csrf_token %}
+                <label for="registration_code">Registration Code*</label>
+                <!-- FIX: Changed id/name from registration-code to registration_code -->
+                <input type="text" id="registration_code" name="registration_code" required><br><br>
+
+                <label for="username">ID (no case-sensitive)*</label>
+                <input type="text" id="username" name="username" required><br><br>
+                
+                <label for="password">Password (case-sensitive)*</label>
+                <input type="password" id="password" name="password" required><br><br>
+                
+                <label for="password_confirm">Password Confirmation (case-sensitive)*</label>
+                <!-- FIX: Changed id/name from password-confirmation to password_confirm -->
+                <input type="password" id="password_confirm" name="password_confirm" required><br><br>
+                
+                <label for="email">Email Address (no case-sensitive)*</label>
+                <input type="email" id="email" name="email" required><br><br>
+
+                <input type="hidden" id="full_name" name="full_name" value="">
+                
+                <label for="phone_number">Phone Number*</label>
+                <!-- FIX: Changed id/name from phone-number to phone_number -->
+                <input type="tel" id="phone_number" name="phone_number" required><br><br>
+                
+                <button type="submit">Create Account</button>
+            </form>
+            <div id="create-account-output"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+
+    <script>
+        async function createAccount(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('create-account-form');
+            const outputDiv = document.getElementById('create-account-output');
+            outputDiv.innerHTML = '<p>Creating your account...</p>';
+            
+            // Collect form data
+            const formData = {
+                'registration_code': document.getElementById('registration_code').value.trim().toLowerCase(),
+                'username': document.getElementById('username').value.trim(),
+                'password': document.getElementById('password').value,
+                'password_confirm': document.getElementById('password_confirm').value,
+                'email': document.getElementById('email').value.trim(),
+                'phone_number': document.getElementById('phone_number').value.trim()
+            };
+
+            // Client-side validation
+            if (formData.registration_code !== 'wavepa') {
+                outputDiv.innerHTML = '<p style="color: red;">Invalid registration code.</p>';
+                return;
+            }
+            if (formData.password !== formData.password_confirm) {
+                outputDiv.innerHTML = '<p style="color: red;">Passwords do not match.</p>';
+                return;
+            }
+
+            outputDiv.innerHTML = '<p>Creating your account...</p>';
+
+            try {
+                const response = await fetch('/create-account/', {
+                    method: 'POST',
+                    headers: {
+                        // FIX: Use FormData instead of JSON to match Django's form parsing
+                        'X-CSRFToken': getCSRFToken(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    // FIX: Send FormData to avoid JSON parsing issues on server
+                    body: new FormData(form)
+                });
+
+                const result = await response.json();
+                if (response.ok && result.status === 'success') {
+                    outputDiv.innerHTML = '<p style="color: green;">' + result.message + '</p>';
+                    setTimeout(() => { window.location.href = result.redirect; }, 1000);
+                } else {
+                    // FIX: Improved error handling to display server errors
+                    outputDiv.innerHTML = '<p style="color: red;">Error: ' + (result.message || 'Account creation failed.') + '</p>';
+                    if (result.errors) {
+                        let errors = '';
+                        for (let field in result.errors) {
+                            errors += field + ': ' + result.errors[field].join(', ') + '<br>';
+                        }
+                        outputDiv.innerHTML += '<p>' + errors + '</p>';
+                    }
+                }
+            } catch (error) {
+                // FIX: Display detailed client-side errors
+                outputDiv.innerHTML = '<p style="color: red;">An error occurred: ' + error.message + '</p>';
+            }
+        }
+
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

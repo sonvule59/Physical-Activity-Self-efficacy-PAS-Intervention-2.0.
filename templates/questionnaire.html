@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eligibility Questionnaire</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Eligibility Questionnaire</h1>
+    </header>
+    
+    <main>
+        <section id="questionnaire">
+            <h2>Please answer the following questions to determine eligibility</h2>
+            <form id="questionnaire-form" action="" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="user-id" name="user-id" value="{{ user_id }}">
+                <input type="hidden" id="token" name="token" value="{{ token }}">
+                <input type="hidden" id="email" name="email" value="{{ email }}">
+                <input type="hidden" id="first-name" name="first-name" value="{{ first_name }}">
+                <input type="hidden" id="last-name" name="last-name" value="{{ last_name }}">
+                <input type="hidden">
+                <input type="hidden" id="phone-number" name="phone-number" value="{{ phone_number }}">  
+                <input type="hidden" id="registration-code" name="registration-code" value="{{ registration_code }}">
+                <input type="hidden" id="password" name="password" value="{{ password }}">
+                <input type="hidden" id="password-confirmation" name="password-confirmation" value="{{ password_confirmation }}">
+
+                <label for="age">1. What is your age?</label><br>
+                <input type="number" id="age" name="age" min="0" required><br><br>
+
+                <label for="height">2. Height in Inches (e.g., 6 feet 1 inch = 73 inches)</label><br>
+                <input type="number" id="height" name="height" min="48" max="83" required><br><br>
+
+                <label for="weight">3. Weight in lbs.</label><br>
+                <input type="number" id="weight" name="weight" min="101" max="500" required><br><br>
+
+                <label>4. Will you have access to a technological device (e.g., computer, smart phone) that can access the online intervention via a web browser throughout this study?</label><br>
+                <input type="radio" name="has_device" value="yes" required> Yes<br>
+                <input type="radio" name="has_device" value="no" required> No<br><br>
+
+                <label>5. Do you agree not to enroll in another research-based intervention program promoting physical activity while participating in this study?</label><br>
+                <input type="radio" name="not_enroll_other" value="yes" required> Yes<br>
+                <input type="radio" name="not_enroll_other" value="no" required> No<br><br>
+
+                <label>6. Do you agree to comply with instructions for physical activity monitoring in this study?</label><br>
+                <input type="radio" name="comply_monitoring" value="yes" required> Yes<br>
+                <input type="radio" name="comply_monitoring" value="no" required> No<br><br>
+
+                <label>7. Do you agree to respond to our contacts during the study?</label><br>
+                <input type="radio" name="respond_contacts" value="yes" required> Yes<br>
+                <input type="radio" name="respond_contacts" value="no" required> No<br><br>
+
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+</body>
+</html>

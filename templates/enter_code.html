@@ -1,0 +1,29 @@
+<!-- templates/enter_code.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAS 2.0 - Enter Wave 1 Physical Activity Code</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Enter Wave 1 Physical Activity Code</h1>
+    <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Code</button>
+    </form>
+    <p>If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee (Principal Investigator) at seunglee@iastate.edu or 517-898-0020.</p>
+    <p>Sincerely,<br>The Obesity and Physical Activity Research Team</p>
+</body>
+</html>

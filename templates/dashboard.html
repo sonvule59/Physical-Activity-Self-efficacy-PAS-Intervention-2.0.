@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to PAS Intervention</h1>
+    </header>
+
+    <main>
+        <section id="user-info">
+            <h2>User Information</h2>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+        </section>
+
+        <section id="survey-progress">
+            <h2>Survey Progress</h2>    
+            {% if progress %}
+                <p><strong>Eligible:</strong> {{ progress.eligible }}</p>
+                <p><strong>Consent Given:</strong> {{ progress.consent_given }}</p>
+                <p><strong>Survey Completed:</strong> {{ progress.survey_completed }}</p>
+                <p><strong>Progress Percentage:</strong> {{ progress.progress_percentage|default:"0" }}%</p>
+                <p><strong>Start Time:</strong> {{ progress.start_time }}</p>
+                <p><strong>End Time:</strong> {{ progress.end_time|default:"None" }}</p>
+                <p><strong>Current Phase:</strong> {{ participant.phase|default:"" }}</p>
+                {% if participant.monitoring_start_date %}
+                    <p><strong>Monitoring Start Date:</strong> {{ participant.monitoring_start_date }}</p> 
+                {% else %}
+                    <p><strong>Monitoring Start Date:</strong> Not Available</p>
+                {% endif %}
+            {% else %}
+                <p>No progress recorded yet.</p>
+            {% endif %}
+        </section>
+
+        {% block content %}
+        <div class="container mt-5">
+            <h1>Welcome, {{ user.username }}</h1>
+            <!-- Correct Wave 1 code entry period logic -->
+            {% if within_wave1_period %}
+                <div class="alert alert-info">
+                    <h4>Wave 1 Code Entry Period Active!</h4>
+                    <p>Enter your Wave 1 Physical Activity Code.</p>
+                    <p>Time remaining: {{ days_until_end_wave1 }} days</p>
+                </div>
+            {% elif days_until_start_wave1 > 0 %}
+                <div class="alert alert-warning">
+                    <h4>Wave 1 Code Entry Period Starting Soon</h4>
+                    <p>You will be able to enter your code in {{ days_until_start_wave1 }} days.</p>
+                    <p>Start date: {{ start_date_wave_1|date:"Y-m-d" }}</p>
+                    <p>End date: {{ end_date_wave1|date:"Y-m-d" }}</p>
+                </div>
+            {% else %}
+                <div class="alert alert-secondary">
+                    <h4>Wave 1 Code Entry Period Ended</h4>
+                    <p>The code entry period has ended.</p>
+                </div>
+            {% endif %}
+        </div>
+        {% endblock %}
+
+        <section id="wave1-code">
+            <h2>Enter Wave 1 Physical Activity Code</h2>
+            {% if within_wave1_period %}
+                <form method="POST" action="{% url 'enter_code' wave=1%}">
+                    {% csrf_token %}
+                    <label for="code">Enter Code:</label>
+                    <input type="text" id="code" name="code" required>
+                    <button type="submit">Submit</button>
+                </form>
+                {% if code_error %}
+                    <p style="color: red;">{{ code_error }}</p>
+                {% endif %}
+            {% else %}
+                <p>This task has expired/not currently Available.</p>
+            {% endif %}   
+        </section>
+       <h2>Study Dashboard</h2>
+    <!-- FIXED: Display messages for errors or success -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li class="message">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <!-- FIXED: Check enrollment status before showing study content -->
+    {% if progress and progress.eligible and progress.consent_given and participant %}
+        <p>Welcome, {{ participant.user.username }}!</p>
+        <!-- FIXED: Show Wave 1 prompt only during Day 11–20 -->
+        {% if within_wave1_period %}
+            <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
+            <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
+        <!-- FIXED: Show future or expired status clearly -->
+        {% elif progress.day_1 %}
+            {% if days_until_start_wave1 > 0 %}
+                <p>Wave 1 code entry starts on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days away).</p>
+            {% elif days_until_end_wave1 <= 0 %}
+                <p>Wave 1 code entry period has ended.</p>
+            {% endif %}
+        {% endif %}
+        {% if within_wave3_period %}
+            <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
+        {% endif %}
+        <!-- ADDED: Contact information for support -->
+        <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
+    {% else %}
+        <!-- FIXED: Clear message for incomplete enrollment -->
+        <p>Please complete enrollment to view study progress.</p>
+    {% endif %} 
+        <!-- <h2>Study Dashboard</h2>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li class="message">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% if progress and participant %}
+        <p>Welcome, {{ participant.user.username }}!</p>
+        <p class="debug">Study Day: {{ study_day }}</p>
+        {% if within_wave1_period %}
+            <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
+            <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
+        {% else %}
+            <p>Wave 1 code entry is not currently available.</p>
+        {% endif %}
+        {% if within_wave3_period %}
+            <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
+        {% endif %}
+    {% else %}
+        <p>Please complete enrollment to view study progress.</p>
+    {% endif %} -->
+    
+        <section id="actions">
+            <h2>Actions</h2>
+            <ul>
+                <li><a href="/logout/">Logout</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+</body>
+</html>
