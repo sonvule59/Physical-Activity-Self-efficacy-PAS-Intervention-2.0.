@@ -21,7 +21,7 @@ In Progress ❗🔄-sv
     - Add password reset functionality on the login page. ⚠️-sv
     - Ensure accounts are not activated until email confirmation (see Information 3).
 
- 3. **Set Up Email Confirmation (Information 3)** ⚠️-sv
+ 3. **Set Up Email Confirmation (Information 3)** ✅-sv
 
     - Develop an email system to send a confirmation email immediately after registration.
     - Include a clickable link in the email to activate the account.
