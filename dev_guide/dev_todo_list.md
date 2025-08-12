@@ -27,13 +27,13 @@ In Progress ❗🔄-sv
     - Include a clickable link in the email to activate the account.
     - Allow researchers to edit the email template (subject: "Confirm to Activate Your Account") via the administration site.
 
- 4. **Build Eligibility Interest Page (Information 4)**✅-sv
+ 4. **Build Eligibility Interest Page (Information 4)** ✅-sv
 
     - Create a page post-account creation asking participants if they are interested in determining eligibility (1-2 minutes).
     - Include "Interested" and "Not Interested" buttons, with a text field for reasons if "Not Interested" is selected.
     - Ensure text is editable by researchers via the administration site.
 
- 5. **Develop Eligibility Criteria Page (Information 5)**✅-sv
+ 5. **Develop Eligibility Criteria Page (Information 5)** ✅-sv
 
     - Implement a form with the following questions:
       - Age (options: &lt;18, 19, …, 64, &gt;64; eligible: 18-64 years).
@@ -57,7 +57,7 @@ In Progress ❗🔄-sv
     - Include researcher-editable text and contact information for Seungmin Lee.
     - Ensure the page is displayed as specified in Information 5 and 6.
 
- 8. **Develop Waiting Screen (Information 8)**⚠️-sv
+ 8. **Develop Waiting Screen (Information 8)** ⚠️-sv
 
     - Create a persistent page for enrolled participants, displayed after consent unless updated by Information 11, 15, or 22.
     - Include researcher-editable text and contact information.
@@ -77,7 +77,7 @@ In Progress ❗🔄-sv
     - Track engagement (e.g., number of challenges completed) for Group 1 only.
     - Trigger emails (Information 16 for Group 0, Information 17 for Group 1) post-randomization.
 
-11. **Create Wave 3 Physical Activity Code Entry Page (Information 22)**✅-sv
+11. **Create Wave 3 Physical Activity Code Entry Page (Information 22)** ✅-sv
 
     - Display a code entry field (code: "wavepa", non-case-sensitive) from Day 95 to Day 104.
     - Show an error message for incorrect code entries.
@@ -88,7 +88,7 @@ In Progress ❗🔄-sv
 
 ## Email Automation Tasks
 
- 1. **Wave 1 Online Survey Set Email (Information 9)**✅-sv
+ 1. **Wave 1 Online Survey Set Email (Information 9)** ✅-sv
 
     - Send on Day 1 after consent, copying Seungmin Lee (svu23@iastate.edu).
     - Include a survey link and consent document download link, editable by researchers.
@@ -96,20 +96,20 @@ In Progress ❗🔄-sv
     - Explore sending via text message (discuss with researchers).
     - Allow text revisions via the administration site.
 
- 2. **Wave 1 Physical Activity Monitoring Email (Information 10)**✅-sv
+ 2. **Wave 1 Physical Activity Monitoring Email (Information 10)** ✅-sv
 
     - Send on Day 11 at 7 AM CT, copying Seungmin Lee.
     - Notify participants to meet research members within 10 days for monitoring.
     - Offer $35 Amazon gift card for completion.
     - Allow text revisions via the administration site.
 
- 3. **Physical Activity Monitoring Tomorrow Email (Wave 1, Information 12)**✅-sv
+ 3. **Physical Activity Monitoring Tomorrow Email (Wave 1, Information 12)** ✅-sv
 
     - Send immediately after correct code entry (Information 11), copying Seungmin Lee.
     - Instruct to wear monitor for 7 days starting tomorrow, with $35 gift card for 4+ days (including one weekend day, 10+ hours/day).
     - Allow text revisions via the administration site.
 
- 4. **Survey and Monitor Return Email (Wave 1, Information 13)**✅-sv
+ 4. **Survey and Monitor Return Email (Wave 1, Information 13)** ✅-sv
 
     - Send 8 days after code entry (e.g., code on 01/20/2025, send on 01/28/2025) at 7 AM CT, copying Seungmin Lee.
     - Include survey link and instructions to return monitor.
@@ -121,19 +121,19 @@ In Progress ❗🔄-sv
     - Notify of missed $35 gift card but continued study participation..
     - Allow text revisions via the administration site.
 
- 6. **Intervention Access Later Email (Information 16)**✅-sv
+ 6. **Intervention Access Later Email (Information 16)** ✅-sv
 
     - Send on Day 29 at 7 AM CT to Group 0, copying Seungmin Lee.
     - Notify of intervention access post-Day 113.
     - Allow text revisions via the administration site.
 
- 7. **Intervention Access Immediately Email (Information 17)**✅-sv
+ 7. **Intervention Access Immediately Email (Information 17)** ✅-sv
 
     - Send on Day 29 at 7 AM CT to Group 1, copying Seungmin Lee.
     - Provide immediate intervention access link and ID, with $20 gift card for 24+ challenges in 4 weeks.
     - Allow text revisions via the administration site.
 
- 8. **Wave 2 Online Survey Set Email (Information 18)**✅-sv
+ 8. **Wave 2 Online Survey Set Email (Information 18)** ✅-sv
 
     - Send on Day 57 at 7 AM CT to all participants, copying Seungmin Lee.
     - Include survey link, offering $5 gift card for completion within 10 days.
