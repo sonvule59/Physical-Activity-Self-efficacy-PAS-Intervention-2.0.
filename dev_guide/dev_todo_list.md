@@ -6,13 +6,13 @@ Some small details needed, mostly done, annotated for Son ⚠️-sv
 In Progress ❗🔄-sv
 ## Website Development Tasks
 
- 1. **Create Website Structure and Branding**✅-sv
+ 1. **Create Website Structure and Branding** ✅-sv
 
     - Develop the website named "Physical Activity Self-efficacy (PAS) Intervention 2.0."
     - Restrict access to invited research participants only (this will come later from Dr. Lee).
     - Implement researcher-editable text for all website content.
 
- 2. **Implement Account Creation (Information 2)**✅-sv
+ 2. **Implement Account Creation (Information 2)** ✅-sv
 
     - Create a registration page requiring:
       - Registration code: "wavepa" (non-case-sensitive).
