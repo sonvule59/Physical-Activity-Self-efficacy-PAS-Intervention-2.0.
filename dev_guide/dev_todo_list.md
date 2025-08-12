@@ -1,6 +1,8 @@
 # To-Do List for PAS Intervention 2.0 Website and Email System
-Completed, annotated for Son: ✅-sv\\
-Some small details needed, mostly done, annotated for Son ⚠️-sv\\
+Completed, annotated for Son: ✅-sv
+
+Some small details needed, mostly done, annotated for Son ⚠️-sv
+
 In Progress ❗🔄-sv
 ## Website Development Tasks
 
