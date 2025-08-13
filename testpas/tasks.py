@@ -6,11 +6,12 @@ from django.core.management import call_command
 from testpas import settings
 from django.utils import timezone
 import random
-from testpas.models import Participant, EmailTemplate
+from testpas.models import Participant, EmailTemplate, UserSurveyProgress
 import logging
 from testpas.management.commands.seed_email_template import EMAIL_TEMPLATES
 from testpas.utils import get_current_time
 from .models import User
+from .timeline import get_study_day
 logger = logging.getLogger(__name__)
 from .timeline import get_timeline_day
 ### Jun 11: Add in run_daily_timeline_checks task among other tasks
@@ -31,11 +32,28 @@ def daily_timeline_check(user):
     
     """----------------------This is TIME COMPRESSION TESTING. Turn this one OFF in production------------------"""
     now = get_current_time()
-    today = get_timeline_day(
-        user, 
-        now=now,
-        compressed=compressed,
-        seconds_per_day=seconds_per_day,
+    
+    # Get user progress to use the same day_1 as frontend
+    user_progress = UserSurveyProgress.objects.filter(
+        user=user, 
+        survey__title="Eligibility Criteria"
+    ).first()
+    
+    if user_progress and user_progress.day_1:
+        today = get_study_day(
+            user_progress.day_1,
+            now=now,
+            compressed=compressed,
+            seconds_per_day=seconds_per_day,
+            reference_timestamp=user_progress.timeline_reference_timestamp
+        )
+    else:
+        # Fallback to user.date_joined if no progress found
+        today = get_timeline_day(
+            user, 
+            now=now,
+            compressed=compressed,
+            seconds_per_day=seconds_per_day,
         )
     """---------------------------------------------------------------------------------------------------------"""
     participant = getattr(user, 'participant', None)
@@ -130,7 +148,7 @@ def daily_timeline_check(user):
         participant.save()
 
     """
-    Information 22: Day 85: Wave 3 Survey Ready
+    Information 20: Day 85: Wave 3 Survey Ready
     (Email) Wave 3 Online Survey Set – Ready. On Day 85, send this email to every participant from any group.  
     """
     if today == 85 and not participant.wave3_survey_email_sent:
@@ -142,7 +160,7 @@ def daily_timeline_check(user):
         participant.save()
 
     """
-    Information 23: Day 95: Wave 3 Monitoring Ready
+    Information 21: Day 95: Wave 3 Monitoring Ready
     (Email) Wave 3 Physical Activity Monitoring Ready. On Day 95, send this email to every participant from any group.  
     """
     if today == 95 and not participant.wave3_monitor_ready_sent:

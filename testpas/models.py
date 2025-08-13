@@ -80,6 +80,9 @@ class UserSurveyProgress(models.Model):
     ### Jun 25: Add in email log date
     date_joined = models.DateTimeField(auto_now_add=True)
     
+    # Timeline reference for time compression testing
+    timeline_reference_timestamp = models.DateTimeField(null=True, blank=True)
+    
     # def __str__(self):
     #     return f"{self.user} - {self.survey} - {self.progress}%"
 

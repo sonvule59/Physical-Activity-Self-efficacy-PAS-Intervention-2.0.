@@ -528,17 +528,52 @@ def dashboard(request):
                 user_progress.day_1,
                 now=get_current_time(),
                 compressed=settings.TIME_COMPRESSION,
-                seconds_per_day=settings.SECONDS_PER_DAY
+                seconds_per_day=settings.SECONDS_PER_DAY,
+                reference_timestamp=user_progress.timeline_reference_timestamp
             )
             
-            day_11 = user_progress.day_1 + timedelta(days=10)
-            print(f"[DEBUG] Day 11: {day_11}")
-            day_21 = user_progress.day_1 + timedelta(days=20)
-            print(f"[DEBUG] Day 21: {day_21}")
-            day_95 = user_progress.day_1 + timedelta(days=94)
-            print(f"[DEBUG] Day 95: {day_95}")
-            day_104 = user_progress.day_1 + timedelta(days=103)
-            print(f"[DEBUG] Day 104: {day_104}")
+            # Calculate compressed timeline milestones
+            # In compressed mode, these are study days, not calendar dates
+            if settings.TIME_COMPRESSION:
+                # For compressed timeline, we work with study days directly
+                day_11_study_day = 11
+                day_21_study_day = 21
+                day_95_study_day = 95
+                day_104_study_day = 104
+                
+                # Calculate days until milestones based on study day difference
+                days_until_start_wave1 = max(0, day_11_study_day - study_day)
+                days_until_end_wave1 = max(0, day_21_study_day - study_day)
+                days_until_start_wave3 = max(0, day_95_study_day - study_day)
+                days_until_end_wave3 = max(0, day_104_study_day - study_day)
+                
+                # For display purposes, convert to approximate real time
+                seconds_until_start_wave1 = days_until_start_wave1 * settings.SECONDS_PER_DAY
+                seconds_until_end_wave1 = days_until_end_wave1 * settings.SECONDS_PER_DAY
+                
+                print(f"[DEBUG] Study Day: {study_day}")
+                print(f"[DEBUG] Days until start wave 1: {days_until_start_wave1} (study days)")
+                print(f"[DEBUG] Days until end wave 1: {days_until_end_wave1} (study days)")
+                print(f"[DEBUG] Seconds until start wave 1: {seconds_until_start_wave1}")
+                print(f"[DEBUG] Seconds until end wave 1: {seconds_until_end_wave1}")
+            else:
+                # For real timeline, use calendar dates
+                day_11 = user_progress.day_1 + timedelta(days=10)
+                day_21 = user_progress.day_1 + timedelta(days=20)
+                day_95 = user_progress.day_1 + timedelta(days=94)
+                day_104 = user_progress.day_1 + timedelta(days=103)
+                
+                days_until_start_wave1 = max(0, (day_11 - current_date).days)
+                days_until_end_wave1 = max(0, (day_21 - current_date).days)
+                days_until_start_wave3 = max(0, (day_95 - current_date).days)
+                days_until_end_wave3 = max(0, (day_104 - current_date).days)
+                
+                print(f"[DEBUG] Day 11: {day_11}")
+                print(f"[DEBUG] Day 21: {day_21}")
+                print(f"[DEBUG] Day 95: {day_95}")
+                print(f"[DEBUG] Day 104: {day_104}")
+                print(f"[DEBUG] Days until start wave 1: {days_until_start_wave1}")
+                print(f"[DEBUG] Days until end wave 1: {days_until_end_wave1}")
 
             # ----  Study progress percentage ----
             total_study_days = 113  # Set this to your full study duration
@@ -549,14 +584,18 @@ def dashboard(request):
             print(f"[DEBUG] Within wave 1 period: {within_wave1_period}")
             within_wave3_period = study_day is not None and 95 <= study_day <= 104 and not participant.wave3_code_entered
             print(f"[DEBUG] Within wave 3 period: {within_wave3_period}")
-            days_until_start_wave1 = max(0, (day_11 - current_date).days)
-            days_until_end_wave1 = max(0, (day_21 - current_date).days)
-            print(f"[DEBUG] Days until start wave 1: {days_until_start_wave1}")
-            print(f"[DEBUG] Days until end wave 1: {days_until_end_wave1}")
-            start_date_wave1 = day_11
-            end_date_wave1 = day_21
-            print(f"[DEBUG] Start date wave 1: {start_date_wave1}")
-            print(f"[DEBUG] End date wave 1: {end_date_wave1}")
+            
+            # Set display dates for template
+            if settings.TIME_COMPRESSION:
+                start_date_wave1 = f"Study Day {day_11_study_day}"
+                end_date_wave1 = f"Study Day {day_21_study_day}"
+                start_date_wave3 = f"Study Day {day_95_study_day}"
+                end_date_wave3 = f"Study Day {day_104_study_day}"
+            else:
+                start_date_wave1 = day_11
+                end_date_wave1 = day_21
+                start_date_wave3 = day_95
+                end_date_wave3 = day_104
 
     context = {
         'user': request.user,  # Explicitly pass the current user
@@ -568,13 +607,14 @@ def dashboard(request):
         'days_until_end_wave1': days_until_end_wave1,
         'start_date_wave1': start_date_wave1,
         'end_date_wave1': end_date_wave1,
-        'days_until_start_wave3': 0,
-        'days_until_end_wave3': 0,
-        'start_date_wave3': day_95 if user_progress else None,
-        'end_date_wave3': day_104 if user_progress else None,
+        'days_until_start_wave3': days_until_start_wave3 if 'days_until_start_wave3' in locals() else 0,
+        'days_until_end_wave3': days_until_end_wave3 if 'days_until_end_wave3' in locals() else 0,
+        'start_date_wave3': start_date_wave3 if 'start_date_wave3' in locals() else None,
+        'end_date_wave3': end_date_wave3 if 'end_date_wave3' in locals() else None,
         'study_day': study_day if user_progress else 0,  # For debugging
         'needs_consent': user_progress and user_progress.eligible and not user_progress.consent_given,  # New flag
         'progress_percentage': progress_percentage,
+        'time_compression': settings.TIME_COMPRESSION,  # Add this for template debugging
     }
     return render(request, "dashboard.html", context)
 # INFORMATION 11 & 22: Enter Code
@@ -594,7 +634,8 @@ def enter_code(request, wave):
             user_progress.day_1,
             now=now,
             compressed=settings.TIME_COMPRESSION,
-            seconds_per_day=settings.SECONDS_PER_DAY
+            seconds_per_day=settings.SECONDS_PER_DAY,
+            reference_timestamp=user_progress.timeline_reference_timestamp
         )
     else:
         study_day = 1  # Default to day 1 if no day_1 set
@@ -643,15 +684,18 @@ def enter_code(request, wave):
                             user_progress.day_1,
                             now=now,
                             compressed=settings.TIME_COMPRESSION,
-                            seconds_per_day=settings.SECONDS_PER_DAY
+                            seconds_per_day=settings.SECONDS_PER_DAY,
+                            reference_timestamp=user_progress.timeline_reference_timestamp
                         )
                     else:
                         participant.code_entry_day = 1
                     
-                    # end Jun 25
+                    # Set code entry date for email task
+                    participant.code_entry_date = timezone.now().date()
                     participant.save()
-                    # send_wave1_code_entry_email.delay(participant.id)
-                    send_wave1_code_entry_email(participant.participant_id)
+                    
+                    # Send Information 12 email - use participant.id (database ID)
+                    send_wave1_code_entry_email(participant.id)
                     messages.success(request, "Code entered successfully!")
                     return redirect('code_success', wave=wave)
                     # participant.code_entered = True

@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from testpas.models import UserSurveyProgress, Participant
+from datetime import datetime
 
 class Command(BaseCommand):
-    help = 'Reset participant timelines to today for time compression testing'
+    help = 'Reset participant timelines to current moment for time compression testing'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -18,7 +19,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        today = timezone.now().date()
+        current_time = timezone.now()
         
         if options['participant']:
             participants = Participant.objects.filter(participant_id=options['participant'])
@@ -41,14 +42,17 @@ class Command(BaseCommand):
             
             if user_progress:
                 old_day_1 = user_progress.day_1
-                user_progress.day_1 = today
+                # Set day_1 to current date and time for proper time compression
+                user_progress.day_1 = current_time.date()
+                user_progress.timeline_reference_timestamp = current_time
                 user_progress.save()
                 
                 self.stdout.write(
                     self.style.SUCCESS(
                         f"Reset timeline for {participant.participant_id} "
                         f"({participant.user.username}): "
-                        f"Day 1 changed from {old_day_1} to {today}"
+                        f"Day 1 changed from {old_day_1} to {user_progress.day_1} "
+                        f"at {current_time.strftime('%H:%M:%S')}"
                     )
                 )
             else:
@@ -61,6 +65,6 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"Timeline reset complete. Participants can now be tested with "
-                f"time compression (10 seconds per day)."
+                f"time compression (10 seconds per day). Study Day 1 starts now!"
             )
         ) 

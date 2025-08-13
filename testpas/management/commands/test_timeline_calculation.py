@@ -42,7 +42,8 @@ class Command(BaseCommand):
                 user_progress.day_1,
                 now=current_time,
                 compressed=settings.TIME_COMPRESSION,
-                seconds_per_day=settings.SECONDS_PER_DAY
+                seconds_per_day=settings.SECONDS_PER_DAY,
+                reference_timestamp=user_progress.timeline_reference_timestamp
             )
             
             self.stdout.write(f"Current time: {current_time}")
