@@ -1,10 +1,101 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervention Access</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <h2>Intervention Access</h2>
-    <p>{{ access_message }}</p>
+    <header>
+        <h1>Physical Activity Intervention</h1>
+    </header>
+    
+    <main>
+        <section id="intervention-access">
+            <h2>Intervention Access</h2>
+            
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+            <div class="access-status">
+                <p><strong>Status:</strong> {{ access_message }}</p>
+                <p><strong>Study Day:</strong> {{ study_day }}</p>
+                <p><strong>Group:</strong> {% if participant.randomized_group == 1 %}Intervention Group{% elif participant.randomized_group == 0 %}Control Group{% else %}Not Assigned{% endif %}</p>
+            </div>
+            
+            {% if has_access %}
+                <div class="intervention-content">
+                    <h3>Welcome to the Physical Activity Intervention!</h3>
+                    <p>You now have access to the online physical activity intervention. Here's what you need to know:</p>
+                    
+                    <ul>
+                        <li><strong>Duration:</strong> 4 weeks of access</li>
+                        <li><strong>Goal:</strong> Complete at least 24 post-introductory challenges</li>
+                        <li><strong>Incentive:</strong> $20 Amazon gift card for completing 24+ challenges</li>
+                        <li><strong>Time Estimate:</strong> Approximately 2 hours total</li>
+                    </ul>
+                    
+                    <div class="progress-tracking">
+                        <h4>Your Progress</h4>
+                        <p><strong>Challenges Completed:</strong> {{ challenges_completed }}/24</p>
+                        <p><strong>Login Count:</strong> {{ intervention_login_count }}</p>
+                        
+                        {% if challenges_completed >= 24 %}
+                            <div class="success-message">
+                                <p>🎉 Congratulations! You have completed the required 24 challenges!</p>
+                            </div>
+                        {% else %}
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ challenges_completed|div:24|mul:100 }}%"></div>
+                            </div>
+                            <p>{{ challenges_completed|sub:24|abs }} more challenges needed to earn the $20 gift card.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="intervention-actions">
+                        <button class="btn btn-primary" onclick="startIntervention()">Start/Continue Intervention</button>
+                        <button class="btn btn-secondary" onclick="recordChallenge()">Record Challenge Completion</button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="no-access">
+                    <p>You do not currently have access to the intervention.</p>
+                    {% if participant.randomized_group == 1 %}
+                        <p>Intervention access is available from Day 29 to Day 56 of the study.</p>
+                    {% elif participant.randomized_group == 0 %}
+                        <p>Control group participants receive intervention access after study completion (Day 113+).</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <div class="navigation">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Back to Dashboard</a>
+                <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function startIntervention() {
+            // Placeholder for intervention start functionality
+            alert('Intervention interface would open here. This is a placeholder for the actual intervention system.');
+        }
+        
+        function recordChallenge() {
+            // Placeholder for challenge recording functionality
+            alert('Challenge completion would be recorded here. This is a placeholder for the actual challenge system.');
+        }
+    </script>
 </body>
 </html>

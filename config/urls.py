@@ -59,7 +59,12 @@ urlpatterns = [
     
     # Information 11 & 22: Code Entry
     path('enter-code/<int:wave>/', views.enter_code, name='enter_code'),
+    path('enter-wave3-code/', views.enter_code, {'wave': 3}, name='enter_wave3_code'),
     path('code-success/<int:wave>/', views.code_success, name='code_success'),
+    path('code-failure/', views.code_failure, name='code_failure'),
+    path('password-reset/', views.password_reset, name='password_reset'),
+    path('password-reset-confirm/<str:token>/', views.password_reset_confirm, name='password_reset_confirm'),
+    path('intervention/', views.intervention_access, name='intervention_access'),
     path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
     
     # Surveys (Information 9, 18, 20)

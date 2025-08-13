@@ -9,8 +9,10 @@ class UserRegistrationForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput, required=True, label="Password")
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=True, label="Confirm Password")
     phone_number = forms.CharField(max_length=15, required=True, label="Phone Number")
-    # registration_code = forms.CharField(max_length=50, required=True, label="Registration Code")
-
+    ## Added 08/13/2025, for testing purposes
+    registration_code = forms.CharField(max_length=50, required=True, label="Registration Code")
+    full_name = forms.CharField(max_length=255, required=True, label="Full Name")
+    ##end of testing
     # Validate unique username
     def clean_username(self):
         username = self.cleaned_data['username'].strip()
@@ -31,6 +33,13 @@ class UserRegistrationForm(forms.Form):
         # if User.objects.filter(email=email).exists():
         #     raise forms.ValidationError("This email is already in use.")
         return email
+
+    # Validate registration code, added 08/13/2025, for testing purposes
+    def clean_registration_code(self):
+        code = self.cleaned_data.get('registration_code', '').strip().lower()
+        if code != 'wavepa':
+            raise forms.ValidationError("Invalid registration code. Please enter 'wavepa'.")
+        return code
 
     # FIX 4: Validate password confirmation
     def clean(self):
@@ -198,3 +207,18 @@ class UserLoginForm(forms.Form):
 
 class ConsentForm(forms.Form):
     consent = forms.BooleanField(label="I consent to participate in this study", required=True)
+
+class PasswordResetForm(forms.Form):
+    email = forms.EmailField(label="Email Address", required=True)
+
+class PasswordResetConfirmForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput, label="New Password", required=True)
+    password_confirm = forms.CharField(widget=forms.PasswordInput, label="Confirm New Password", required=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        if password and password_confirm and password != password_confirm:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data

@@ -64,28 +64,15 @@ EMAIL_TEMPLATES = [
             'subject': 'Missing Code Entry (Wave 1)',
             'body': (
                 'Hi {username},\n\n'
-                'You missed the code entry (i.e., no $35 worth of Amazon electronic gift cards). However, you will still have more tasks in the future. '
-                'We will contact you via email, so please regularly check your inbox.\n\n'
-                'If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n'
+                'We noticed you haven not entered your Wave 1 physical activity monitoring code. '
+                'Unfortunately, you have missed the opportunity to earn the $35 Amazon gift card for this monitoring period. '
+                'However, you will still have more tasks in the future and can continue participating in the study.\n\n'
+                'We will contact you via email for upcoming tasks, so please regularly check your inbox.\n\n'
+                'If you need any assistance or have questions, please contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n'
                 'Sincerely,\nThe Obesity and Physical Activity Research Team'
             )
         },
-    # {
-    #     "name": "wave1_code_entry",
-    #     "subject": "Physical Activity Monitoring Tomorrow (Wave 1)",
-    #     "body": "Hi {username},\n\nYou have successfully entered the access code for physical activity monitoring. Thank you!\n\nPlease start wearing the monitor tomorrow ({start_date}) for seven consecutive days until {end_date}.\n\nBest,\nPAS 2.0 Team"
-    # },
-    {
-        "name": "wave1_survey_return",
-        "subject": "Survey by Today & Return Monitor (Wave 1)",
-        "body": "Dear {username},\n\nPlease complete a short survey and return the monitor by today.\n\nBest,\nPAS 2.0 Team"
-        # "body": "Dear {participant_id},\n\nPlease complete a short survey and return the monitor by today.\n\nBest,\nPAS 2.0 Team"
-    },
-    {
-        "name": "wave1_missing_code",
-        "subject": "Missing Code Entry (Wave 1)",
-        "body": "Hi {username},\n\nWe noticed you haven't entered your Wave 1 code. Please do so by today if you haven't.\n\nBest,\nPAS 2.0 Team"
-    },
+
     {
         "name": "intervention_access_later",
         "subject": "Intervention Access Later",
@@ -110,7 +97,7 @@ EMAIL_TEMPLATES = [
             "(Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
             "Sincerely,\n\n"
             "The Obesity and Physical Activity Research Team"
-    )
+        )
     },
     {
         "name": "wave2_survey_ready",
@@ -161,12 +148,32 @@ EMAIL_TEMPLATES = [
     {
         "name": "wave3_missing_code",
         "subject": "Missing Code Entry (Study End)",
-        "body": "Dear {username},\n\nYou missed the Wave 3 code entry. No further action is required.\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {username},\n\n"
+            "We noticed you haven't entered your Wave 3 physical activity monitoring code. "
+            "Unfortunately, you have missed the opportunity to earn the $40 Amazon gift card for this monitoring period. "
+            "The study has now concluded, and you will no longer receive further tasks.\n\n"
+            "If you were assigned to Group 0, you will now receive access to the intervention. "
+            "Please check your email for intervention access instructions.\n\n"
+            "If you need any assistance or have questions, please contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\nThe Obesity and Physical Activity Research Team"
+        )
     },
     {
         "name": "study_end",
         "subject": "PAS 2.0 Study Concluded",
-        "body": "Dear {username},\n\nThank you for participating in the PAS 2.0 study. The study has now concluded.\n\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {username},\n\n"
+            "Thank you for participating in the PAS 2.0 study. The study has now concluded.\n\n"
+            "Your final tasks are:\n"
+            "1. Please complete a short survey. This task must be done by today and should take approximately 10 minutes to complete.\n"
+            "   Please click the following link to complete the task: [Survey Link Placeholder].\n\n"
+            "2. Please return the monitor. Within a couple of days, research members will contact you to arrange the return.\n\n"
+            "If you were assigned to Group 0, you will now receive access to the intervention. "
+            "Please check your email for intervention access instructions.\n\n"
+            "If you need any assistance or have questions, please contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\nThe Obesity and Physical Activity Research Team"
+        )
     },
 ]
 

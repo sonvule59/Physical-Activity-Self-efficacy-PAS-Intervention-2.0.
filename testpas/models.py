@@ -121,11 +121,19 @@ class Participant(models.Model):
     wave3_survey_email_sent = models.BooleanField(default=False)
     wave3_code_entered = models.BooleanField(default=False)  # New field for Wave 3
     wave3_code_entry_date = models.DateField(null=True, blank=True)
+    wave3_code_entry_day = models.IntegerField(null=True, blank=True)  # Add missing field
     wave3_monitor_ready_sent = models.BooleanField(default=False)
     wave3_missing_code_sent = models.BooleanField(default=False)
     wave3_survey_monitor_return_sent = models.BooleanField(default=False)
     wave3_survey_monitor_return_date = models.DateField(null=True, blank=True)
     randomized_group = models.IntegerField(null=True, blank=True)
+    
+    # Intervention tracking fields
+    intervention_access_granted = models.BooleanField(default=False)
+    intervention_access_date = models.DateTimeField(null=True, blank=True)
+    intervention_login_count = models.IntegerField(default=0)
+    challenges_completed = models.IntegerField(default=0)
+    intervention_completion_date = models.DateTimeField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.confirmation_token:
@@ -134,7 +142,7 @@ class Participant(models.Model):
                 self.confirmation_token = uuid.uuid4().hex
         super().save(*args, **kwargs)
 
-    def send_email(self, template_name, extra_context=None):
+    def send_email(self, template_name, extra_context=None, mark_as=None):
             template = EmailTemplate.objects.get(name=template_name)
             context = {'participant_id': self.participant_id, 'username': self.user.username}
             if extra_context:
@@ -148,7 +156,7 @@ class Participant(models.Model):
                     [self.email or self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
                     fail_silently=False,
                 )
-                self.email_status = 'sent'
+                self.email_status = mark_as or 'sent'
                 self.email_send_date = timezone.now().date()
                 self.save()
             except Exception as e:
@@ -162,16 +170,6 @@ class Participant(models.Model):
             'account_confirmation',
             extra_context={'confirmation_link': confirmation_link}
         )
-    # def send_confirmation_email(self):
-    #     from django.core.mail import send_mail
-    #     template = EmailTemplate.objects.get(name='account_confirmation')
-    #     subject = template.subject
-    #     confirmation_link = f"http://localhost:8000/confirm/{self.confirmation_token}/"
-    #     message = template.body.format(participant_id=self.participant_id, confirmation_link=confirmation_link)
-    #     send_mail(subject, message, 'projectpas2024@gmail.com', [self.email])
-
-    # def __str__(self):
-    #     return self.participant_id
     def __str__(self):
         return self.user.username
     
@@ -200,27 +198,6 @@ class Participant(models.Model):
         self.email_send_date = timezone.now().date()
         self.save()
 
-    # def send_wave2_survey_email(self):
-    #     template = EmailTemplate.objects.get(name='wave2_survey_ready')
-    #     subject = template.subject
-    #     message = template.body.format(participant_id=self.participant_id)
-    #     try:
-    #         send_mail(
-    #             subject,
-    #             message,
-    #             settings.DEFAULT_FROM_EMAIL,
-    #             [self.user.email, 'vuleson59@gmail.com', 'projectpas2024@gmail.com'],
-    #             fail_silently=False,
-    #         )
-    #         self.email_status = 'sent'
-    #         self.email_send_date = timezone.now().date()
-    #         self.save()
-    #         return True
-    #     except Exception as e:
-    #         print(f"Wave 2 email error: {str(e)}")
-    #         self.email_status = 'failed'
-    #         self.save()
-            # return False
     def send_missing_code_email(self):  # Info 14
         template = EmailTemplate.objects.get(name='wave1_missing_code')
         message = template.body.format(username=self.user.username)
@@ -316,10 +293,6 @@ class EmailContent(models.Model):
 
     def __str__(self):
         return self.subject
-# @receiver(post_save, sender=ParticipantEntry)
-# def schedule_email_on_entry(sender, instance, created, **kwargs):
-#     if created:
-#         schedule_email(instance)
 
 class MessageContent(models.Model):
     subject = models.CharField(max_length=255)
@@ -369,5 +342,23 @@ class Token(models.Model):
         if not self.token:
             self.token = self.generate_token()
         super().save(*args, **kwargs)
+
+class Content(models.Model):
+    """Model for researcher-editable website content"""
+    CONTENT_TYPES = [
+        ('exit_screen', 'Exit Screen Content'),
+        ('waiting_screen', 'Waiting Screen Content'),
+        ('consent_form', 'Consent Form Content'),
+        ('eligibility_interest', 'Eligibility Interest Page'),
+        ('home_page', 'Home Page Content'),
+    ]
+    
+    content_type = models.CharField(max_length=50, choices=CONTENT_TYPES, unique=True)
+    title = models.CharField(max_length=255)
+    content = models.TextField(help_text="HTML content that can be edited by researchers")
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.get_content_type_display()} - {self.title}"
 
 

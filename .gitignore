@@ -204,3 +204,4 @@ testpas/management/.DS_Store
 .DS_Store
 celerybeat-schedule-shm
 celerybeat-schedule-wal
+IMPLEMENTATION_SUMMARY.md

@@ -150,6 +150,25 @@
         {% if within_wave3_period %}
             <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
         {% endif %} -->
+        <!-- Intervention Access Section -->
+        {% if participant and participant.randomized_group == 1 and 29 <= study_day and study_day <= 56 %}
+            <section id="intervention-access">
+                <div class="alert alert-success">
+                    <h3>Intervention Access Available</h3>
+                    <p>You now have access to the physical activity intervention (Days 29-56).</p>
+                    <a href="{% url 'intervention_access' %}" class="btn btn-primary">Access Intervention</a>
+                </div>
+            </section>
+        {% elif participant and participant.randomized_group == 0 and study_day > 112 %}
+            <section id="intervention-access">
+                <div class="alert alert-success">
+                    <h3>Intervention Access Available</h3>
+                    <p>You now have access to the physical activity intervention after study completion.</p>
+                    <a href="{% url 'intervention_access' %}" class="btn btn-primary">Access Intervention</a>
+                </div>
+            </section>
+        {% endif %}
+        
         <!-- ADDED: Contact information for support -->
         <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
     {% else %}

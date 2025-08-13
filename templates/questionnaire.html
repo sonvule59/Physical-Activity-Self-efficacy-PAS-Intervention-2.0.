@@ -29,13 +29,188 @@
                 <input type="hidden" id="password-confirmation" name="password-confirmation" value="{{ password_confirmation }}"> -->
 
                 <label for="age">1. What is your age?</label><br>
-                <input type="number" id="age" name="age" min="0" required><br><br>
+                <select id="age" name="age" required>
+                    <option value="">Select your age</option>
+                    <option value="lt18">Less than 18</option>
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:17 }}">{{ forloop.counter|add:17 }}</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:26 }}">{{ forloop.counter|add:26 }}</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:35 }}">{{ forloop.counter|add:35 }}</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:44 }}">{{ forloop.counter|add:44 }}</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:53 }}">{{ forloop.counter|add:53 }}</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:62 }}">{{ forloop.counter|add:62 }}</option>
+                    {% endfor %}
+                    <option value="64">64</option>
+                    <option value="gt64">More than 64</option>
+                </select><br><br>
 
-                <label for="height">2. Height in Inches (e.g., 6 feet 1 inch = 73 inches)</label><br>
-                <input type="number" id="height" name="height" min="48" max="100" required><br><br>
+                <label for="height">2. Height in Inches</label><br>
+                <select id="height" name="height" required>
+                    <option value="">Select your height</option>
+                    <option value="lt48">Less than 4 feet 0 inches</option>
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:47 }}">{{ forloop.counter|add:47 }} inches</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:56 }}">{{ forloop.counter|add:56 }} inches</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:65 }}">{{ forloop.counter|add:65 }} inches</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:74 }}">{{ forloop.counter|add:74 }} inches</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:83 }}">{{ forloop.counter|add:83 }} inches</option>
+                    {% endfor %}
+                    <option value="gt83">More than 6 feet 11 inches</option>
+                </select><br><br>
 
                 <label for="weight">3. Weight in lbs.</label><br>
-                <input type="number" id="weight" name="weight" min="101" max="1000" required><br><br>
+                <select id="weight" name="weight" required>
+                    <option value="">Select your weight</option>
+                    <option value="lt120">Less than 120 lbs</option>
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:119 }}">{{ forloop.counter|add:119 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:128 }}">{{ forloop.counter|add:128 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:137 }}">{{ forloop.counter|add:137 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:146 }}">{{ forloop.counter|add:146 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:155 }}">{{ forloop.counter|add:155 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:164 }}">{{ forloop.counter|add:164 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:173 }}">{{ forloop.counter|add:173 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:182 }}">{{ forloop.counter|add:182 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:191 }}">{{ forloop.counter|add:191 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:200 }}">{{ forloop.counter|add:200 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:209 }}">{{ forloop.counter|add:209 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:218 }}">{{ forloop.counter|add:218 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:227 }}">{{ forloop.counter|add:227 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:236 }}">{{ forloop.counter|add:236 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:245 }}">{{ forloop.counter|add:245 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:254 }}">{{ forloop.counter|add:254 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:263 }}">{{ forloop.counter|add:263 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:272 }}">{{ forloop.counter|add:272 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:281 }}">{{ forloop.counter|add:281 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:290 }}">{{ forloop.counter|add:290 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:299 }}">{{ forloop.counter|add:299 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:308 }}">{{ forloop.counter|add:308 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:317 }}">{{ forloop.counter|add:317 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:326 }}">{{ forloop.counter|add:326 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:335 }}">{{ forloop.counter|add:335 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:344 }}">{{ forloop.counter|add:344 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:353 }}">{{ forloop.counter|add:353 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:362 }}">{{ forloop.counter|add:362 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:371 }}">{{ forloop.counter|add:371 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:380 }}">{{ forloop.counter|add:380 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:389 }}">{{ forloop.counter|add:389 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:398 }}">{{ forloop.counter|add:398 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:407 }}">{{ forloop.counter|add:407 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:416 }}">{{ forloop.counter|add:416 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:425 }}">{{ forloop.counter|add:425 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:434 }}">{{ forloop.counter|add:434 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:443 }}">{{ forloop.counter|add:443 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:452 }}">{{ forloop.counter|add:452 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:461 }}">{{ forloop.counter|add:461 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:470 }}">{{ forloop.counter|add:470 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:479 }}">{{ forloop.counter|add:479 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:488 }}">{{ forloop.counter|add:488 }} lbs</option>
+                    {% endfor %}
+                    {% for i in "123456789"|make_list %}
+                        <option value="{{ forloop.counter|add:497 }}">{{ forloop.counter|add:497 }} lbs</option>
+                    {% endfor %}
+                    <option value="gt500">More than 500 lbs</option>
+                </select><br><br>
 
                 <label>4. Will you have access to a technological device (e.g., computer, smart phone) that can access the online intervention via a web browser throughout this study?</label><br>
                 <input type="radio" name="has_device" value="yes" required> Yes<br>

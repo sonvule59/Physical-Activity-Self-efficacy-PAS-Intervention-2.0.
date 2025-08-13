@@ -20,20 +20,17 @@ from .utils import validate_token
 import uuid
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-# from django.conf import settings
 from testpas.settings import *
 import os
 import datetime
 from twilio.rest import Client
 import pytz
-from .models import Participant, SurveyProgress, Survey, UserSurveyProgress
+from .models import Participant, SurveyProgress, Survey, UserSurveyProgress, Content
 from django.db.models import Model
-from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm
+from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, UserRegistrationForm, PasswordResetForm, PasswordResetConfirmForm
 import csv
 from testpas.schedule_emails import schedule_wave1_monitoring_email
 from django.http import HttpResponse
-from django.apps import apps
-from django.db import transaction
 from testpas.utils import get_current_time
 
 from .timeline import get_timeline_day, get_study_day
@@ -61,7 +58,14 @@ def home(request):
                 context['participant'] = participant
                 context['start_date'] = progress.day_1
                 day_1 = progress.day_1 if progress.day_1 else participant.enrollment_date if participant.enrollment_date else current_date
-                study_day = (current_date - progress.day_1).days + 1 if progress.day_1 else 1
+                # study_day = (current_date - progress.day_1).days + 1 if progress.day_1 else 1
+                # Use compressed timeline calculation
+                study_day = get_study_day(
+                    progress.day_1,
+                    now=get_current_time(),
+                    compressed=settings.TIME_COMPRESSION,   
+                    seconds_per_day=settings.SECONDS_PER_DAY
+                ) if progress.day_1 else 1
                 context['study_day'] = study_day
                 # context['days_until_start'] = 0
                 # context['days_until_end'] = 0
@@ -243,6 +247,59 @@ def login_view(request):
             return render(request, 'login.html')
     return render(request, 'login.html')
 
+def password_reset(request):
+    """Handle password reset request"""
+    if request.method == 'POST':
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+                # Generate reset token
+                token = Token.generate_token()
+                Token.objects.create(recipient=user, token=token)
+                
+                # Send reset email
+                reset_link = f"{settings.BASE_URL}/password-reset-confirm/{token}/"
+                send_mail(
+                    'Password Reset Request',
+                    f'Click the following link to reset your password: {reset_link}\n\nIf you did not request this, please ignore this email.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Password reset email sent. Please check your email.')
+                return redirect('login')
+            except User.DoesNotExist:
+                messages.error(request, 'No user found with that email address.')
+    else:
+        form = PasswordResetForm()
+    
+    return render(request, 'password_reset.html', {'form': form})
+
+def password_reset_confirm(request, token):
+    """Handle password reset confirmation"""
+    try:
+        token_obj = Token.objects.get(token=token, used=False)
+        user = token_obj.recipient
+        
+        if request.method == 'POST':
+            form = PasswordResetConfirmForm(request.POST)
+            if form.is_valid():
+                user.set_password(form.cleaned_data['password'])
+                user.save()
+                token_obj.used = True
+                token_obj.save()
+                messages.success(request, 'Password reset successfully. You can now login with your new password.')
+                return redirect('login')
+        else:
+            form = PasswordResetConfirmForm()
+        
+        return render(request, 'password_reset_confirm.html', {'form': form, 'token': token})
+    except Token.DoesNotExist:
+        messages.error(request, 'Invalid or expired reset link.')
+        return redirect('login')
+
 def questionnaire_interest(request):
     if request.method == 'GET':
         return render(request, 'questionnaire_interest.html')
@@ -399,7 +456,12 @@ def consent_form(request):
 
 # INFORMATION 10: Exit Screen for Not Eligible
 def exit_screen_not_eligible(request):
-    return render(request, 'exit_screen_not_eligible.html')
+    try:
+        content = Content.objects.get(content_type='exit_screen')
+        return render(request, 'exit_screen_not_eligible.html', {'content': content})
+    except Content.DoesNotExist:
+        # Fallback to default content
+        return render(request, 'exit_screen_not_eligible.html')
 
 def exit_screen_declined(request):
     return render(request, 'exit_screen_declined.html')
@@ -455,36 +517,19 @@ def dashboard(request):
     day_95 = None
     day_104 = None
     
-    # day_1 = progress.day_1 if progress.day_1 else participant.enrollment_date if participant.enrollment_date else current_date
+    # Use compressed timeline calculation consistently
     if user_progress and user_progress.eligible and user_progress.consent_given and participant:
         if not participant.enrollment_date:
             participant.enrollment_date = user_progress.day_1 or current_date
             participant.save()
         if user_progress.day_1 is not None:
-            # Fix: Use corrected timeline calculationstudy_day = get_timeline_day(
-        #     request.user,
-        #     now=get_current_time(),
-        #     compressed=settings.TIME_COMPRESSION,
-        #     seconds_per_day=settings.SECONDS_PER_DAY
-        # )
-            # now = get_current_time()
-            # day_1_datetime = timezone.make_aware(
-            #     timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
-            #     timezone.get_current_timezone()
-            # )
+            # Use compressed timeline calculation
             study_day = get_study_day(
                 user_progress.day_1,
                 now=get_current_time(),
                 compressed=settings.TIME_COMPRESSION,
                 seconds_per_day=settings.SECONDS_PER_DAY
             )
-            # if settings.TIME_COMPRESSION:
-            #     # Use compressed timeline calculation
-            #     seconds_elapsed = (now - day_1_datetime).total_seconds()
-            #     study_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
-            # else:
-            #     # Use real timeline calculation
-            #     study_day = (now.date() - user_progress.day_1).days + 1
             
             day_11 = user_progress.day_1 + timedelta(days=10)
             print(f"[DEBUG] Day 11: {day_11}")
@@ -542,38 +587,17 @@ def enter_code(request, wave):
         messages.error(request, "Enrollment date not set. Contact support.")
         return redirect('home')
 
-    """----------------------This is real time. Turn this one ON in production----------------------------------"""
-    # current_date = timezone.now().date()
-    # study_day = (current_date - user_progress.day_1).days + 1
-    """---------------------------------------------------------------------------------------------------------"""
-    
-    """----------------------This is TIME COMPRESSION TESTING. Turn this one OFF in production------------------"""
+    # Use compressed timeline calculation consistently
     now = get_current_time()
-    # study_day = get_timeline_day(
-    #     request.user,
-    #     now=now,
-    #     compressed=settings.TIME_COMPRESSION,
-    #     seconds_per_day=settings.SECONDS_PER_DAY,
-    # )
-    # Fix: Use user_progress.day_1 instead of user.date_joined for timeline calculation
     if user_progress and user_progress.day_1:
-        # Convert day_1 date to datetime for timeline calculation
-        day_1_datetime = timezone.make_aware(
-            timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
-            timezone.get_current_timezone()
+        study_day = get_study_day(
+            user_progress.day_1,
+            now=now,
+            compressed=settings.TIME_COMPRESSION,
+            seconds_per_day=settings.SECONDS_PER_DAY
         )
-        
-        if settings.TIME_COMPRESSION:
-            # Use compressed timeline calculation
-            seconds_elapsed = (now - day_1_datetime).total_seconds()
-            study_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
-        else:
-            # Use real timeline calculation
-            study_day = (now.date() - user_progress.day_1).days + 1
     else:
         study_day = 1  # Default to day 1 if no day_1 set
-    
-    """---------------------------------------------------------------------------------------------------------"""
     
     # Add debugging
     print(f"[DEBUG] Enter code - Wave: {wave}")
@@ -613,23 +637,14 @@ def enter_code(request, wave):
                 if wave == 1:
                     # Jun 25: Add in store timeline day instead of date 
                     participant.code_entered = True
-                    # participant.code_entry_day = get_timeline_day(
-                    #     request.user,
-                    #     compressed=settings.TIME_COMPRESSION,
-                    #     seconds_per_day=settings.SECONDS_PER_DAY
-                    # )
-                    # Fix: Use corrected timeline calculation for code_entry_day
+                    # Use compressed timeline calculation for code_entry_day
                     if user_progress and user_progress.day_1:
-                        day_1_datetime = timezone.make_aware(
-                            timezone.datetime.combine(user_progress.day_1, timezone.datetime.min.time()),
-                            timezone.get_current_timezone()
+                        participant.code_entry_day = get_study_day(
+                            user_progress.day_1,
+                            now=now,
+                            compressed=settings.TIME_COMPRESSION,
+                            seconds_per_day=settings.SECONDS_PER_DAY
                         )
-                        
-                        if settings.TIME_COMPRESSION:
-                            seconds_elapsed = (now - day_1_datetime).total_seconds()
-                            participant.code_entry_day = int(seconds_elapsed // settings.SECONDS_PER_DAY) + 1
-                        else:
-                            participant.code_entry_day = (now.date() - user_progress.day_1).days + 1
                     else:
                         participant.code_entry_day = 1
                     
@@ -713,7 +728,12 @@ def exit_screen_not_interested(request):
     if request.method == 'GET':
         return render(request, 'exit_screen_not_interested.html')
 def waiting_screen(request):
-    return render(request, "waiting_screen.html")
+    try:
+        content = Content.objects.get(content_type='waiting_screen')
+        return render(request, "waiting_screen.html", {'content': content})
+    except Content.DoesNotExist:
+        # Fallback to default content
+        return render(request, "waiting_screen.html")
 
 def logout_view(request):
     print(f"[DEBUG] Logging out user: {request.user.username}")
@@ -722,3 +742,64 @@ def logout_view(request):
     request.session.flush()
     print(f"[DEBUG] Session cleared, redirecting to login")
     return redirect('login')  # Redirect to the login page after logout
+
+@login_required
+def intervention_access(request):
+    """Handle intervention access for participants"""
+    try:
+        participant = Participant.objects.get(user=request.user)
+        user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
+        
+        if not user_progress or not user_progress.consent_given:
+            messages.error(request, "You must complete enrollment before accessing the intervention.")
+            return redirect('dashboard')
+        
+        # Calculate study day using compressed timeline
+        study_day = get_study_day(
+            user_progress.day_1,
+            now=get_current_time(),
+            compressed=settings.TIME_COMPRESSION,
+            seconds_per_day=settings.SECONDS_PER_DAY
+        )
+        
+        # Check if participant should have access
+        has_access = False
+        access_message = ""
+        
+        if participant.randomized_group == 1:  # Intervention group
+            if 29 <= study_day <= 56:
+                has_access = True
+                access_message = "You have access to the intervention from Day 29 to Day 56."
+                if not participant.intervention_access_granted:
+                    participant.intervention_access_granted = True
+                    participant.intervention_access_date = get_current_time()
+                    participant.save()
+            else:
+                access_message = "Your intervention access period has ended (Days 29-56)."
+        elif participant.randomized_group == 0:  # Control group
+            if study_day > 112:
+                has_access = True
+                access_message = "You now have access to the intervention after study completion."
+                if not participant.intervention_access_granted:
+                    participant.intervention_access_granted = True
+                    participant.intervention_access_date = get_current_time()
+                    participant.save()
+            else:
+                access_message = "You will receive intervention access after Day 113 (study completion)."
+        else:
+            access_message = "You have not been assigned to a group yet."
+        
+        context = {
+            'participant': participant,
+            'study_day': study_day,
+            'has_access': has_access,
+            'access_message': access_message,
+            'challenges_completed': participant.challenges_completed,
+            'intervention_login_count': participant.intervention_login_count,
+        }
+        
+        return render(request, 'intervention_access.html', context)
+        
+    except Participant.DoesNotExist:
+        messages.error(request, "Participant record not found.")
+        return redirect('dashboard')

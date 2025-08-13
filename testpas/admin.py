@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.http import HttpResponse
 import csv
-from .models import Participant, UserSurveyProgress, Response, EmailTemplate
+from .models import Participant, UserSurveyProgress, Response, EmailTemplate, Survey, Question, ParticipantEntry, EmailContent, MessageContent, Challenge, SurveyProgress, Token, Content
 from django.utils import timezone
 
 @admin.register(Participant)
@@ -56,12 +56,33 @@ class ParticipantAdmin(admin.ModelAdmin):
 admin.site.register(UserSurveyProgress)
 admin.site.register(Response)
 admin.site.register(EmailTemplate)
+admin.site.register(Survey)
+admin.site.register(Question)
+admin.site.register(ParticipantEntry)
+admin.site.register(EmailContent)
+admin.site.register(MessageContent)
+admin.site.register(Challenge)
+admin.site.register(SurveyProgress)
+admin.site.register(Token)
 
-# admin.site.register(Participant, ParticipantAdmin)
-# admin.site.register(UserSurveyProgress)
-# admin.site.register(Survey)
-# admin.site.register(Question)
-# admin.site.register(EmailTemplate)
-# admin.site.register(EmailContent)
-# admin.site.register(ParticipantEntry)
+@admin.register(Content)
+class ContentAdmin(admin.ModelAdmin):
+    list_display = ('content_type', 'title', 'last_updated')
+    list_filter = ('content_type', 'last_updated')
+    search_fields = ('title', 'content')
+    readonly_fields = ('last_updated',)
+    
+    fieldsets = (
+        ('Content Information', {
+            'fields': ('content_type', 'title')
+        }),
+        ('Content', {
+            'fields': ('content',),
+            'description': 'Enter HTML content. You can use basic HTML tags like <p>, <strong>, <em>, <ul>, <li>, etc.'
+        }),
+        ('Metadata', {
+            'fields': ('last_updated',),
+            'classes': ('collapse',)
+        }),
+    )
 

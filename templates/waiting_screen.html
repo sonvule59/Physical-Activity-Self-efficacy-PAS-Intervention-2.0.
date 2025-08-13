@@ -14,14 +14,18 @@
     
     <main>
         <section id="waiting-screen">
-            <h2>Your Participation is Important to Us</h2>
-            <p>
-                We have received your consent and are processing your enrollment.
-                Please wait while we finalize the details. You will be contacted by our research team soon.
-            </p>
-            <p>
-                If you have any questions in the meantime, please feel free to contact us.
-            </p>
+            {% if content %}
+                {{ content.content|safe }}
+            {% else %}
+                <h2>Your Participation is Important to Us</h2>
+                <p>
+                    We have received your consent and are processing your enrollment.
+                    Please wait while we finalize the details. You will be contacted by our research team soon.
+                </p>
+                <p>
+                    If you have any questions in the meantime, please feel free to contact us.
+                </p>
+            {% endif %}
             <a href="/">Return to Home Page</a>
         </section>
     </main>

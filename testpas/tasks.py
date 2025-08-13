@@ -67,15 +67,8 @@ def daily_timeline_check(user):
             participant.send_email("wave1_survey_return")
             participant.email_status = 'sent_wave1_survey_return'
             participant.save()
-    # if participant.code_entry_date:
-    #     code_day = get_timeline_day(user.date_joined + timezone.timedelta(days=participant.code_entry_date), compressed=compressed, seconds_per_day=seconds_per_day)
-    #     if code_day is not None and today == code_day + 8 and participant.email_status != 'sent_wave1_survey_return':
-    #         participant.send_email("wave1_survey_return")
-    #         participant.email_status = 'sent_wave1_survey_return'
-    #         participant.save()
 
     # Info 15 – Day 29: Randomization
-
     """
     The following Python code is checking if today is the 29th day of the month and if the participant's
     # randomized_group is None. If these conditions are met, it then randomizes the participant, sets
@@ -156,6 +149,22 @@ def daily_timeline_check(user):
         participant.send_email("wave3_monitoring_ready", extra_context={"username": user.username})
         participant.wave3_monitor_ready_sent = True
         participant.save()
+
+    # Info 25 – Day 105: Missed Wave 3 Code Entry
+    if today == 105 and not participant.wave3_code_entered and not participant.wave3_missing_code_sent:
+        participant.send_email("wave3_missing_code")
+        participant.wave3_missing_code_sent = True
+        participant.save()
+
+    # Info 24 – 8 days after Wave 3 code entry: Study End Survey & Monitor Return
+    if hasattr(participant, 'wave3_code_entry_day') and participant.wave3_code_entry_day is not None:
+        wave3_code_day = participant.wave3_code_entry_day
+        if today == wave3_code_day + 8 and not participant.wave3_survey_monitor_return_sent:
+            participant.send_email("study_end")
+            participant.wave3_survey_monitor_return_sent = True
+            participant.wave3_survey_monitor_return_date = timezone.now().date()
+            participant.save()
+
 @shared_task
 def send_wave1_survey_return_email(participant_id):
     """Information 13: Survey by Today & Return Monitor (Wave 1)"""
@@ -177,6 +186,44 @@ def send_wave1_survey_return_email(participant_id):
         logger.error(f"Participant {participant_id} not found for wave1_survey_return")
     except Exception as e:
         logger.error(f"Error sending wave1_survey_return for participant {participant_id}: {str(e)}")
+
+@shared_task
+def send_wave1_code_entry_email(participant_id):
+    """Information 12: Physical Activity Monitoring Tomorrow (Wave 1)"""
+    try:
+        participant = Participant.objects.get(id=participant_id)
+        # Check email_status to prevent duplicates
+        if participant.email_status == 'sent_wave1_code':
+            logger.info(f"Skipping wave1_code_entry for {participant.email}: already sent")
+            return
+        code_date = participant.code_entry_date
+        if not code_date:
+            logger.error(f"No code entry date for participant {participant_id}")
+            return
+        start_date = code_date + timedelta(days=1)
+        end_date = code_date + timedelta(days=7)
+        # Send immediately at 7 AM CT
+        now = timezone.now()
+        send_time = now.replace(hour=7, minute=0, second=0, microsecond=0)
+        if now.hour >= 7:
+            send_time += timedelta(days=1)
+        participant.send_email(
+            'wave1_code_entry',
+            extra_context={
+                'username': participant.user.username,
+                'code_date': code_date.strftime('%m/%d/%Y'),
+                'start_date': start_date.strftime('%m/%d/%Y'),
+                'end_date': end_date.strftime('%m/%d/%Y'),
+            }
+        )
+        participant.email_status = 'sent_wave1_code'
+        participant.save()
+        logger.info(f"Sent wave1_code_entry to {participant.email}")
+    except Participant.DoesNotExist:
+        logger.error(f"Participant {participant_id} not found for wave1_code_entry")
+    except Exception as e:
+        logger.error(f"Error sending wave1_code_entry for participant {participant_id}: {str(e)}")
+
 @shared_task
 def send_wave1_monitoring_email(participant_id):
     """Send Wave 1 Physical Activity Monitoring email to participant."""
@@ -232,43 +279,45 @@ def send_wave3_code_entry_email(participant_id):
         logger.error(f"Error sending Wave 3 code entry email: {str(e)}")
 
 @shared_task
-def send_wave1_code_entry_email(participant_id):
-    """Information 12: Physical Activity Monitoring Tomorrow (Wave 1)"""
+def send_study_end_email(participant_id):
+    """Information 24: Survey and Monitor Return Email (Study End)"""
     try:
         participant = Participant.objects.get(id=participant_id)
-        # Check email_status to prevent duplicates
-        if participant.email_status == 'sent_wave1_code':
-            logger.info(f"Skipping wave1_code_entry for {participant.email}: already sent")
+        
+        # Check if already sent
+        if participant.wave3_survey_monitor_return_sent:
+            logger.info(f"Study end email already sent for participant {participant_id}")
             return
-        code_date = participant.code_entry_date
-        if not code_date:
-            logger.error(f"No code entry date for participant {participant_id}")
-            return
-        start_date = code_date + timedelta(days=1)
-        end_date = code_date + timedelta(days=7)
-        # Send immediately at 7 AM CT
-        now = timezone.now()
-        send_time = now.replace(hour=7, minute=0, second=0, microsecond=0)
-        if now.hour >= 7:
-            send_time += timedelta(days=1)
-        participant.send_email(
-            'wave1_code_entry',
-            extra_context={
-                'username': participant.user.username,
-                'code_date': code_date.strftime('%m/%d/%Y'),
-                'start_date': start_date.strftime('%m/%d/%Y'),
-                'end_date': end_date.strftime('%m/%d/%Y'),
-            }
-        )
-        participant.email_status = 'sent_wave1_code'
+            
+        participant.send_email('study_end')
+        participant.wave3_survey_monitor_return_sent = True
+        participant.wave3_survey_monitor_return_date = timezone.now().date()
         participant.save()
-        logger.info(f"Sent wave1_code_entry to {participant.email}")
-    except Participant.DoesNotExist:
-        logger.error(f"Participant {participant_id} not found for wave1_code_entry")
+        
+        logger.info(f"Sent study end email to {participant.participant_id}")
     except Exception as e:
-        logger.error(f"Error sending wave1_code_entry for participant {participant_id}: {str(e)}")
+        logger.error(f"Error sending study end email: {str(e)}")
 
- 
+@shared_task
+def send_wave3_missing_code_email(participant_id):
+    """Information 25: Missing Code Entry Email (Study End)"""
+    try:
+        participant = Participant.objects.get(id=participant_id)
+        
+        # Check if already sent
+        if participant.wave3_missing_code_sent:
+            logger.info(f"Wave 3 missing code email already sent for participant {participant_id}")
+            return
+            
+        participant.send_email('wave3_missing_code')
+        participant.wave3_missing_code_sent = True
+        participant.save()
+        
+        logger.info(f"Sent Wave 3 missing code email to {participant.participant_id}")
+    except Exception as e:
+        logger.error(f"Error sending Wave 3 missing code email: {str(e)}")
+
+
 @shared_task
 def run_randomization():
     call_command('randomize_participants')
