@@ -40,12 +40,6 @@ from .timeline import get_timeline_day, get_study_day
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
-# _fake_time = None
-# def get_current_time():
-#     global _fake_time
-#     if _fake_time is not None:
-#         return _fake_time
-#     return timezone.now()
 
 @login_required
 def home(request):
@@ -135,8 +129,6 @@ def home(request):
             context['wave3_end_date'] = participant.enrollment_date + timedelta(days=103)
             context['wave3_days_remaining'] = 104 - study_day
         
-        # Show intervention access for Group 1 during intervention period
-        # if request.user.group == 1 and 29 <= study_day <= 56:
         if participant.group == 1 and 29 <= study_day <= 56:
             context['show_intervention_access'] = True
         

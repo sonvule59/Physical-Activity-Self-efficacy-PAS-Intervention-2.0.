@@ -42,7 +42,9 @@ LOGIN_URL = '/login/'  # Default login URL for the application
 # SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 
 ALLOWED_HOSTS = ['*']
-# PostgreSQL configuration (for use on Heroku)
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
 DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.postgresql',
@@ -58,7 +60,6 @@ DATABASES = {
 
 # # # SendGrid configuration
 # SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-
 
 # Application definition
 
@@ -133,13 +134,6 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 15.0 if TIME_COMPRESSION else 86400.0,
     },
 }
-# CELERY_BEAT_SCHEDULE = {
-#     # 'send-emails-every-minute': {
-#     #     'task': 'testpas.tasks.send_scheduled_emails',
-#     #     'schedule': 10.0,  # Run every 10 seconds to catch minute-based triggers
-    
-# }
-
 
 # Define how many seconds represent one simulated "day"
 
@@ -161,33 +155,8 @@ DEFAULT_FROM_EMAIL = 'vuleson59@gmail.com'
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# DATABASES = {'default': {}}
-# DATABASES = {
-#     'default': dj_database_url.config(default='postgres://localhost:5432')
-# }
 ATOMIC_REQUESTS = True
 
-# if "DATABASE_NAME" in os.environ:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#             'NAME': env('DATABASE_NAME'),
-#             'USER' : env('DATABASE_USER'),
-#             'PASSWORD' : env('DATABASE_PASS'),
-#             'HOST' : env('DATABASE_HOST'),
-#             'PORT' : env('DATABASE_PORT'),
-#         }
-#     }
 
 
 
