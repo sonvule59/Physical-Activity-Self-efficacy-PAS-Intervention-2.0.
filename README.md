@@ -114,13 +114,13 @@ EMAIL_USE_TLS=True
 ```
 
 ### Celery Configuration
-For scheduled tasks (email sending):
+For scheduled tasks (email sending) (If Using VSCode Open a Bash or Git Bash Terminal to do this Step):
 ```bash
 # Start Celery worker
-celery -A pas_intervention worker -l info
+celery -A config worker -l info
 
 # Start Celery beat scheduler
-celery -A pas_intervention beat -l info
+celery -A config beat -l info
 ```
 
 ### Admin Interface
