@@ -115,7 +115,7 @@ In Progress ❗🔄-sv
     - Include survey link and instructions to return monitor.
     - Allow text revisions via the administration site.
 
- 5. **Missing Code Entry Email (Wave 1, Information 14)**❗🔄-sv
+ 5. **Missing Code Entry Email (Wave 1, Information 14)** ✅-sv
 
     - Send on Day 21 at 7 AM CT to participants who missed code entry, copying Seungmin Lee.
     - Notify of missed $35 gift card but continued study participation..
