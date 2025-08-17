@@ -115,6 +115,37 @@
             {% endif %}
         {% endif %}
 
+        <!-- Wave 3 Code Entry Section -->
+        {% if progress.day_1 %}
+            {% if within_wave3_period %}
+                <section id="wave3-code-entry">
+                    <div class="alert alert-info">
+                        <h3>Wave 3 Physical Activity Code Entry</h3>
+                        <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
+                        <p>Please enter the code below:</p>
+                        <form method="POST" action="{% url 'enter_code' wave=3 %}">
+                            {% csrf_token %}
+                            <label for="code">Code:</label>
+                            <input type="text" id="code" name="code" required>
+                            <button type="submit">Submit</button>
+                        </form>
+                        {% if code_error %}
+                            <p style="color:red;">{{ code_error }}</p>
+                        {% endif %}
+                        <p><em>If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</em></p>
+                    </div>
+                </section>
+            {% elif study_day < 95 %}
+                <div class="alert alert-warning">
+                    <p>Wave 3 code entry opens on {{ start_date_wave3 }} ({{ days_until_start_wave3 }} days from today).</p>
+                </div>
+            {% elif study_day > 104 or participant.wave3_code_entered %}
+                <div class="alert alert-secondary">
+                    <p>The Wave 3 code entry period has ended.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+
         <!-- {% if progress.day_1 %}
             {% if within_wave1_period %}
                 <div class="alert alert-info">

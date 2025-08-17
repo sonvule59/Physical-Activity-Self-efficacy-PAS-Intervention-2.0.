@@ -40,10 +40,7 @@ urlpatterns = [
     path('questionnaire/', views.questionnaire, name='questionnaire'),
     
     # Information 4: Interest Screening
-    path('questionnaire/interest/', views.questionnaire_interest, name='questionnaire_interest'),
-    
-    # Information 5: Eligibility Screening
-    # path('questionnaire/eligibility/', views.eligibility_screening, name='eligibility_screening'),
+    path('questionnaire/interest/', views.questionnaire_interest, name='questionnaire_interest'),  # type: ignore
     
     # Information 6: Consent Form
     path('questionnaire/consent/', views.consent_form, name='consent_form'),
@@ -52,7 +49,7 @@ urlpatterns = [
     # Information 7: Exit Screens
     # path('exit/not-interested/', views.exit_not_interested, name='exit_not_interested'),
     path('exit/not-eligible/', views.exit_screen_not_eligible, name='exit_screen_not_eligible'),
-    # path('exit/declined/', views.exit_declined, name='exit_declined'),
+
     
     # Information 8: Waiting Screen
     path('waiting_screen/', views.waiting_screen, name='waiting_screen'),
@@ -68,16 +65,10 @@ urlpatterns = [
     path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
     
     # Surveys (Information 9, 18, 20)
-    # path('survey/wave<int:wave>/', views.survey_view, name='survey'),
+    path('survey/wave<int:wave>/', views.survey_view, name='survey'),
     
     # Daily Activity Logs (Information 13, 24)
-    # path('survey/daily-log/wave<int:wave>/', views.daily_log_view, name='daily_log'),
-    
-    # Intervention Access (Information 17)
-    # path('intervention/', views.intervention_home, name='intervention_home'),
-    
-    # Data Export (Information 26)
-    # path('admin/export-data/', views.export_data, name='export_data'),
+    path('survey/daily-log/wave<int:wave>/', views.daily_log_view, name='daily_log'),
 ]
 
 # app_name = 'testpas'

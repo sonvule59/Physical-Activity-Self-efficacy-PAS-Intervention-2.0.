@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ survey_title }}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{ survey_title }}</h1>
+            <div style="text-align: right;">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{% url 'logout' %}" class="btn btn-danger">Sign Out</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="alert alert-info">
+                <h2>{{ survey_description }}</h2>
+                <p><strong>Participant ID:</strong> {{ participant.participant_id }}</p>
+                <p><strong>Username:</strong> {{ participant.user.username }}</p>
+            </div>
+
+            <div class="survey-content">
+                <h3>Survey Instructions</h3>
+                <p>This survey will take approximately 10-15 minutes to complete. Please answer all questions honestly and to the best of your ability.</p>
+                
+                <div class="alert alert-warning">
+                    <p><strong>Important:</strong> Complete this survey within 10 days to earn your Amazon gift card.</p>
+                </div>
+
+                <!-- Placeholder for actual survey content -->
+                <div class="survey-placeholder">
+                    <h4>Survey Content</h4>
+                    <p>This is a placeholder for the actual survey questions. In a real implementation, this would contain:</p>
+                    <ul>
+                        <li>Demographic questions</li>
+                        <li>Physical activity assessment</li>
+                        <li>Self-efficacy measures</li>
+                        <li>Health-related questions</li>
+                        <li>Other study-specific measures</li>
+                    </ul>
+                    
+                    <p>The survey content would be dynamically loaded based on the wave and participant group.</p>
+                </div>
+
+                <form method="POST" class="survey-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="completion_confirmation">
+                            <input type="checkbox" id="completion_confirmation" name="completion_confirmation" required>
+                            I confirm that I have completed this survey honestly and to the best of my ability.
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Submit Survey</button>
+                        <button type="button" class="btn btn-secondary" onclick="saveProgress()">Save Progress</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
+            <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function saveProgress() {
+            alert('Progress saved! You can return to complete the survey later.');
+        }
+    </script>
+</body>
+</html> 

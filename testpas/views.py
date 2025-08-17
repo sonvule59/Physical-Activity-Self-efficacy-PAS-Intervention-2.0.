@@ -398,6 +398,13 @@ Participants should be able to access the IRB consent form on the website."""
 def consent_form(request):
     if request.method == "POST":
         logger.debug(f"Consent form POST data for {request.user.username}: {dict(request.POST)}")
+        
+        # Check if user declined consent
+        consent_choice = request.POST.get('consent')
+        if consent_choice == 'no':
+            logger.info(f"User {request.user.username} declined consent")
+            return redirect('exit_screen_not_interested')
+        
         form = ConsentForm(request.POST)
         if form.is_valid():
             user = request.user
@@ -406,7 +413,7 @@ def consent_form(request):
                 if not user_progress.eligible:
                     logger.warning(f"User {user.username} not eligible")
                     messages.error(request, "You are not eligible to participate.")
-                    return redirect("testpas:exit_not_eligible")
+                    return redirect("exit_screen_not_eligible")
             except UserSurveyProgress.DoesNotExist:
                 logger.error(f"No UserSurveyProgress found for {user.username}")
                 messages.error(request, "No eligibility record found. Please contact support.")
@@ -463,8 +470,53 @@ def exit_screen_not_eligible(request):
         # Fallback to default content
         return render(request, 'exit_screen_not_eligible.html')
 
-def exit_screen_declined(request):
-    return render(request, 'exit_screen_declined.html')
+
+
+@login_required
+def survey_view(request, wave):
+    """Handle survey views for different waves"""
+    participant = get_object_or_404(Participant, user=request.user)
+    
+    # Check if participant is eligible for this survey
+    if not participant.user.is_authenticated:
+        return redirect('login')
+    
+    context = {
+        'wave': wave,
+        'participant': participant,
+        'survey_title': f'Wave {wave} Survey',
+    }
+    
+    if wave == 1:
+        context['survey_description'] = 'Wave 1 Online Survey Set - Complete this survey within 10 days to earn a $5 Amazon gift card.'
+    elif wave == 2:
+        context['survey_description'] = 'Wave 2 Online Survey Set - Complete this survey within 10 days to earn a $5 Amazon gift card.'
+    elif wave == 3:
+        context['survey_description'] = 'Wave 3 Online Survey Set - Complete this survey within 10 days to earn a $5 Amazon gift card.'
+    else:
+        context['survey_description'] = f'Wave {wave} Survey'
+    
+    return render(request, 'survey.html', context)
+
+@login_required
+def daily_log_view(request, wave):
+    """Handle daily activity log views for different waves"""
+    participant = get_object_or_404(Participant, user=request.user)
+    
+    context = {
+        'wave': wave,
+        'participant': participant,
+        'log_title': f'Wave {wave} Daily Activity Log',
+    }
+    
+    if wave == 1:
+        context['log_description'] = 'Wave 1 Daily Activity Log - Record your physical activity for the past 7 days.'
+    elif wave == 3:
+        context['log_description'] = 'Wave 3 Daily Activity Log - Record your physical activity for the past 7 days.'
+    else:
+        context['log_description'] = f'Wave {wave} Daily Activity Log'
+    
+    return render(request, 'daily_log.html', context)
 
 """DEV TIME CONTROLS"""
 @login_required
@@ -708,8 +760,21 @@ def enter_code(request, wave):
                 elif wave == 3:
                     participant.wave3_code_entered = True
                     participant.wave3_code_entry_date = timezone.now().date()
+                    # Set Wave 3 code entry day using compressed timeline
+                    if user_progress and user_progress.day_1:
+                        participant.wave3_code_entry_day = get_study_day(
+                            user_progress.day_1,
+                            now=now,
+                            compressed=settings.TIME_COMPRESSION,
+                            seconds_per_day=settings.SECONDS_PER_DAY,
+                            reference_timestamp=user_progress.timeline_reference_timestamp
+                        )
+                    else:
+                        participant.wave3_code_entry_day = 1
                     participant.save()
-                    # send_wave3_code_entry_email.delay(participant.id)
+                    
+                    # Send Information 23 email - use participant.id (database ID)
+                    send_wave3_code_entry_email(participant.id)
                     messages.success(request, "Code entered successfully!")
                     return redirect('code_success', wave=wave)
                 

@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ log_title }}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{ log_title }}</h1>
+            <div style="text-align: right;">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{% url 'logout' %}" class="btn btn-danger">Sign Out</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="alert alert-info">
+                <h2>{{ log_description }}</h2>
+                <p><strong>Participant ID:</strong> {{ participant.participant_id }}</p>
+                <p><strong>Username:</strong> {{ participant.user.username }}</p>
+            </div>
+
+            <div class="log-content">
+                <h3>Daily Activity Log Instructions</h3>
+                <p>Please record your physical activity for each day of the monitoring period. This log helps us understand your activity patterns.</p>
+                
+                <div class="alert alert-warning">
+                    <p><strong>Important:</strong> Complete this log within 7 days to earn your Amazon gift card.</p>
+                </div>
+
+                <!-- Placeholder for actual daily log content -->
+                <div class="log-placeholder">
+                    <h4>Daily Activity Log</h4>
+                    <p>This is a placeholder for the actual daily activity log. In a real implementation, this would contain:</p>
+                    <ul>
+                        <li>Daily activity tracking forms</li>
+                        <li>Physical activity duration and intensity</li>
+                        <li>Steps taken per day</li>
+                        <li>Exercise type and duration</li>
+                        <li>Sedentary time tracking</li>
+                    </ul>
+                    
+                    <p>The log content would be dynamically loaded based on the wave and monitoring period.</p>
+                </div>
+
+                <form method="POST" class="log-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="log_completion_confirmation">
+                            <input type="checkbox" id="log_completion_confirmation" name="log_completion_confirmation" required>
+                            I confirm that I have accurately recorded my daily physical activity for the monitoring period.
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Submit Daily Log</button>
+                        <button type="button" class="btn btn-secondary" onclick="saveLogProgress()">Save Progress</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
+            <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function saveLogProgress() {
+            alert('Daily log progress saved! You can return to complete the log later.');
+        }
+    </script>
+</body>
+</html> 

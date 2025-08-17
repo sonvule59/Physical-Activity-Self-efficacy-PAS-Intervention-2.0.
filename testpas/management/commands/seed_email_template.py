@@ -53,7 +53,7 @@ EMAIL_TEMPLATES = [
                 'The timeline for wearing the physical activity monitor is complete for this wave.\n\n'
                 'Your next two tasks are listed below:\n'
                 '1. Please complete a short survey. This task must be done by today and should take approximately 10 minutes to complete.\n'
-                '   Please click the following link to complete the task: [Survey Link Placeholder].\n\n'
+                '   Please click the following link to complete the task: {survey_link}\n\n'
                 '2. Please return the monitor. Within a couple of days, research members will contact you to arrange the return.\n\n'
                 'If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.\n\n'
                 'Sincerely,\nThe Obesity and Physical Activity Research Team'
@@ -106,7 +106,7 @@ EMAIL_TEMPLATES = [
             "Hi {username},\n\n"
             "Your next task is to complete the Wave 2 Online Survey Set within 10 days. You will earn $5 in your Amazon electronic gift card account for completing this task. "
             "You will receive the accrued incentives after this study ends. After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n"
-            "· Please click the following link to complete the task: [a link that will be updated by researchers].\n\n"
+            "· Please click the following link to complete the task: {survey_link}\n\n"
             "If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee (Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
             "Sincerely,\n"
             "The Obesity and Physical Activity Research Team"
@@ -128,7 +128,15 @@ EMAIL_TEMPLATES = [
     {
         "name": "wave3_survey_ready",
         "subject": "Wave 3 Online Survey Set – Ready",
-        "body": "Dear {username},\n\nYour Wave 3 online survey is now available. Please complete it soon.\n\nBest,\nPAS 2.0 Team"
+        "body": (
+            "Hi {username},\n\n"
+            "Your next task is to complete the Wave 3 Online Survey Set within 10 days. You will earn $5 in your Amazon electronic gift card account for completing this task. "
+            "You will receive the accrued incentives after this study ends. After 10 days, this task will expire (i.e., no Amazon gift card for this task).\n"
+            "· Please click the following link to complete the task: {survey_link}\n\n"
+            "If you need any assistance or have any questions at any time, please contact Seungmin (“Seung”) Lee (Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
+            "Sincerely,\n"
+            "The Obesity and Physical Activity Research Team"
+        )
     },
     {
         "name": "wave3_monitoring_ready",
@@ -167,7 +175,7 @@ EMAIL_TEMPLATES = [
             "Thank you for participating in the PAS 2.0 study. The study has now concluded.\n\n"
             "Your final tasks are:\n"
             "1. Please complete a short survey. This task must be done by today and should take approximately 10 minutes to complete.\n"
-            "   Please click the following link to complete the task: [Survey Link Placeholder].\n\n"
+            "   Please click the following link to complete the task: {survey_link}\n\n"
             "2. Please return the monitor. Within a couple of days, research members will contact you to arrange the return.\n\n"
             "If you were assigned to Group 0, you will now receive access to the intervention. "
             "Please check your email for intervention access instructions.\n\n"
