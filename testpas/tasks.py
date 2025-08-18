@@ -64,15 +64,15 @@ def daily_timeline_check(user):
     print(f"[CHECK] User {user.id}, Day {today}, Status: {participant.email_status}")
 
     # Info 9 – Day 1: Wave 1 Online Survey Ready
-    if today == 1 and participant.email_status != 'sent_wave1_survey':
+    if today and today == 1 and participant.email_status != 'sent_wave1_survey':
         participant.send_email("wave1_survey_ready")
 
     # Info 10 – Day 11: Wave 1 Monitor Ready
-    if today == 11 and not participant.code_entry_date and participant.email_status != 'sent_wave1_monitor':
+    if today and today == 11 and not participant.code_entry_date and participant.email_status != 'sent_wave1_monitor':
         participant.send_email("wave1_monitor_ready")
 
     # Info 14 – Day 21: Missed Wave 1 Code Entry
-    if today == 21 and not participant.code_entered and participant.email_status != 'sent_wave1_missing':
+    if today and today == 21 and not participant.code_entered and participant.email_status != 'sent_wave1_missing':
         participant.send_email("wave1_missing_code")
         participant.email_status = 'sent_wave1_missing'
         participant.save()
@@ -101,7 +101,7 @@ def daily_timeline_check(user):
     """
     # Info 15 – Day 29: Randomization
     # On Day 29, randomize participants into Group 0 (control) or Group 1 (intervention) if not already randomized.
-    if today == 29 and participant.randomized_group is None:
+    if today and 29 <= today <= 30 and participant.randomized_group is None:
         import random
         participant.randomized_group = random.choice([0, 1])
         participant.save()
@@ -120,7 +120,7 @@ def daily_timeline_check(user):
     Information 18: Day 57: Wave 2 Survey Ready
     (Email) Wave 2 Online Survey Set – Ready. On Day 57, send this email to every participant from any group.  
     """
-    if today == 57 and not participant.wave2_survey_email_sent:
+    if today and today == 57 and not participant.wave2_survey_email_sent:
         participant.send_email(
             "wave2_survey_ready",
             extra_context={
@@ -136,7 +136,7 @@ def daily_timeline_check(user):
     (Email) Wave 2 No Monitoring Email – Ready. On Day 67, send this email to every participant from any group.  
     """
     # Day 67 – Send No Wave 2 Monitoring Email
-    if today == 67 and not participant.wave2_monitoring_notice_sent:
+    if today and 67 <= today <= 68 and not participant.wave2_monitoring_notice_sent:
         participant.send_email(
             "wave2_no_monitoring",
             extra_context={
@@ -151,7 +151,7 @@ def daily_timeline_check(user):
     Information 20: Day 85: Wave 3 Survey Ready
     (Email) Wave 3 Online Survey Set – Ready. On Day 85, send this email to every participant from any group.  
     """
-    if today == 85 and not participant.wave3_survey_email_sent:
+    if today and 85 <= today <= 86 and not participant.wave3_survey_email_sent:
         participant.send_email(
             "wave3_survey_ready", 
             extra_context={
@@ -163,13 +163,13 @@ def daily_timeline_check(user):
     Information 21: Day 95: Wave 3 Monitoring Ready
     (Email) Wave 3 Physical Activity Monitoring Ready. On Day 95, send this email to every participant from any group.  
     """
-    if today == 95 and not participant.wave3_monitor_ready_sent:
+    if today and today == 95 and not participant.wave3_monitor_ready_sent:
         participant.send_email("wave3_monitoring_ready", extra_context={"username": user.username})
         participant.wave3_monitor_ready_sent = True
         participant.save()
 
     # Info 25 – Day 105: Missed Wave 3 Code Entry
-    if today == 105 and not participant.wave3_code_entered and not participant.wave3_missing_code_sent:
+    if today and today == 105 and not participant.wave3_code_entered and not participant.wave3_missing_code_sent:
         participant.send_email("wave3_missing_code")
         participant.wave3_missing_code_sent = True
         participant.save()
@@ -177,7 +177,7 @@ def daily_timeline_check(user):
     # Info 24 – 8 days after Wave 3 code entry: Study End Survey & Monitor Return
     if hasattr(participant, 'wave3_code_entry_day') and participant.wave3_code_entry_day is not None:
         wave3_code_day = participant.wave3_code_entry_day
-        if today == wave3_code_day + 8 and not participant.wave3_survey_monitor_return_sent:
+        if today and today >= wave3_code_day + 8 and not participant.wave3_survey_monitor_return_sent:
             participant.send_email("study_end")
             participant.wave3_survey_monitor_return_sent = True
             participant.wave3_survey_monitor_return_date = timezone.now().date()

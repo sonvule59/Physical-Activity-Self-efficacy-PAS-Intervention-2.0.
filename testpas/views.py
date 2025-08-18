@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
 from hashlib import sha256
-from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email
+from testpas.tasks import send_wave1_monitoring_email, send_wave1_code_entry_email, send_wave3_code_entry_email
 # from testpas.settings import DEFAULT_FROM_EMAIL
 from testpas.schedule_emails import schedule_wave1_monitoring_email
 # from testpas.utils import generate_token, validate_token, send_confirmation_email
@@ -423,8 +423,10 @@ def consent_form(request):
             if created:
                 logger.info(f"Created Participant for {user.username}")
 
-            # Jun 25: Add in store timeline day instead of date 
-            user_progress.day_1 = timezone.now().date()  # Reset to today's date
+            # Set timeline for time compression testing
+            current_time = timezone.now()
+            user_progress.day_1 = current_time.date()  # Reset to today's date
+            user_progress.timeline_reference_timestamp = current_time  # Set reference timestamp for time compression
             user_progress.consent_given = True
             user_progress.save()
 
