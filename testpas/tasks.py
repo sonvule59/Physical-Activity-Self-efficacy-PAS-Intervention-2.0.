@@ -60,6 +60,12 @@ def daily_timeline_check(user):
     if not participant:
         print(f"[SKIP] No participant for user {user.id}")
         return
+    
+    # Skip participants who have completed the study (Day 112+)
+    if today and today > 112:
+        print(f"[SKIP] User {user.id} completed study (Day {today} > 112)")
+        return
+        
     # study_day = get_timeline_day(user, compressed=settings.TIME_COMPRESSION, seconds_per_day=settings.SECONDS_PER_DAY)
     print(f"[CHECK] User {user.id}, Day {today}, Status: {participant.email_status}")
 
