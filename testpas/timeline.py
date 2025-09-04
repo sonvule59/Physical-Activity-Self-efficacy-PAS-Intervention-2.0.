@@ -26,18 +26,22 @@ def get_study_day(start_date, now=None, compressed=False, seconds_per_day=86400,
     if compressed and reference_timestamp:
         # Use the reference timestamp for time compression
         seconds_elapsed = (now - reference_timestamp).total_seconds()
-        return int(seconds_elapsed // seconds_per_day) + 1
-    
-    if isinstance(start_date, datetime.date) and not isinstance(start_date, datetime.datetime):
-        # Convert date to datetime at midnight
-        start_date = datetime.datetime.combine(start_date, datetime.time.min)
-        start_date = make_aware(start_date)
-    
-    seconds_elapsed = (now - start_date).total_seconds()
-    if compressed:
-        return int(seconds_elapsed // seconds_per_day) + 1
+
+        study_day = int(seconds_elapsed // seconds_per_day) + 1
     else:
-        return (now.date() - start_date.date()).days + 1
+        if isinstance(start_date, datetime.date) and not isinstance(start_date, datetime.datetime):
+            # Convert date to datetime at midnight
+            start_date = datetime.datetime.combine(start_date, datetime.time.min)
+            start_date = make_aware(start_date)
+        
+        seconds_elapsed = (now - start_date).total_seconds()
+        if compressed:
+            study_day = int(seconds_elapsed // seconds_per_day) + 1
+        else:
+            study_day = (now.date() - start_date.date()).days + 1
+    
+    # Cap study day at 150 to prevent infinite counting
+    return min(study_day, 113)
 def get_day_difference_compressed(start_time, now=None, seconds_per_day=86400):
     """86400 seconds = 1 real-world day (24 hours * 60 minutes * 60 seconds). We can adjust this for testing purposes. We will do this
     this way to make sure it works."""
