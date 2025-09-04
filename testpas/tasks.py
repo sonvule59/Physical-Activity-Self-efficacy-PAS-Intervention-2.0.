@@ -54,7 +54,7 @@ def daily_timeline_check(user):
             now=now,
             compressed=compressed,
             seconds_per_day=seconds_per_day,
-        )
+            )
     """---------------------------------------------------------------------------------------------------------"""
     participant = getattr(user, 'participant', None)
     if not participant:
@@ -187,7 +187,7 @@ def daily_timeline_check(user):
             participant.send_email("study_end")
             participant.wave3_survey_monitor_return_sent = True
             participant.wave3_survey_monitor_return_date = timezone.now().date()
-            participant.save()
+        participant.save()
 
 @shared_task
 def send_wave1_survey_return_email(participant_id):

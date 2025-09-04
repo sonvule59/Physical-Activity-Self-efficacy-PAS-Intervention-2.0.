@@ -7,242 +7,426 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Dashboard</title>
+    <title>PAS 2.0 - Dashboard</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+        .user-info {
+            text-align: right;
+            color: #666;
+        }
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h2 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 400;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+        .card h3 {
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .status-item {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .status-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .status-item p {
+            margin: 0;
+            color: #666;
+        }
+        .alert {
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+        .alert-info {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+            color: #0d47a1;
+        }
+        .alert-warning {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+            color: #e65100;
+        }
+        .alert-success {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+            color: #2e7d32;
+        }
+        .alert-secondary {
+            background: #f5f5f5;
+            border-left-color: #9e9e9e;
+            color: #424242;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .messages {
+            margin-bottom: 2rem;
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: #e3f2fd;
+            color: #0d47a1;
+            border-left: 4px solid #2196f3;
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 3rem;
+            padding: 2rem;
+        }
+        .footer p {
+            margin: 0.5rem 0;
+            opacity: 0.9;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            .user-info {
+                text-align: center;
+            }
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to PAS Intervention</h1>
-        <!-- Add prominent logout button in header -->
-        <div style="text-align: right; margin-top: 10px;">
-            <a href="{% url 'logout' %}" style="background-color: #dc3545; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Sign Out</a>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>PAS 2.0 Dashboard</h1>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Welcome back, {{ user.username }}!</p>
+            </div>
+            <div class="user-info">
+                <p style="margin: 0 0 0.5rem 0;"><strong>Study Day:</strong> {{ study_day|default:"N/A" }}</p>
+                <a href="{% url 'logout' %}" class="logout-btn">Sign Out</a>
+            </div>
         </div>
-    </header>
 
-    <main>
-        <section id="user-info">
-            <h2>User Information</h2>
-            <p><strong>Username:</strong> {{ user.username }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>User ID:</strong> {{ user.id }}</p>
-            <p><strong>Authenticated:</strong> {{ user.is_authenticated }}</p>
-        </section>
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-        <section id="survey-progress">
-            <h2>Survey Progress</h2>    
-            {% if progress %}
-                <p><strong>Eligible:</strong> {{ progress.eligible }}</p>
-                <p><strong>Consent Given:</strong> {{ progress.consent_given }}</p>
-                <p><strong>Survey Completed:</strong> {{ progress.survey_completed }}</p>
-                <p><strong>Progress Percentage:</strong> {{ progress.progress_percentage }}%</p>
-                <p><strong>Start Time:</strong> {{ progress.start_time }}</p>
-                <p><strong>End Time:</strong> {{ progress.end_time|default:"None" }}</p>
-                <p><strong>Current Phase:</strong> {{ participant.phase|default:"" }}</p>
-                {% if participant.monitoring_start_date %}
-                    <p><strong>Monitoring Start Date:</strong> {{ participant.monitoring_start_date }}</p> 
-                {% else %}
-                    <p><strong>Monitoring Start Date:</strong> Not Available</p>
-                {% endif %}
-                
-                <!-- NEW: Enrollment Status Summary -->
-                <h3>Enrollment Status</h3>
-                {% if progress.eligible and progress.consent_given %}
-                    <p style="color: green;"><strong>✅ Fully Enrolled</strong></p>
-                {% elif progress.eligible and not progress.consent_given %}
-                    <p style="color: orange;"><strong>⚠️ Eligible - Pending Consent</strong></p>
-                {% elif not progress.eligible %}
-                    <p style="color: red;"><strong>❌ Not Eligible</strong></p>
-                {% else %}
-                    <p style="color: gray;"><strong>⏳ In Progress</strong></p>
-                {% endif %}
-            {% else %}
-                <p>No progress recorded yet.</p>
-            {% endif %}
-        </section>
-
-        {% block content %}
-        <div class="container mt-5">
-            <h1>Welcome, {{ user.username }}</h1>
-        </div>
-        {% endblock %}
-
-       <h2>Study Dashboard</h2>
-    <!-- FIXED: Display messages for errors or success -->
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li class="message">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    {% if needs_consent %}
-        <div class="alert alert-info">
-            <h3>Enrollment Status: Eligible - Pending Consent</h3>
-            <p>Congratulations! You have been found eligible for the study. To complete your enrollment, please provide your consent.</p>
-            <p><a href="{% url 'consent_form' %}" class="btn btn-primary">Complete Consent Form</a></p>
-        </div>
-    {% elif progress and progress.eligible and progress.consent_given and participant %}
-        <p>Welcome, {{ participant.user.username }}!</p>
-        <!-- Show Wave 1 prompt only during Day 11–20 -->
-        {% if progress.day_1 %}
-            {% if within_wave1_period %}
-                <section id="wave1-code-entry">
-                    <div class="alert alert-info">
-                        <h3>Wave 1 Physical Activity Code Entry</h3>
-                        <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
-                        <p>Please enter the code below:</p>
-                        <form method="POST" action="{% url 'enter_code' wave=1 %}">
-                            {% csrf_token %}
-                            <label for="code">Code:</label>
-                            <input type="text" id="code" name="code" required>
-                            <button type="submit">Submit</button>
-                        </form>
-                        {% if code_error %}
-                            <p style="color:red;">{{ code_error }}</p>
-                        {% endif %}
-                        <p><em>If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</em></p>
+        <!-- Enrollment Status -->
+        {% if needs_consent %}
+            <div class="card">
+                <div class="alert alert-warning">
+                    <h3>📋 Enrollment Status: Eligible - Pending Consent</h3>
+                    <p>Congratulations! You have been found eligible for the study. To complete your enrollment, please provide your consent.</p>
+                    <a href="{% url 'consent_form' %}" class="btn btn-primary">Complete Consent Form</a>
+                </div>
+            </div>
+        {% elif progress and progress.eligible and progress.consent_given and participant %}
+            <!-- Study Progress Card -->
+            <div class="card">
+                <h2>📊 Study Progress</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <h4>Enrollment Status</h4>
+                        <p style="color: #4caf50; font-weight: 600;">✅ Fully Enrolled</p>
                     </div>
-                </section>
-            {% elif study_day < 11 %}
-                <div class="alert alert-warning">
-                    <p>Wave 1 code entry opens on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days from today).</p>
-                </div>
-            {% elif study_day > 20 or participant.code_entered %}
-                <div class="alert alert-secondary">
-                    <p>The Wave 1 code entry period has ended.</p>
-                </div>
-            {% endif %}
-        {% endif %}
-
-        <!-- Wave 3 Code Entry Section -->
-        {% if progress.day_1 %}
-            {% if within_wave3_period %}
-                <section id="wave3-code-entry">
-                    <div class="alert alert-info">
-                        <h3>Wave 3 Physical Activity Code Entry</h3>
-                        <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
-                        <p>Please enter the code below:</p>
-                        <form method="POST" action="{% url 'enter_code' wave=3 %}">
-                            {% csrf_token %}
-                            <label for="code">Code:</label>
-                            <input type="text" id="code" name="code" required>
-                            <button type="submit">Submit</button>
-                        </form>
-                        {% if code_error %}
-                            <p style="color:red;">{{ code_error }}</p>
-                        {% endif %}
-                        <p><em>If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</em></p>
+                    <div class="status-item">
+                        <h4>Study Day</h4>
+                        <p><strong>{{ study_day|default:"N/A" }}</strong> of 113 days</p>
                     </div>
-                </section>
-            {% elif study_day < 95 %}
-                <div class="alert alert-warning">
-                    <p>Wave 3 code entry opens on {{ start_date_wave3 }} ({{ days_until_start_wave3 }} days from today).</p>
+                    <div class="status-item">
+                        <h4>Progress</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ progress_percentage|default:0 }}%;"></div>
+                        </div>
+                        <p>{{ progress_percentage|default:0 }}% Complete</p>
+                    </div>
+                    <div class="status-item">
+                        <h4>Participant ID</h4>
+                        <p><strong>{{ participant.participant_id }}</strong></p>
+                    </div>
                 </div>
-            {% elif study_day > 104 or participant.wave3_code_entered %}
-                <div class="alert alert-secondary">
-                    <p>The Wave 3 code entry period has ended.</p>
+            </div>
+
+            <!-- Wave 1 Code Entry -->
+            {% if progress.day_1 %}
+                {% if within_wave1_period %}
+                    <div class="card">
+                        <div class="alert alert-info">
+                            <h3>📱 Wave 1 Physical Activity Code Entry</h3>
+                            <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
+                            <p>Please enter the code below:</p>
+                            <form method="POST" action="{% url 'enter_code' wave=1 %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="code">Code:</label>
+                                    <input type="text" id="code" name="code" required placeholder="Enter your code">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Code</button>
+                            </form>
+                            {% if code_error %}
+                                <p style="color: #dc3545; margin-top: 1rem;">{{ code_error }}</p>
+                            {% endif %}
+                            <p style="margin-top: 1rem; font-style: italic; color: #666;">If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
+                        </div>
+                    </div>
+                {% elif study_day < 11 %}
+                    <div class="card">
+                        <div class="alert alert-warning">
+                            <h3>⏳ Wave 1 Code Entry</h3>
+                            <p>Wave 1 code entry opens on <strong>{{ start_date_wave1 }}</strong> ({{ days_until_start_wave1 }} days from today).</p>
+                        </div>
+                    </div>
+                {% elif study_day > 20 or participant.code_entered %}
+                    <div class="card">
+                        <div class="alert alert-secondary">
+                            <h3>✅ Wave 1 Code Entry</h3>
+                            <p>The Wave 1 code entry period has ended.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Wave 3 Code Entry -->
+            {% if progress.day_1 %}
+                {% if within_wave3_period %}
+                    <div class="card">
+                        <div class="alert alert-info">
+                            <h3>📱 Wave 3 Physical Activity Code Entry</h3>
+                            <p>You will receive a code to wear the physical activity monitor when you get the device.</p>
+                            <p>Please enter the code below:</p>
+                            <form method="POST" action="{% url 'enter_code' wave=3 %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="code">Code:</label>
+                                    <input type="text" id="code" name="code" required placeholder="Enter your code">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Code</button>
+                            </form>
+                            {% if code_error %}
+                                <p style="color: #dc3545; margin-top: 1rem;">{{ code_error }}</p>
+                            {% endif %}
+                            <p style="margin-top: 1rem; font-style: italic; color: #666;">If you need any assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
+                        </div>
+                    </div>
+                {% elif study_day < 95 %}
+                    <div class="card">
+                        <div class="alert alert-warning">
+                            <h3>⏳ Wave 3 Code Entry</h3>
+                            <p>Wave 3 code entry opens on <strong>{{ start_date_wave3 }}</strong> ({{ days_until_start_wave3 }} days from today).</p>
+                        </div>
+                    </div>
+                {% elif study_day > 104 or participant.wave3_code_entered %}
+                    <div class="card">
+                        <div class="alert alert-secondary">
+                            <h3>✅ Wave 3 Code Entry</h3>
+                            <p>The Wave 3 code entry period has ended.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Intervention Access -->
+            {% if participant and participant.randomized_group == 1 and 29 <= study_day and study_day <= 56 %}
+                <div class="card">
+                    <div class="alert alert-success">
+                        <h3>🎯 Intervention Access Available</h3>
+                        <p>You now have access to the physical activity intervention (Days 29-56).</p>
+                        <a href="{% url 'intervention_access' %}" class="btn btn-success">Access Intervention</a>
+                    </div>
+                </div>
+            {% elif participant and participant.randomized_group == 0 and study_day > 112 %}
+                <div class="card">
+                    <div class="alert alert-success">
+                        <h3>🎯 Intervention Access Available</h3>
+                        <p>You now have access to the physical activity intervention after study completion.</p>
+                        <a href="{% url 'intervention_access' %}" class="btn btn-success">Access Intervention</a>
+                    </div>
                 </div>
             {% endif %}
-        {% endif %}
 
-        <!-- {% if progress.day_1 %}
-            {% if within_wave1_period %}
-                <div class="alert alert-info">
-                    <h3>Wave 1 Code Entry</h3>
-                    <p>To begin physical activity monitoring, enter your access code.</p>
-                    <p>Code entry is open until <strong>{{ end_date_wave1 }}</strong> ({{ days_until_end_wave1 }} days remaining).</p>
-                    <a href="{% url 'enter_code' 1 %}" class="btn btn-primary">Enter Code</a>
-                </div>
-            {% elif days_until_start_wave1 > 0 %}
-                <div class="alert alert-warning">
-                    <p>Wave 1 code entry opens on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days from today).</p>
-                </div>
-            {% elif days_until_end_wave1 <= 0 %}
-                <div class="alert alert-secondary">
-                    <p>Wave 1 code entry period has ended.</p>
-                </div>
-            {% endif %}
-        {% endif %} -->
- 
-
-        
-       <!--  {% if within_wave1_period %}
-            <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
-            <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
-
-        {% elif progress.day_1 %}
-            {% if days_until_start_wave1 > 0 %}
-                <p>Wave 1 code entry starts on {{ start_date_wave1 }} ({{ days_until_start_wave1 }} days away).</p>
-            {% elif days_until_end_wave1 <= 0 %}
-                <p>Wave 1 code entry period has ended.</p>
-            {% endif %}
-        {% endif %}
-        {% if within_wave3_period %}
-            <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
-        {% endif %} -->
-        <!-- Intervention Access Section -->
-        {% if participant and participant.randomized_group == 1 and 29 <= study_day and study_day <= 56 %}
-            <section id="intervention-access">
-                <div class="alert alert-success">
-                    <h3>Intervention Access Available</h3>
-                    <p>You now have access to the physical activity intervention (Days 29-56).</p>
-                    <a href="{% url 'intervention_access' %}" class="btn btn-primary">Access Intervention</a>
-                </div>
-            </section>
-        {% elif participant and participant.randomized_group == 0 and study_day > 112 %}
-            <section id="intervention-access">
-                <div class="alert alert-success">
-                    <h3>Intervention Access Available</h3>
-                    <p>You now have access to the physical activity intervention after study completion.</p>
-                    <a href="{% url 'intervention_access' %}" class="btn btn-primary">Access Intervention</a>
-                </div>
-            </section>
-        {% endif %}
-        
-        <!-- ADDED: Contact information for support -->
-        <p>If you need assistance, contact Seungmin Lee at svu23@iastate.edu or 517-898-0020.</p>
-    {% else %}
-        <!-- FIXED: Clear message for incomplete enrollment -->
-        <p>Please complete enrollment to view study progress.</p>
-        {% if not progress %}
-            <p><a href="{% url 'questionnaire' %}">Complete Eligibility Questionnaire</a></p>
-        {% endif %}
-    {% endif %} 
-        <!-- <h2>Study Dashboard</h2>
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li class="message">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    {% if progress and participant %}
-        <p>Welcome, {{ participant.user.username }}!</p>
-        <p class="debug">Study Day: {{ study_day }}</p>
-        {% if within_wave1_period %}
-            <p><a href="{% url 'enter_code' 1 %}">Enter Wave 1 Physical Activity Code</a></p>
-            <p>Code entry available until {{ end_date_wave1 }} ({{ days_until_end_wave1 }} days remaining).</p>
         {% else %}
-            <p>Wave 1 code entry is not currently available.</p>
+            <!-- Not Enrolled -->
+            <div class="card">
+                <div class="alert alert-warning">
+                    <h3>📝 Complete Enrollment</h3>
+                    <p>Please complete enrollment to view study progress.</p>
+                    {% if not progress %}
+                        <a href="{% url 'questionnaire' %}" class="btn btn-primary">Complete Eligibility Questionnaire</a>
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
-        {% if within_wave3_period %}
-            <p><a href="{% url 'enter_code' 3 %}">Enter Wave 3 Physical Activity Code</a></p>
-        {% endif %}
-    {% else %}
-        <p>Please complete enrollment to view study progress.</p>
-    {% endif %} -->
-    
-        <section id="actions">
-            <h2>Actions</h2>
-            <ul>
-                <li><a href="{% url 'logout' %}">Logout</a></li>
-            </ul>
-        </section>
-    </main>
 
-    <footer>
+        <!-- Contact Information -->
+        <div class="card">
+            <h2>📞 Need Help?</h2>
+            <p>If you need assistance, contact Seungmin Lee at <strong>svu23@iastate.edu</strong> or <strong>517-898-0020</strong>.</p>
+        </div>
+    </div>
+
+    <div class="footer">
         <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
-    </footer>
+    </div>
 </body>
 </html>

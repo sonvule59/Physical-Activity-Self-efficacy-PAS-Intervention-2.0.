@@ -22,8 +22,9 @@ from testpas import views, settings
 from testpas.views import *
 
 urlpatterns = [
-    # Home and authentication
-    path('', views.home, name='home'),
+    # Landing page and authentication
+    path('', views.landing, name='landing'),
+    path('home/', views.home, name='home'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),

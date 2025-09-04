@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAS Intervention 2.0 - Welcome</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .description {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+        .footer {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .description {
+                font-size: 1.1rem;
+            }
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to PAS 2.0</h1>
+        
+        <div class="description">
+            The Physical Activity Self-efficacy (PAS) intervention is an online behavioral intervention specifically designed to promote physical activity in adults with obesity by providing capability-enhancing learning opportunities.
+        </div>
+        
+        <div class="cta-buttons">
+            <a href="{% url 'create_account' %}" class="btn btn-primary">Join the Study</a>
+            <a href="{% url 'login' %}" class="btn btn-secondary">Participant Login</a>
+        </div>
+        
+        <div class="footer">
+            <p>© Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+            <p>For assistance, contact Seungmin ("Seung") Lee at seunglee@iastate.edu or 517-898-0020.</p>
+        </div>
+    </div>
+</body>
+</html>

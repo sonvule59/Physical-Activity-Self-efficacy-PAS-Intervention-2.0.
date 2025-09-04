@@ -38,109 +38,117 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+def landing(request):
+    """Landing page for unauthenticated users"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'landing.html')
+
 @login_required
 def home(request):
-    """Home page - shows appropriate content based on user status"""
-    current_date = timezone.now().date()
-    day_1 = current_date  # Initialize with current_date instead of 0
-    participant = None  # Initialize participant
-    if not request.user.is_authenticated:
-        return render(request, 'home.html', {'user': None})
-    context = {'user': request.user, 'within_wave1_period': False, 'within_wave3_period': False, 'study_day': 0}
-    current_date = timezone.now().date()
-    if request.user.is_authenticated:
-        try:
-            participant = Participant.objects.get(user=request.user)
-            progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
-            #  START: Correct enrollment status check
-            if progress and progress.consent_given:
-                context['progress'] = progress
-                context['participant'] = participant
-                context['start_date'] = progress.day_1
-                day_1 = progress.day_1 if progress.day_1 else participant.enrollment_date if participant.enrollment_date else current_date
-                # study_day = (current_date - progress.day_1).days + 1 if progress.day_1 else 1
-                # Use compressed timeline calculation
-                study_day = get_study_day(
-                    progress.day_1,
-                    now=get_current_time(),
-                    compressed=settings.TIME_COMPRESSION,   
-                    seconds_per_day=settings.SECONDS_PER_DAY
-                ) if progress.day_1 else 1
-                context['study_day'] = study_day
-                # context['days_until_start'] = 0
-                # context['days_until_end'] = 0
-                # if progress.day_1:
-                    # Wave 1 code entry period (Days 11-20)
-                current_date = timezone.now().date()
-                # day_11 = progress.day_1 + timezone.timedelta(days=10)
-                # day_21 = progress.day_1 + timezone.timedelta(days=20)
-                day_11 = day_1 + timezone.timedelta(days=10)
-                day_21 = day_1 + timezone.timedelta(days=20)
-                context['within_wave1_period'] = day_11 <= current_date <= day_21 and not participant.code_entered
-                context['days_until_start'] = (day_11 - current_date).days if current_date < day_11 else 0
-                context['days_until_end'] = (day_21 - current_date).days if current_date <= day_21 else 0
+
+# current_date = timezone.now().date()
+#     day_1 = current_date  # Initialize with current_date instead of 0
+#     participant = None  # Initialize participant
+#     if not request.user.is_authenticated:
+#         return render(request, 'home.html', {'user': None})
+#     context = {'user': request.user, 'within_wave1_period': False, 'within_wave3_period': False, 'study_day': 0}
+#     current_date = timezone.now().date()
+#     if request.user.is_authenticated:
+#         try:
+#             participant = Participant.objects.get(user=request.user)
+#             progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
+#             #  START: Correct enrollment status check
+#             if progress and progress.consent_given:
+#                 context['progress'] = progress
+#                 context['participant'] = participant
+#                 context['start_date'] = progress.day_1
+#                 day_1 = progress.day_1 if progress.day_1 else participant.enrollment_date if participant.enrollment_date else current_date
+#                 # study_day = (current_date - progress.day_1).days + 1 if progress.day_1 else 1
+#                 # Use compressed timeline calculation
+#                 study_day = get_study_day(
+#                     progress.day_1,
+#                     now=get_current_time(),
+#                     compressed=settings.TIME_COMPRESSION,   
+#                     seconds_per_day=settings.SECONDS_PER_DAY
+#                 ) if progress.day_1 else 1
+#                 context['study_day'] = study_day
+#                 # context['days_until_start'] = 0
+#                 # context['days_until_end'] = 0
+#                 # if progress.day_1:
+#                     # Wave 1 code entry period (Days 11-20)
+#                 current_date = timezone.now().date()
+#                 # day_11 = progress.day_1 + timezone.timedelta(days=10)
+#                 # day_21 = progress.day_1 + timezone.timedelta(days=20)
+#                 day_11 = day_1 + timezone.timedelta(days=10)
+#                 day_21 = day_1 + timezone.timedelta(days=20)
+#                 context['within_wave1_period'] = day_11 <= current_date <= day_21 and not participant.code_entered
+#                 context['days_until_start'] = (day_11 - current_date).days if current_date < day_11 else 0
+#                 context['days_until_end'] = (day_21 - current_date).days if current_date <= day_21 else 0
                 
-                # Wave 3 code entry period (Days 95-104)
-                day_95 = day_1 + timedelta(days=94) if progress.day_1 else current_date
-                day_104 = day_1 + timedelta(days=103) if progress.day_1 else current_date
-                context['within_wave3_period'] = day_95 <= current_date <= day_104 and not participant.wave3_code_entered
-                context['wave3_start_date'] = day_95
-                context['wave3_end_date'] = day_104
-                context['wave3_days_remaining'] = (day_104 - current_date).days if day_95 <= current_date <= day_104 else 0
+#                 # Wave 3 code entry period (Days 95-104)
+#                 day_95 = day_1 + timedelta(days=94) if progress.day_1 else current_date
+#                 day_104 = day_1 + timedelta(days=103) if progress.day_1 else current_date
+#                 context['within_wave3_period'] = day_95 <= current_date <= day_104 and not participant.wave3_code_entered
+#                 context['wave3_start_date'] = day_95
+#                 context['wave3_end_date'] = day_104
+#                 context['wave3_days_remaining'] = (day_104 - current_date).days if day_95 <= current_date <= day_104 else 0
         
-                # Intervention access
-                context['show_intervention_access'] = (
-                    (participant.group == 1 and 29 <= study_day <= 56) or
-                    (participant.group == 0 and study_day > 112)
-                    )
-            else:
-                context['progress'] = None  # Not enrolled
-                context['participant'] = participant if participant else None
-                context['study_day'] = 0
-                context['within_wave1_period'] = False
-                context['within_wave3_period'] = False
-        except Participant.DoesNotExist:
-            context['progress'] = None  # Not enrolled
-            context['participant'] = None
-            context['study_day'] = 0
-            context['within_wave1_period'] = False
-            context['within_wave3_period'] = False
-            #  END
-    # Calculate study day
-    study_day = (current_date - day_1).days + 1
+#                 # Intervention access
+#                 context['show_intervention_access'] = (
+#                     (participant.group == 1 and 29 <= study_day <= 56) or
+#                     (participant.group == 0 and study_day > 112)
+#                     )
+#             else:
+#                 context['progress'] = None  # Not enrolled
+#                 context['participant'] = participant if participant else None
+#                 context['study_day'] = 0
+#                 context['within_wave1_period'] = False
+#                 context['within_wave3_period'] = False
+#         except Participant.DoesNotExist:
+#             context['progress'] = None  # Not enrolled
+#             context['participant'] = None
+#             context['study_day'] = 0
+#             context['within_wave1_period'] = False
+#             context['within_wave3_period'] = False
+#             #  END
+#     # Calculate study day
+#     study_day = (current_date - day_1).days + 1
     
-    # Determine what to show based on study day
-    context = {
-        'user': request.user,
-        'participant': participant,
-        'study_day': study_day,
-        'within_wave1_period': False,
-        'within_wave3_period': False,
-    }
+#     # Determine what to show based on study day
+#     context = {
+#         'user': request.user,
+#         'participant': participant,
+#         'study_day': study_day,
+#         'within_wave1_period': False,
+#         'within_wave3_period': False,
+#     }
     
-    if participant and study_day:
-        # Wave 1 code entry period (Days 11-20)
-        if 11 <= study_day <= 20 and not participant.code_entered:
-            context['within_wave1_period'] = True
-            context['wave1_start_date'] = participant.enrollment_date + timedelta(days=10)
-            context['wave1_end_date'] = participant.enrollment_date + timedelta(days=19)
-            context['wave1_days_remaining'] = 20 - study_day
+#     if participant and study_day:
+#         # Wave 1 code entry period (Days 11-20)
+#         if 11 <= study_day <= 20 and not participant.code_entered:
+#             context['within_wave1_period'] = True
+#             context['wave1_start_date'] = participant.enrollment_date + timedelta(days=10)
+#             context['wave1_end_date'] = participant.enrollment_date + timedelta(days=19)
+#             context['wave1_days_remaining'] = 20 - study_day
         
-        # Wave 3 code entry period (Days 95-104)
-        elif 95 <= study_day <= 104 and not participant.wave3_code_entered:
-            context['within_wave3_period'] = True
-            context['wave3_start_date'] = participant.enrollment_date + timedelta(days=94)
-            context['wave3_end_date'] = participant.enrollment_date + timedelta(days=103)
-            context['wave3_days_remaining'] = 104 - study_day
+#         # Wave 3 code entry period (Days 95-104)
+#         elif 95 <= study_day <= 104 and not participant.wave3_code_entered:
+#             context['within_wave3_period'] = True
+#             context['wave3_start_date'] = participant.enrollment_date + timedelta(days=94)
+#             context['wave3_end_date'] = participant.enrollment_date + timedelta(days=103)
+#             context['wave3_days_remaining'] = 104 - study_day
         
-        if participant.group == 1 and 29 <= study_day <= 56:
-            context['show_intervention_access'] = True
+#         if participant.group == 1 and 29 <= study_day <= 56:
+#             context['show_intervention_access'] = True
         
-        # Show intervention access for Group 0 after study
-        elif participant.group == 0 and study_day > 112:
-            context['show_intervention_access'] = True
+#         # Show intervention access for Group 0 after study
+#         elif participant.group == 0 and study_day > 112:
+#             context['show_intervention_access'] = True
     
-    return render(request, 'home.html', context)
+#     return render(request, 'home.html', context)
+    """Home page - redirects authenticated users to dashboard"""
+    return redirect('dashboard')
 
 
 """Information 2: Create Account"""
@@ -181,7 +189,7 @@ def create_account(request):
                         'redirect': '/'
                     })
                 messages.success(request, "Account created. Please check your email to confirm.")
-                return redirect("home")
+                return redirect("landing")
             except Exception as e:
                 logger.error(f"Error creating account for username {form.cleaned_data.get('username')}: {e}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -622,12 +630,12 @@ def dashboard(request):
                 days_until_start_wave3 = max(0, (day_95 - current_date).days)
                 days_until_end_wave3 = max(0, (day_104 - current_date).days)
                 
-                print(f"[DEBUG] Day 11: {day_11}")
-                print(f"[DEBUG] Day 21: {day_21}")
-                print(f"[DEBUG] Day 95: {day_95}")
-                print(f"[DEBUG] Day 104: {day_104}")
-                print(f"[DEBUG] Days until start wave 1: {days_until_start_wave1}")
-                print(f"[DEBUG] Days until end wave 1: {days_until_end_wave1}")
+            print(f"[DEBUG] Day 11: {day_11}")
+            print(f"[DEBUG] Day 21: {day_21}")
+            print(f"[DEBUG] Day 95: {day_95}")
+            print(f"[DEBUG] Day 104: {day_104}")
+            print(f"[DEBUG] Days until start wave 1: {days_until_start_wave1}")
+            print(f"[DEBUG] Days until end wave 1: {days_until_end_wave1}")
 
             # ----  Study progress percentage ----
             total_study_days = 113  # Set this to your full study duration
@@ -851,8 +859,8 @@ def logout_view(request):
     logout(request)
     # Clear all session data
     request.session.flush()
-    print(f"[DEBUG] Session cleared, redirecting to login")
-    return redirect('login')  # Redirect to the login page after logout
+    print(f"[DEBUG] Session cleared, redirecting to landing")
+    return redirect('landing')  # Redirect to the landing page after logout
 
 @login_required
 def intervention_access(request):

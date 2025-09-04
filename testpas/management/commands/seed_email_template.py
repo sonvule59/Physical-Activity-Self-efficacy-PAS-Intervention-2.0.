@@ -97,7 +97,7 @@ EMAIL_TEMPLATES = [
             "(Principal Investigator) at svu23@iastate.edu or 517-898-0020.\n\n"
             "Sincerely,\n\n"
             "The Obesity and Physical Activity Research Team"
-        )
+    )
     },
     {
         "name": "wave2_survey_ready",
