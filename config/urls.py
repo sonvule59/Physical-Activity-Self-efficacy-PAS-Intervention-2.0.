@@ -63,6 +63,8 @@ urlpatterns = [
     path('password-reset/', views.password_reset, name='password_reset'),
     path('password-reset-confirm/<str:token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path('intervention/', views.intervention_access, name='intervention_access'),
+    path('intervention/test/', views.intervention_access_test, name='intervention_access_test'),
+    path('intervention/challenge-25/', views.intervention_challenge_25, name='intervention_challenge_25'),
     path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
     
     # Surveys (Information 9, 18, 20)

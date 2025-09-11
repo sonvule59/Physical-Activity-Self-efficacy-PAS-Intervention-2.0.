@@ -1,0 +1,390 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge 25: Leisure Related Physical Activity</title>
+    <style>
+
+        /* General container styling for centering */
+        .container {
+            text-align: center; /* Center-aligns all child elements */
+            margin: 20px auto; /* Adds space around the container */
+        }
+
+         /* Heading styling */
+         .heading {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* General character styling */
+        .character-container {
+            width: 100px;
+            height: 150px;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto 10px; /* Centers the image and adds spacing below it */
+            margin-bottom: 20px;
+        }
+
+        .character-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        /* Points display styling */
+        .points-section {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px; /* Adds spacing below points */
+        }
+
+        /* Flexbox layout for button container */
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;       /* Allows buttons to wrap to the next line */
+            gap: 15px;              /* Space between buttons */
+            justify-content: center; /* Center buttons in the container */
+            max-width: 800px;
+            margin: 0 auto;         /* Center the container on the page */
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            max-width: 200px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Button Styling */
+        .tooltip button {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tooltip button:hover {
+            background-color: #45a049;
+        }
+
+        /* Walking Animation */
+        @keyframes walking {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(50px); }
+            100% { transform: translateX(0); }
+        }
+
+        .walking {
+            animation: walking 2s infinite;
+        }
+
+        /* Water Aerobics Animation */
+        @keyframes waterAerobics {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+
+        .water-aerobics {
+            animation: waterAerobics 1.5s infinite ease-in-out;
+        }
+
+        /* Swimming Animation */
+        @keyframes swimming {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(30px, -10px); }
+            50% { transform: translate(60px, 0); }
+            75% { transform: translate(30px, 10px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .swimming {
+            animation: swimming 2s infinite ease-in-out;
+        }
+
+
+         /* Yoga Animation */
+         @keyframes yoga {
+            0% { transform: rotate(0); }
+            50% { transform: rotate(15deg); }
+            100% { transform: rotate(0); }
+        }
+
+        .yoga {
+            animation: yoga 3s infinite ease-in-out;
+        }
+
+        /* Tai Chi Animation */
+        @keyframes taiChi {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .tai-chi {
+            animation: taiChi 2.5s infinite;
+        }
+
+        /* Cycling Animation */
+        @keyframes cycling {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+
+        .cycling {
+            animation: cycling 1s infinite linear;
+        }
+
+        /* Dancing Animation */
+        @keyframes dancing {
+            0% { transform: rotate(0); }
+            50% { transform: rotate(20deg); }
+            100% { transform: rotate(0); }
+        }
+
+        .dancing {
+            animation: dancing 0.8s infinite;
+        }
+
+        /* Chair Exercises Animation */
+        @keyframes chairExercises {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .chair-exercises {
+            animation: chairExercises 1.5s infinite ease-in-out;
+        }
+
+        /* Light Gardening Animation */
+        @keyframes gardening {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+            100% { transform: translateY(0); }
+        }
+
+        .light-gardening {
+            animation: gardening 1.2s infinite;
+        }
+
+        /* Stretching Animation */
+        @keyframes stretching {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .stretching {
+            animation: stretching 2s infinite ease-in-out;
+        }
+
+        /* Golf Animation */
+        @keyframes golf {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .golf {
+            animation: golf 2s infinite;
+        }
+
+        /* Bowling Animation */
+        @keyframes bowling {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(15px); }
+            100% { transform: translateX(0); }
+        }
+
+        .bowling {
+            animation: bowling 1.8s infinite;
+        }
+
+        /* Shuffleboard Animation */
+        @keyframes shuffleboard {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shuffleboard {
+            animation: shuffleboard 1.5s infinite;
+        }
+
+        /* Fishing Animation */
+        @keyframes fishing {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+
+        .fishing {
+            animation: fishing 2.5s infinite ease-in-out;
+        }
+
+        /* Nature Walks Animation */
+        @keyframes natureWalks {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .nature-walks {
+            animation: natureWalks 3s infinite ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Heading -->
+    <div class="heading">Challenge 25: Leisure-Related Physical Activity</div>
+
+    <!-- Character Container -->
+    <div class="character-container" id="character-container">
+        <img src="{% static 'demo_game/images/obese_man.png' %}" alt="Character" id="character">
+    </div>
+
+    <!-- Points Display -->
+    <div class="points-section">Total Points: <span id="points">0</span></div>
+</div>
+
+<!-- Buttons with tooltips -->
+<div class="button-container">
+    <div class="tooltip">
+        <button onclick="setActivity('walking', 10)">Walking</button>
+        <span class="tooltiptext">Gentle walks around the neighborhood or in a local park</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('water-aerobics', 10)">Water Aerobics</button>
+        <span class="tooltiptext">Low-impact exercise classes in a pool</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('swimming', 10)">Swimming</button>
+        <span class="tooltiptext">Recreational swimming or swimming laps at a comfortable pace</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('yoga', 10)">Yoga</button>
+        <span class="tooltiptext">Yoga classes or home practice tailored for beginners or individuals with larger bodies.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('tai-chi', 10)">Tai Chi</button>
+        <span class="tooltiptext">Gentle martial arts focusing on slow, controlled movements.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('cycling', 10)">Cycling</button>
+        <span class="tooltiptext">Riding a bicycle on flat, even surfaces, or using a stationary bike.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('dancing', 10)">Dancing</button>
+        <span class="tooltiptext">Low-impact dance classes or dancing at home for fun.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('chair-exercises', 10)">Chair Excercises</button>
+        <span class="tooltiptext">Seated workouts that can be done with or without weights.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('light-gardening', 10)">Light Gardening</button>
+        <span class="tooltiptext">Planting, watering, and maintaining a garden.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('dancing', 10)">Dancing</button>
+        <span class="tooltiptext">Low-impact dance classes or dancing at home for fun.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('stretching', 10)">Stretching Routines</button>
+        <span class="tooltiptext">Gentle stretching exercises to improve flexibility.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('golf', 10)">Golf</button>
+        <span class="tooltiptext">Walking the course and swinging clubs at a comfortable pace.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('bowling', 10)">Bowling</button>
+        <span class="tooltiptext">A fun, social activity that involves some walking and lifting.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('shuffleboard', 10)">Shuffleboard or Bocce Ball</button>
+        <span class="tooltiptext">Light physical activity with a social component.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('fishing', 10)">Fishing</button>
+        <span class="tooltiptext">Enjoying the outdoors and light physical activity.</span>
+    </div>
+
+    <div class="tooltip">
+        <button onclick="setActivity('nature-walks', 10)">Nature Walks</button>
+        <span class="tooltiptext">Exploring nature trails at a comfortable pace.</span>
+    </div>
+</div>
+
+<script>
+    // Initialize points
+    let points = 0;
+
+    function setActivity(activity, pointsAwarded) {
+        // Get the character container element
+        var characterContainer = document.getElementById('character-container');
+
+        // Remove previous activity class
+        characterContainer.className = 'character-container';  
+
+        // Add the new activity class to trigger animation
+        characterContainer.classList.add(activity);  
+
+        // Update points
+        points += pointsAwarded;
+        document.getElementById('points').innerText = points;  // Update points on the screen
+    }
+</script>
+
+</body>
+</html>

@@ -477,7 +477,6 @@ def exit_screen_not_eligible(request):
         content = Content.objects.get(content_type='exit_screen')
         return render(request, 'exit_screen_not_eligible.html', {'content': content})
     except Content.DoesNotExist:
-        # Fallback to default content
         return render(request, 'exit_screen_not_eligible.html')
 
 
@@ -851,7 +850,6 @@ def waiting_screen(request):
         content = Content.objects.get(content_type='waiting_screen')
         return render(request, "waiting_screen.html", {'content': content})
     except Content.DoesNotExist:
-        # Fallback to default content
         return render(request, "waiting_screen.html")
 
 def logout_view(request):
@@ -911,6 +909,40 @@ def intervention_access(request):
         context = {
             'participant': participant,
             'study_day': study_day,
+            'has_access': has_access,
+            'access_message': access_message,
+            'challenges_completed': participant.challenges_completed,
+            'intervention_login_count': participant.intervention_login_count,
+        }
+        
+        return render(request, 'intervention_access.html', context)
+        
+    except Participant.DoesNotExist:
+        messages.error(request, "Participant record not found.")
+        return redirect('dashboard')
+
+@login_required
+def intervention_challenge_25(request):
+    """Render Challenge 25: Leisure-Related Physical Activity demo."""
+    return render(request, 'interventions/challenge_25.html')
+
+@login_required
+def intervention_access_test(request):
+    """Test version of intervention access that bypasses study day restrictions."""
+    try:
+        participant = Participant.objects.get(user=request.user)
+        user_progress = UserSurveyProgress.objects.filter(user=request.user, survey__title="Eligibility Criteria").first()
+        
+        if not user_progress or not user_progress.consent_given:
+            messages.error(request, "You must complete enrollment before accessing the intervention.")
+            return redirect('dashboard')
+        
+        has_access = True
+        access_message = "TEST MODE: Intervention access granted for testing purposes."
+        
+        context = {
+            'participant': participant,
+            'study_day': 50,  # Fake study day for testing
             'has_access': has_access,
             'access_message': access_message,
             'challenges_completed': participant.challenges_completed,
