@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge 1: Introduction</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .commit-list { margin: 0.75rem 0 1rem 0; padding-left: 1.2rem; }
+        .commit-list li { margin: 0.3rem 0; }
+        .badge { display: inline-block; background: #4caf50; color: #fff; padding: 6px 10px; border-radius: 999px; font-weight: 600; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .meta { color: #666; margin-bottom: 1rem; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+    </head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Challenge 1</h1>
+            <div class="meta">Introduction</div>
+            <h2>My Commitment</h2>
+            <p>I am beginning my journey with this online intervention, designed to promote physical activity in adults with obesity.</p>
+            <p>I recognize that this process may be challenging, but I am confident in my persistence, determination, and self-discipline to achieve my goals.</p>
+            <p>When I encounter obstacles, I will overcome them by:</p>
+            <ul class="commit-list">
+                <li>Taking a moment to refocus</li>
+                <li>Breaking tasks into smaller, manageable steps</li>
+                <li>Seeking support and collaboration when needed</li>
+                <li>Staying informed and motivated</li>
+                <li>Maintaining a positive mindset</li>
+                <li>Sharing and discussing ideas and concerns</li>
+            </ul>
+            <span class="badge">✅ I am fully committed to actively engaging in this intervention.</span>
+        </div>
+
+        <div class="card">
+            <h2>Welcome Video</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1041378133" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Challenge 1 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+                <a class="btn" href="{% url 'intervention_challenge_25' %}">Open Challenge 25</a>
+            </div>
+            <div id="caption" class="caption">
+                <p><strong>Welcome!</strong> This intervention is a research-based online program to promote health-enhancing physical activity in adults who are overweight or obese. For simplicity, “adults who are overweight or obese” will be referred to as “adults with obesity” from this point forward.</p>
+                <p>This intervention is based on scientific evidence, behavioral theory, and effective behavioral change techniques to help adults with obesity: (a) learn major health benefits of physical activity, (b) motivate for physical activity, (c) understand how to be physically active, and (d) overcome their unique barriers to physical activity. The references used to develop the intervention can be provided upon request. The intervention is developed and tested by an interdisciplinary research team that includes experts in health science, computer science, art and design, theatre, etc.</p>
+                <p>We believe that you can promote physical activity with this intervention! To get you started, let's learn more about the intervention contents.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

@@ -31,6 +31,7 @@ from .forms import CodeEntryForm, InterestForm, EligibilityForm, ConsentForm, Us
 import csv
 from testpas.schedule_emails import schedule_wave1_monitoring_email
 from django.http import HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
 from testpas.utils import get_current_time
 
 from .timeline import get_timeline_day, get_study_day
@@ -676,6 +677,7 @@ def dashboard(request):
         'needs_consent': user_progress and user_progress.eligible and not user_progress.consent_given,  # New flag
         'progress_percentage': progress_percentage,
         'time_compression': settings.TIME_COMPRESSION,  # Add this for template debugging
+        'intervention_points': participant.intervention_points if participant else 0,  # Add intervention points
     }
     return render(request, "dashboard.html", context)
 # INFORMATION 11 & 22: Enter Code
@@ -913,6 +915,8 @@ def intervention_access(request):
             'access_message': access_message,
             'challenges_completed': participant.challenges_completed,
             'intervention_login_count': participant.intervention_login_count,
+            'progress_percent': min(int((participant.challenges_completed / 24) * 100), 100) if participant.challenges_completed is not None else 0,
+            'remaining_challenges': max(0, 24 - (participant.challenges_completed or 0)),
         }
         
         return render(request, 'intervention_access.html', context)
@@ -924,7 +928,118 @@ def intervention_access(request):
 @login_required
 def intervention_challenge_25(request):
     """Render Challenge 25: Leisure-Related Physical Activity demo."""
-    return render(request, 'interventions/challenge_25.html')
+    participant = get_object_or_404(Participant, user=request.user)
+    context = {
+        'participant': participant,
+        'current_points': participant.intervention_points,
+    }
+    return render(request, 'interventions/challenge_25.html', context)
+
+@login_required
+def intervention_challenge_1(request):
+    """Render Challenge 1: Introduction."""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = {
+        'participant': participant,
+    }
+    return render(request, 'interventions/challenge_1.html', context)
+
+@login_required
+def intervention_challenge_2(request):
+    """Render Introductory Challenge 2: Contents."""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = {
+        'participant': participant,
+    }
+    return render(request, 'interventions/challenge_2.html', context)
+
+@login_required
+def intervention_challenge_4(request):
+    """Render Introductory Challenge 4: Review."""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = {
+        'participant': participant,
+    }
+    return render(request, 'interventions/challenge_4.html', context)
+
+@login_required
+def intervention_challenge_5(request):
+    """Render and handle Introductory Challenge 5: Self-efficacy."""
+    participant = get_object_or_404(Participant, user=request.user)
+    if request.method == 'POST':
+        try:
+            q1 = int(request.POST.get('q1'))
+            q2 = int(request.POST.get('q2'))
+            q3 = int(request.POST.get('q3'))
+            q4 = int(request.POST.get('q4'))
+            q5 = int(request.POST.get('q5'))
+            q6 = int(request.POST.get('q6'))
+            q7 = int(request.POST.get('q7'))
+        except (TypeError, ValueError):
+            messages.error(request, 'Please answer all questions before submitting.')
+            return redirect('intervention_challenge_5')
+
+        from .models import Challenge5Response
+        Challenge5Response.objects.create(
+            user=request.user,
+            participant=participant,
+            q1=q1, q2=q2, q3=q3, q4=q4, q5=q5, q6=q6, q7=q7
+        )
+        messages.success(request, 'Responses saved. Thank you!')
+        return redirect('intervention_access')
+
+    context = { 'participant': participant }
+    return render(request, 'interventions/challenge_5.html', context)
+
+@staff_member_required
+def export_challenge_5_csv(request):
+    """Export Challenge 5 responses as CSV (staff only)."""
+    from .models import Challenge5Response
+    import csv
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="challenge5_responses.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['username', 'participant_id', 'created_at', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'])
+    for r in Challenge5Response.objects.select_related('user', 'participant').all():
+        writer.writerow([
+            r.user.username,
+            r.participant.participant_id,
+            r.created_at.isoformat(),
+            r.q1, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7
+        ])
+    return response
+
+@login_required
+def ge_challenge_1(request):
+    """General Education - Challenge 1: Physical Activity"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/ge_challenge_1.html', context)
+
+@login_required
+def update_intervention_points(request):
+    """Handle AJAX requests to update intervention points."""
+    if request.method == 'POST':
+        try:
+            participant = Participant.objects.get(user=request.user)
+            points_to_add = int(request.POST.get('points', 0))
+            
+            # Update points
+            participant.intervention_points += points_to_add
+            participant.save()
+            
+            return JsonResponse({
+                'success': True,
+                'new_total': participant.intervention_points,
+                'points_added': points_to_add
+            })
+        except (Participant.DoesNotExist, ValueError) as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 @login_required
 def intervention_access_test(request):
@@ -947,6 +1062,8 @@ def intervention_access_test(request):
             'access_message': access_message,
             'challenges_completed': participant.challenges_completed,
             'intervention_login_count': participant.intervention_login_count,
+            'progress_percent': min(int((participant.challenges_completed / 24) * 100), 100) if participant.challenges_completed is not None else 0,
+            'remaining_challenges': max(0, 24 - (participant.challenges_completed or 0)),
         }
         
         return render(request, 'intervention_access.html', context)

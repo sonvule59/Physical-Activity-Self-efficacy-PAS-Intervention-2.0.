@@ -280,7 +280,7 @@
     </div>
 
     <!-- Points Display -->
-    <div class="points-section">Total Points: <span id="points">0</span></div>
+    <div class="points-section">Total Points: <span id="points">{{ current_points|default:0 }}</span></div>
 </div>
 
 <!-- Buttons with tooltips -->
@@ -367,8 +367,8 @@
 </div>
 
 <script>
-    // Initialize points
-    let points = 0;
+    // Initialize points from backend
+    let points = parseInt('{{ current_points|default:0 }}') || 0;
 
     function setActivity(activity, pointsAwarded) {
         // Get the character container element
@@ -380,9 +380,50 @@
         // Add the new activity class to trigger animation
         characterContainer.classList.add(activity);  
 
-        // Update points
-        points += pointsAwarded;
-        document.getElementById('points').innerText = points;  // Update points on the screen
+        // Update points via AJAX
+        updatePoints(pointsAwarded);
+    }
+
+    function updatePoints(pointsToAdd) {
+        // Send AJAX request to update points in database
+        fetch('{% url "update_intervention_points" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: 'points=' + pointsToAdd
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the display with the new total from server
+                points = data.new_total;
+                document.getElementById('points').innerText = points;
+                console.log('Points updated: +' + data.points_added + ' = ' + data.new_total);
+            } else {
+                console.error('Failed to update points:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating points:', error);
+        });
+    }
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 </script>
 

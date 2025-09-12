@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Education - Challenge 1: Physical Activity</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>General Education</h1>
+            <div class="meta">Challenge 1: Physical Activity</div>
+            <h2>What is Physical Activity</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1041378056" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="GE Challenge 1 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+            <div id="caption" class="caption">
+                <p>Physical activity refers to any bodily movement that increases energy expenditure above a basal level. There are different intensities of physical activity: light, moderate, and vigorous intensity.</p>
+                <ul>
+                    <li>Light-intensity physical activity refers to non-sedentary behavior (e.g., walking slowly, stretching, making the bed).</li>
+                    <li>Moderate-intensity physical activity refers to activities that require moderate physical effort and make you breathe somewhat harder than normal (e.g., walking briskly, playing doubles tennis, raking the yard).</li>
+                    <li>Vigorous-intensity physical activity refers to activities that require more challenging physical effort and make you breathe much harder than normal (e.g., running, playing basketball, carrying heavy loads upstairs repeatedly).</li>
+                </ul>
+                <p>Physical activity can be accumulated in short bouts during the day rather than performed in one long, continuous bout.</p>
+                <p>Physical activity consists of planned or unplanned activities that are part of everyday life. These are activities that an individual selects and are not normally prescribed. There are multiple domains in physical activity: work-, transport-, domestic-, and leisure-related physical activity.</p>
+                <ul>
+                    <li>Work-related refers to physical activity at your workplace or as part of your work, including paid jobs, farming, and volunteer work.</li>
+                    <li>Transport-related refers to physical activity that you do for traveling from place to place, including to places like work, stores, and movie theaters.</li>
+                    <li>Domestic-related refers to physical activity done in and around your home, like housework, gardening, yard work, and caring for your family.</li>
+                    <li>Leisure-related refers to any preferred pleasurable and enjoyable physical activity during unobligated time or free time, including playing a sport, yoga, or walking at a park.</li>
+                </ul>
+                <p>This intervention is to promote light-, moderate-, and vigorous-intensity physical activity in the work-, transport-, domestic-, and leisure-related domains. We believe that you can increase physical activity with the intervention!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

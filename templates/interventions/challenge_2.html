@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introductory Challenge 2: Contents</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Introductory Challenge 2</h1>
+            <div class="meta">Contents</div>
+            <h2>Introduction: Contents</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1041378101" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Intro Challenge 2 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+            <div id="caption" class="caption">
+                <p>Participants may open or close the following captions, which can be positioned either below or beside the video.</p>
+                <p>Unfortunately, adults with obesity have multiple unique barriers to physical activity (e.g., weight perception). Also, personal, social, and environmental factors, such as low motivation, the influence of other people, and work environments, may act as barriers to physical activity.</p>
+                <p>To overcome barriers to physical activity, you are strongly encouraged to increase your belief in your ability to do physical activity, which is called, “physical activity self-efficacy.” This is a special form of self-confidence for physical activity.</p>
+                <p>This intervention is designed to increase physical activity self-efficacy. Increasing your physical activity self-efficacy will promote physical activity! Based on behavioral theory and scientific evidence, the intervention is designed to provide capability-enhancing opportunities by using some engaging activities. Simply, you will:</p>
+                <ul>
+                    <li>listen to lectures,</li>
+                    <li>play simple games,</li>
+                    <li>watch videos,</li>
+                    <li>think about success, and</li>
+                    <li>practice some behavioral change techniques.</li>
+                </ul>
+                <p>With this intervention, you can increase your belief in your ability to do physical activity and thus promote physical activity!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

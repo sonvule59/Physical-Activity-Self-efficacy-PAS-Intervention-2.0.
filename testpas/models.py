@@ -138,6 +138,11 @@ class Participant(models.Model):
     challenges_completed = models.IntegerField(default=0)
     intervention_completion_date = models.DateTimeField(null=True, blank=True)
     
+    # Intervention game tracking
+    intervention_points = models.IntegerField(default=0)
+    challenge_25_completed = models.BooleanField(default=False)
+    challenge_25_completion_date = models.DateTimeField(null=True, blank=True)
+    
     def save(self, *args, **kwargs):
         if not self.confirmation_token:
             self.confirmation_token = uuid.uuid4().hex
@@ -374,4 +379,26 @@ class Content(models.Model):
     def __str__(self):
         return f"{self.get_content_type_display()} - {self.title}"
 
+
+
+class Challenge5Response(models.Model):
+    """Stores responses to Introductory Challenge 5 (Self-efficacy, 7 items, 0-4)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='challenge5_responses')
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE, related_name='challenge5_responses')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    q1 = models.PositiveSmallIntegerField()
+    q2 = models.PositiveSmallIntegerField()
+    q3 = models.PositiveSmallIntegerField()
+    q4 = models.PositiveSmallIntegerField()
+    q5 = models.PositiveSmallIntegerField()
+    q6 = models.PositiveSmallIntegerField()
+    q7 = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Challenge5Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
 

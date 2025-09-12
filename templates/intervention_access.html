@@ -53,14 +53,19 @@
                             </div>
                         {% else %}
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ challenges_completed|div:24|mul:100 }}%"></div>
+                                <div id="progress-fill" class="progress-fill"></div>
                             </div>
-                            <p>{{ challenges_completed|sub:24|abs }} more challenges needed to earn the $20 gift card.</p>
+                            <p>{{ remaining_challenges }} more challenges needed to earn the $20 gift card.</p>
                         {% endif %}
                     </div>
                     
                     <div class="intervention-actions">
-                        <a class="btn btn-primary" href="{% url 'intervention_challenge_25' %}">Start Challenge 25 Demo</a>
+                        <a class="btn btn-primary" href="{% url 'intervention_challenge_1' %}">Open Challenge 1: Introduction</a>
+                        <a class="btn btn-primary" href="{% url 'intervention_challenge_2' %}">Open Challenge 2: Contents</a>
+                        <a class="btn btn-primary" href="{% url 'intervention_challenge_3' %}">Open Challenge 3: Game</a>
+                        <a class="btn btn-primary" href="{% url 'intervention_challenge_4' %}">Open Challenge 4: Review</a>
+                        <a class="btn btn-primary" href="{% url 'intervention_challenge_5' %}">Open Challenge 5: Self-efficacy</a>
+                        <a class="btn btn-primary" href="{% url 'ge_challenge_1' %}">General Education: Challenge 1</a>
                         <!-- <button class="btn btn-primary" onclick="startIntervention()">Start/Continue Intervention</button> -->
                         <button class="btn btn-secondary" onclick="recordChallenge()">Record Challenge Completion</button>
                     </div>
@@ -88,6 +93,14 @@
     </footer>
 
     <script>
+        // Set progress bar width via JS to avoid template-in-CSS lint issues
+        (function(){
+            var percent = parseInt('{{ progress_percent|default:0 }}') || 0;
+            var el = document.getElementById('progress-fill');
+            if (el) {
+                el.style.width = percent + '%';
+            }
+        })();
         function startIntervention() {
             // Placeholder for intervention start functionality
             alert('Intervention interface would open here. This is a placeholder for the actual intervention system.');

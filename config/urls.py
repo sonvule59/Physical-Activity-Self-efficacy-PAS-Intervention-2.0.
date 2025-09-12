@@ -65,6 +65,15 @@ urlpatterns = [
     path('intervention/', views.intervention_access, name='intervention_access'),
     path('intervention/test/', views.intervention_access_test, name='intervention_access_test'),
     path('intervention/challenge-25/', views.intervention_challenge_25, name='intervention_challenge_25'),
+    path('intervention/challenge-2/', views.intervention_challenge_2, name='intervention_challenge_2'),
+    # Introductory Challenge 3 is the game (alias to 25)
+    path('intervention/challenge-3/', views.intervention_challenge_25, name='intervention_challenge_3'),
+    path('intervention/challenge-4/', views.intervention_challenge_4, name='intervention_challenge_4'),
+    path('intervention/challenge-5/', views.intervention_challenge_5, name='intervention_challenge_5'),
+    path('intervention/challenge-5/export/', views.export_challenge_5_csv, name='export_challenge_5_csv'),
+    path('intervention/ge/challenge-1/', views.ge_challenge_1, name='ge_challenge_1'),
+    path('intervention/challenge-1/', views.intervention_challenge_1, name='intervention_challenge_1'),
+    path('intervention/update-points/', views.update_intervention_points, name='update_intervention_points'),
     path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
     
     # Surveys (Information 9, 18, 20)
