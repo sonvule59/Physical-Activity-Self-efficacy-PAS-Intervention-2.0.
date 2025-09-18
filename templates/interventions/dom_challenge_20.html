@@ -1,0 +1,401 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domestic-Related Physical Activity - Challenge 20: Domestic Game</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+        
+        /* Game Layout */
+        .game-container { display: flex; gap: 2rem; margin: 2rem 0; }
+        .character-section { flex: 1; text-align: center; }
+        .activities-section { flex: 2; }
+        
+        /* Character Styling */
+        .character { position: relative; width: 120px; height: 120px; margin: 0 auto 1rem; border-radius: 50%; overflow: hidden; background: #f0f0f0; border: 3px solid #667eea; }
+        .character img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transition: all 0.5s ease; }
+        .character.level-1 img { transform: scale(1.1); }
+        .character.level-2 img { transform: scale(1.05); }
+        .character.level-3 img { transform: scale(1.0); }
+        .character.level-4 img { transform: scale(0.95); }
+        .character.level-5 img { transform: scale(0.9); }
+        
+        .points-badge { position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3); border: 2px solid white; }
+        .points-earned { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 1.2rem; font-weight: bold; opacity: 0; pointer-events: none; z-index: 15; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4); border: 2px solid white; }
+        .points-earned.show { animation: pointsPop 2s ease-out forwards; }
+        
+        @keyframes pointsPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) translateY(0); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) translateY(-10px); }
+            40% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) translateY(-20px); }
+            60% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) translateY(-30px); }
+            80% { opacity: 0.8; transform: translate(-50%, -50%) scale(1) translateY(-40px); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8) translateY(-50px); }
+        }
+        
+        .exercise-animation { position: absolute; top: 10%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; opacity: 0; pointer-events: none; z-index: 10; }
+        .exercise-animation.show { animation: exercisePop 1.5s ease-out forwards; }
+        
+        @keyframes exercisePop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) translateY(0); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) translateY(-10px); }
+            40% { opacity: 1; transform: translate(-50%, -50%) scale(1.3) translateY(-20px); }
+            60% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) translateY(-30px); }
+            80% { opacity: 0.8; transform: translate(-50%, -50%) scale(1) translateY(-40px); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8) translateY(-50px); }
+        }
+        
+        /* Activity Buttons */
+        .activities-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .activity-btn { background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%); color: white; border: none; padding: 12px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); }
+        .activity-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4); }
+        .activity-btn:active { transform: translateY(0); }
+        
+        /* Domestic-specific animations */
+        .vacuuming-animation img { animation: vacuuming 3s ease-in-out; }
+        .sweeping-mopping-animation img { animation: sweepingMopping 3s ease-in-out; }
+        .dusting-animation img { animation: dusting 3s ease-in-out; }
+        .washing-dishes-animation img { animation: washingDishes 3s ease-in-out; }
+        .laundry-animation img { animation: laundry 3s ease-in-out; }
+        .making-bed-animation img { animation: makingBed 3s ease-in-out; }
+        .cooking-animation img { animation: cooking 3s ease-in-out; }
+        .grocery-shopping-animation img { animation: groceryShopping 3s ease-in-out; }
+        .gardening-animation img { animation: gardening 3s ease-in-out; }
+        .taking-trash-animation img { animation: takingTrash 3s ease-in-out; }
+        .cleaning-windows-animation img { animation: cleaningWindows 3s ease-in-out; }
+        .decluttering-animation img { animation: decluttering 3s ease-in-out; }
+        .pet-care-animation img { animation: petCare 3s ease-in-out; }
+        .car-washing-animation img { animation: carWashing 3s ease-in-out; }
+        .home-maintenance-animation img { animation: homeMaintenance 3s ease-in-out; }
+        
+        @keyframes vacuuming {
+            0% { transform: scale(1) translateX(0); }
+            20% { transform: scale(1.05) translateX(-10px); }
+            40% { transform: scale(1.1) translateX(-20px); }
+            60% { transform: scale(1.05) translateX(-15px); }
+            80% { transform: scale(1.1) translateX(-20px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes sweepingMopping {
+            0% { transform: scale(1) translateX(0); }
+            25% { transform: scale(1.05) translateX(15px); }
+            50% { transform: scale(1.1) translateX(30px); }
+            75% { transform: scale(1.05) translateX(20px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes dusting {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(5deg); }
+            50% { transform: scale(1.1) rotate(10deg); }
+            75% { transform: scale(1.05) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes washingDishes {
+            0% { transform: scale(1) translateY(0); }
+            20% { transform: scale(1.05) translateY(-5px); }
+            40% { transform: scale(1.1) translateY(-10px); }
+            60% { transform: scale(1.05) translateY(-8px); }
+            80% { transform: scale(1.1) translateY(-10px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes laundry {
+            0% { transform: scale(1) translateY(0); }
+            20% { transform: scale(1.05) translateY(-8px); }
+            40% { transform: scale(1.1) translateY(-15px); }
+            60% { transform: scale(1.05) translateY(-12px); }
+            80% { transform: scale(1.1) translateY(-15px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes makingBed {
+            0% { transform: scale(1) translateX(0); }
+            25% { transform: scale(1.05) translateX(10px); }
+            50% { transform: scale(1.1) translateX(20px); }
+            75% { transform: scale(1.05) translateX(15px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes cooking {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(3deg); }
+            50% { transform: scale(1.1) rotate(6deg); }
+            75% { transform: scale(1.05) rotate(3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes groceryShopping {
+            0% { transform: scale(1) translateX(0); }
+            20% { transform: scale(1.05) translateX(-12px); }
+            40% { transform: scale(1.1) translateX(-25px); }
+            60% { transform: scale(1.05) translateX(-18px); }
+            80% { transform: scale(1.1) translateX(-25px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes gardening {
+            0% { transform: scale(1) translateY(0); }
+            20% { transform: scale(1.05) translateY(-10px); }
+            40% { transform: scale(1.1) translateY(-20px); }
+            60% { transform: scale(1.05) translateY(-15px); }
+            80% { transform: scale(1.1) translateY(-20px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes takingTrash {
+            0% { transform: scale(1) translateX(0); }
+            25% { transform: scale(1.05) translateX(8px); }
+            50% { transform: scale(1.1) translateX(16px); }
+            75% { transform: scale(1.05) translateX(12px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes cleaningWindows {
+            0% { transform: scale(1) translateX(0); }
+            20% { transform: scale(1.05) translateX(10px); }
+            40% { transform: scale(1.1) translateX(20px); }
+            60% { transform: scale(1.05) translateX(15px); }
+            80% { transform: scale(1.1) translateX(20px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes decluttering {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(-5deg); }
+            50% { transform: scale(1.1) rotate(-10deg); }
+            75% { transform: scale(1.05) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes petCare {
+            0% { transform: scale(1) translateY(0); }
+            20% { transform: scale(1.05) translateY(-5px); }
+            40% { transform: scale(1.1) translateY(-10px); }
+            60% { transform: scale(1.05) translateY(-8px); }
+            80% { transform: scale(1.1) translateY(-10px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes carWashing {
+            0% { transform: scale(1) translateX(0); }
+            25% { transform: scale(1.05) translateX(12px); }
+            50% { transform: scale(1.1) translateX(25px); }
+            75% { transform: scale(1.05) translateX(18px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+        
+        @keyframes homeMaintenance {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(5deg); }
+            50% { transform: scale(1.1) rotate(10deg); }
+            75% { transform: scale(1.05) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .game-info { background: #f8f9fa; border-left: 4px solid #667eea; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 12px 12px 0; }
+        .game-info h3 { margin: 0 0 1rem 0; color: #333; }
+        .game-info p { margin: 0.5rem 0; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Domestic-Related Physical Activity</h1>
+            <div class="meta">Challenge 20: Domestic Game</div>
+            <h2>Domestic-Related Physical Activity Game</h2>
+            <p>Click on domestic activities to help your character get more active and earn points!</p>
+            
+            <div class="game-info">
+                <h3>Domestic Activity Game</h3>
+                <p>Click on different domestic-related activities to help your character become more active. Each activity earns you 10 points and helps your character get fitter!</p>
+            </div>
+            
+            <div class="game-container">
+                <div class="character-section">
+                    <div class="character level-1" id="character">
+                        <img src="{% static 'demo_game/images/obese_man.png' %}" alt="Home Worker" id="characterImage">
+                        <div class="points-badge" id="pointsBadge">0</div>
+                        <div class="exercise-animation" id="exerciseAnimation"></div>
+                        <div class="points-earned" id="pointsEarned">+10 Points!</div>
+                    </div>
+                    <h3>Home Worker</h3>
+                    <p>Click activities to help me get more active!</p>
+                </div>
+                
+                <div class="activities-section">
+                    <h3>Domestic Activities</h3>
+                    <div class="activities-grid">
+                        <button class="activity-btn" onclick="doActivity('vacuuming')">🧹 Vacuuming</button>
+                        <button class="activity-btn" onclick="doActivity('sweeping-mopping')">🧽 Sweeping and Mopping</button>
+                        <button class="activity-btn" onclick="doActivity('dusting')">🪶 Dusting</button>
+                        <button class="activity-btn" onclick="doActivity('washing-dishes')">🍽️ Washing Dishes</button>
+                        <button class="activity-btn" onclick="doActivity('laundry')">👕 Laundry</button>
+                        <button class="activity-btn" onclick="doActivity('making-bed')">🛏️ Making the Bed</button>
+                        <button class="activity-btn" onclick="doActivity('cooking')">👨‍🍳 Cooking</button>
+                        <button class="activity-btn" onclick="doActivity('grocery-shopping')">🛒 Grocery Shopping</button>
+                        <button class="activity-btn" onclick="doActivity('gardening')">🌱 Gardening</button>
+                        <button class="activity-btn" onclick="doActivity('taking-trash')">🗑️ Taking Out the Trash</button>
+                        <button class="activity-btn" onclick="doActivity('cleaning-windows')">🪟 Cleaning Windows</button>
+                        <button class="activity-btn" onclick="doActivity('decluttering')">📦 Decluttering</button>
+                        <button class="activity-btn" onclick="doActivity('pet-care')">🐕 Pet Care</button>
+                        <button class="activity-btn" onclick="doActivity('car-washing')">🚗 Car Washing</button>
+                        <button class="activity-btn" onclick="doActivity('home-maintenance')">🔧 Home Maintenance</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <a class="btn" href="{% url 'intervention_access' %}" style="text-decoration: none;">Back to Intervention Access</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPoints = parseInt('{{ current_points|default:0 }}') || 0;
+        let currentLevel = 1;
+        
+        const character = document.getElementById('character');
+        const characterImage = document.getElementById('characterImage');
+        const pointsBadge = document.getElementById('pointsBadge');
+        const exerciseAnimation = document.getElementById('exerciseAnimation');
+        const pointsEarned = document.getElementById('pointsEarned');
+        
+        // Update points display
+        function updatePointsDisplay() {
+            pointsBadge.textContent = currentPoints;
+        }
+        
+        // Update character level based on points
+        function updateLevel() {
+            if (currentPoints >= 200) currentLevel = 5;
+            else if (currentPoints >= 150) currentLevel = 4;
+            else if (currentPoints >= 100) currentLevel = 3;
+            else if (currentPoints >= 50) currentLevel = 2;
+            else currentLevel = 1;
+            
+            // Update character appearance
+            character.className = `character level-${currentLevel}`;
+        }
+        
+        // Show exercise animation
+        function showExerciseAnimation(activity) {
+            const exerciseEmojis = {
+                'vacuuming': '🧹',
+                'sweeping-mopping': '🧽',
+                'dusting': '🪶',
+                'washing-dishes': '🍽️',
+                'laundry': '👕',
+                'making-bed': '🛏️',
+                'cooking': '👨‍🍳',
+                'grocery-shopping': '🛒',
+                'gardening': '🌱',
+                'taking-trash': '🗑️',
+                'cleaning-windows': '🪟',
+                'decluttering': '📦',
+                'pet-care': '🐕',
+                'car-washing': '🚗',
+                'home-maintenance': '🔧'
+            };
+            
+            exerciseAnimation.textContent = exerciseEmojis[activity] || '💪';
+            exerciseAnimation.classList.add('show');
+            
+            setTimeout(() => {
+                exerciseAnimation.classList.remove('show');
+            }, 1500);
+        }
+        
+        // Show points earned animation
+        function showPointsEarned() {
+            pointsEarned.classList.add('show');
+            setTimeout(() => {
+                pointsEarned.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Animate character
+        function animateCharacter(activity) {
+            character.classList.add(`${activity}-animation`);
+            setTimeout(() => {
+                character.classList.remove(`${activity}-animation`);
+            }, 3000);
+        }
+        
+        // Main activity function
+        function doActivity(activity) {
+            // Add points
+            currentPoints += 10;
+            
+            // Update display
+            updatePointsDisplay();
+            updateLevel();
+            
+            // Show animations
+            showExerciseAnimation(activity);
+            showPointsEarned();
+            animateCharacter(activity);
+            
+            // Send to server
+            updatePointsOnServer(10);
+        }
+        
+        // Update points on server
+        function updatePointsOnServer(pointsToAdd) {
+            fetch('{% url "update_intervention_points" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: 'points=' + pointsToAdd
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentPoints = data.new_total;
+                    updatePointsDisplay();
+                    updateLevel();
+                } else {
+                    console.error('Failed to update points:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating points:', error);
+            });
+        }
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Initialize display
+        updatePointsDisplay();
+        updateLevel();
+    </script>
+</body>
+</html>

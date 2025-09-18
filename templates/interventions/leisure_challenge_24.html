@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leisure-Related Physical Activity - Challenge 24: Story</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+        .video-container { margin: 2rem 0; text-align: center; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 800px; margin: 0 auto; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px; }
+        .caption-toggle { margin: 1rem 0; text-align: center; }
+        .caption-toggle button { background: #f8f9fa; border: 2px solid #e0e0e0; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: #333; }
+        .caption-toggle button:hover { background: #e9ecef; }
+        .caption-toggle button.active { background: #667eea; color: white; border-color: #667eea; }
+        .captions { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; display: none; }
+        .captions.show { display: block; }
+        .captions h3 { margin: 0 0 1rem 0; color: #333; }
+        .captions p { margin: 0.5rem 0; line-height: 1.6; }
+        .story-info { background: #f8f9fa; border-left: 4px solid #667eea; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 12px 12px 0; }
+        .story-info h3 { margin: 0 0 1rem 0; color: #333; }
+        .story-info p { margin: 0.5rem 0; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Leisure-Related Physical Activity</h1>
+            <div class="meta">Challenge 24: Story</div>
+            <h2>Leisure-Related Physical Activity: Story</h2>
+            <p>Watch this story about incorporating physical activity into leisure time and recreational activities.</p>
+            
+            <div class="story-info">
+                <h3>Real-Life Examples</h3>
+                <p>This story demonstrates practical ways to incorporate leisure-related physical activity into your free time. Learn from real examples of how others have successfully made leisure activities more active and enjoyable.</p>
+            </div>
+            
+            <div class="video-container">
+                <div class="video-wrapper">
+                    <iframe src="https://player.vimeo.com/video/844734974?title=0&byline=0&portrait=0" 
+                            frameborder="0" 
+                            allow="autoplay; fullscreen; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+                
+                <div class="caption-toggle">
+                    <button onclick="toggleCaptions()" id="captionBtn">Show Captions</button>
+                </div>
+                
+                <div class="captions" id="captions">
+                    <h3>Leisure-Related Physical Activity Story</h3>
+                    <p>This video demonstrates real-life examples of how people incorporate physical activity into their leisure time and recreational activities. Watch to see practical strategies and inspiring stories of successful leisure-related physical activity.</p>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <a class="btn" href="{% url 'intervention_access' %}" style="text-decoration: none;">Back to Intervention Access</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCaptions() {
+            const captions = document.getElementById('captions');
+            const btn = document.getElementById('captionBtn');
+            
+            if (captions.classList.contains('show')) {
+                captions.classList.remove('show');
+                btn.textContent = 'Show Captions';
+                btn.classList.remove('active');
+            } else {
+                captions.classList.add('show');
+                btn.textContent = 'Hide Captions';
+                btn.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

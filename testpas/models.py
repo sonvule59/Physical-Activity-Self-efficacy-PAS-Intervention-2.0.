@@ -434,3 +434,114 @@ class WorkRelatedChallenge11Response(models.Model):
     def __str__(self):
         return f"WorkRelatedChallenge11Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
 
+class TransportRelatedChallenge13Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Easy-to-perform task
+    answer2 = models.TextField(blank=True, null=True)  # Increasingly difficult task
+    answer3 = models.TextField(blank=True, null=True)  # Specific plan
+    answer4 = models.TextField(blank=True, null=True)  # Flexible habit
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"TransportRelatedChallenge13Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+
+class TransportRelatedChallenge16Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Past success experiences
+    answer2 = models.TextField(blank=True, null=True)  # Mental rehearsal factors
+    answer3 = models.TextField(blank=True, null=True)  # Prompts and cues plan
+    answer4 = models.TextField(blank=True, null=True)  # General behavior goal
+    answer5 = models.TextField(blank=True, null=True)  # Outcome goal
+    answer6 = models.TextField(blank=True, null=True)  # Social support plan
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"TransportRelatedChallenge16Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+
+class DomesticRelatedChallenge18Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Easy-to-perform task
+    answer2 = models.TextField(blank=True, null=True)  # Increasingly difficult task
+    answer3 = models.TextField(blank=True, null=True)  # Specific plan
+    answer4 = models.TextField(blank=True, null=True)  # Flexible habit
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"DomesticRelatedChallenge18Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+
+class DomesticRelatedChallenge21Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Past success experiences
+    answer2 = models.TextField(blank=True, null=True)  # Mental rehearsal factors
+    answer3 = models.TextField(blank=True, null=True)  # Prompts and cues plan
+    answer4 = models.TextField(blank=True, null=True)  # General behavior goal
+    answer5 = models.TextField(blank=True, null=True)  # Outcome goal
+    answer6 = models.TextField(blank=True, null=True)  # Social support plan
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"DomesticRelatedChallenge21Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+
+class LeisureRelatedChallenge23Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Easy-to-perform task
+    answer2 = models.TextField(blank=True, null=True)  # Increasingly difficult task
+    answer3 = models.TextField(blank=True, null=True)  # Specific plan
+    answer4 = models.TextField(blank=True, null=True)  # Flexible habit
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"LeisureRelatedChallenge23Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+
+class LeisureRelatedChallenge26Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Past success experiences
+    answer2 = models.TextField(blank=True, null=True)  # Mental rehearsal factors
+    answer3 = models.TextField(blank=True, null=True)  # Prompts and cues plan
+    answer4 = models.TextField(blank=True, null=True)  # General behavior goal
+    answer5 = models.TextField(blank=True, null=True)  # Outcome goal
+    answer6 = models.TextField(blank=True, null=True)  # Social support plan
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"LeisureRelatedChallenge26Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+
+class ChallengeCompletion(models.Model):
+    """Track which challenges each user has completed"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    challenge_number = models.IntegerField(help_text="Challenge number (1-35)")
+    challenge_name = models.CharField(max_length=100, help_text="Name of the challenge")
+    completed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'challenge_number']
+        ordering = ['challenge_number']
+    
+    def __str__(self):
+        return f"Challenge {self.challenge_number}: {self.challenge_name} - {self.user.username}"
+

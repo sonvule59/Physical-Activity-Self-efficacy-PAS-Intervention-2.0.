@@ -48,12 +48,12 @@
                     
                     <div class="progress-tracking">
                         <h4>Your Progress</h4>
-                        <p><strong>Challenges Completed:</strong> {{ challenges_completed }}/24</p>
+                        <p><strong>Challenges Completed:</strong> {{ challenges_completed }}/{{ total_challenges }}</p>
                         <p><strong>Login Count:</strong> {{ intervention_login_count }}</p>
                         
-                        {% if challenges_completed >= 24 %}
+                        {% if challenges_completed >= total_challenges %}
                             <div class="success-message">
-                                <p>🎉 Congratulations! You have completed the required 24 challenges!</p>
+                                <p>🎉 Congratulations! You have completed all {{ total_challenges }} challenges!</p>
                             </div>
                         {% else %}
                             <div class="progress-bar">
@@ -120,35 +120,54 @@
                             <h4>Transport-related Physical Activity</h4>
                             <p>Incorporate movement into your travel.</p>
                             <div class="link-list">
-                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                                <a class="btn btn-primary" href="{% url 'tr_challenge_12' %}">Challenge 12: Learning</a>
+                                <a class="btn btn-primary" href="{% url 'tr_challenge_13' %}">Challenge 13: Easy Task</a>
+                                <a class="btn btn-primary" href="{% url 'tr_challenge_14' %}">Challenge 14: Story</a>
+                                <a class="btn btn-primary" href="{% url 'tr_challenge_15' %}">Challenge 15: Transport Game</a>
+                                <a class="btn btn-primary" href="{% url 'tr_challenge_16' %}">Challenge 16: Technique</a>
                             </div>
                         </div>
                         <div class="category-card">
                             <h4>Domestic-related Activity</h4>
                             <p>Be active in and around your home.</p>
                             <div class="link-list">
-                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                                <a class="btn btn-primary" href="{% url 'dom_challenge_17' %}">Challenge 17: Learning</a>
+                                <a class="btn btn-primary" href="{% url 'dom_challenge_18' %}">Challenge 18: Easy Task</a>
+                                <a class="btn btn-primary" href="{% url 'dom_challenge_19' %}">Challenge 19: Story</a>
+                                <a class="btn btn-primary" href="{% url 'dom_challenge_20' %}">Challenge 20: Domestic Game</a>
+                                <a class="btn btn-primary" href="{% url 'dom_challenge_21' %}">Challenge 21: Technique</a>
                             </div>
                         </div>
                         <div class="category-card">
                             <h4>Leisure-related Physical Activity</h4>
                             <p>Enjoyable activities during free time.</p>
                             <div class="link-list">
-                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                                <a class="btn btn-primary" href="{% url 'leisure_challenge_22' %}">Challenge 22: Learning</a>
+                                <a class="btn btn-primary" href="{% url 'leisure_challenge_23' %}">Challenge 23: Easy Task</a>
+                                <a class="btn btn-primary" href="{% url 'leisure_challenge_24' %}">Challenge 24: Story</a>
+                                <a class="btn btn-primary" href="{% url 'leisure_challenge_25' %}">Challenge 25: Leisure Game</a>
+                                <a class="btn btn-primary" href="{% url 'leisure_challenge_26' %}">Challenge 26: Technique</a>
                             </div>
                         </div>
                         <div class="category-card">
                             <h4>Mindfulness</h4>
                             <p>Cultivate awareness to support activity.</p>
                             <div class="link-list">
-                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                                <a class="btn btn-primary" href="{% url 'mindfulness_challenge_27' %}">Challenge 27: Learning</a>
+                                <a class="btn btn-primary" href="{% url 'mindfulness_challenge_28' %}">Challenge 28: Practice</a>
+                                <a class="btn btn-primary" href="{% url 'mindfulness_challenge_29' %}">Challenge 29: At Work</a>
+                                <a class="btn btn-primary" href="{% url 'mindfulness_challenge_30' %}">Challenge 30: In Transport</a>
+                                <a class="btn btn-primary" href="{% url 'mindfulness_challenge_31' %}">Challenge 31: In Domestic Setting</a>
+                                <a class="btn btn-primary" href="{% url 'mindfulness_challenge_32' %}">Challenge 32: In Leisure</a>
                             </div>
                         </div>
                         <div class="category-card">
                             <h4>Yoga</h4>
                             <p>Gentle movement and flexibility practices.</p>
                             <div class="link-list">
-                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                                <a class="btn btn-primary" href="{% url 'yoga_challenge_33' %}">Challenge 33: Learning</a>
+                                <a class="btn btn-primary" href="{% url 'yoga_challenge_34' %}">Challenge 34: Practice 1</a>
+                                <a class="btn btn-primary" href="{% url 'yoga_challenge_35' %}">Challenge 35: Practice 2</a>
                             </div>
                         </div>
                         <div class="category-card">

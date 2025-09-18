@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leisure-Related Physical Activity - Challenge 22: Learning</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+        .video-container { margin: 2rem 0; text-align: center; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 800px; margin: 0 auto; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px; }
+        .caption-toggle { margin: 1rem 0; text-align: center; }
+        .caption-toggle button { background: #f8f9fa; border: 2px solid #e0e0e0; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: #333; }
+        .caption-toggle button:hover { background: #e9ecef; }
+        .caption-toggle button.active { background: #667eea; color: white; border-color: #667eea; }
+        .captions { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; display: none; }
+        .captions.show { display: block; }
+        .captions h3 { margin: 0 0 1rem 0; color: #333; }
+        .captions p { margin: 0.5rem 0; line-height: 1.6; }
+        .captions ul { margin: 0.5rem 0; padding-left: 1.5rem; }
+        .captions li { margin: 0.25rem 0; color: #666; }
+        .learning-info { background: #f8f9fa; border-left: 4px solid #667eea; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 12px 12px 0; }
+        .learning-info h3 { margin: 0 0 1rem 0; color: #333; }
+        .learning-info p { margin: 0.5rem 0; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Leisure-Related Physical Activity</h1>
+            <div class="meta">Challenge 22: Learning</div>
+            <h2>Leisure-Related Physical Activity: Learning</h2>
+            <p>Learn about incorporating physical activity into your leisure time and recreational activities.</p>
+            
+            <div class="learning-info">
+                <h3>About Leisure-Related Physical Activity</h3>
+                <p>Leisure-related physical activity refers to an individual's preferred pleasurable and enjoyable physical activity during unobligated time or free time. It is physical activity that you do solely for leisure and recreation, for example, playing sports, exercising, fishing, hiking, etc.</p>
+            </div>
+            
+            <div class="video-container">
+                <div class="video-wrapper">
+                    <iframe src="https://player.vimeo.com/video/1042953375?title=0&byline=0&portrait=0" 
+                            frameborder="0" 
+                            allow="autoplay; fullscreen; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+                
+                <div class="caption-toggle">
+                    <button onclick="toggleCaptions()" id="captionBtn">Show Captions</button>
+                </div>
+                
+                <div class="captions" id="captions">
+                    <h3>Leisure-Related Physical Activity: Learning</h3>
+                    <p>Leisure-related physical activity refers to an individual's preferred pleasurable and enjoyable physical activity during unobligated time or free time. It is physical activity that you do solely for leisure and recreation, for example, playing sports, exercising, fishing, hiking, etc. Leisure-related physical activity is important to adults with obesity because the activity, when pursued with moderate- and particularly vigorous-intensity, produces great improvements in insulin sensitivity, blood pressure, and body composition. In addition, physical activity during free time is often necessary to meet the recommended physical activity guidelines (e.g., at least 150 minutes of moderate-intensity physical activity per week).</p>
+                    
+                    <p>Moderate-intensity leisure-related physical activity may include: walking fast at a park, playing tennis doubles, shooting baskets, playing frisbee, etc. Vigorous-intensity leisure-related physical activity may include: jogging, playing football, basketball, soccer, etc.</p>
+                    
+                    <p>Leisure-related physical activity can also provide opportunities for socialization, relaxation, entertainment, and excitement, which may increase your overall well-being. For example, participating in sports and recreational activity provides an opportunity to connect with people from different backgrounds and foster new friendships. Moreover, leisure-related physical activity helps you experience reduced anxiety, improvements in mood, and better sleep. Leisure-related physical activity requires attention to the task at hand which helps participants leave behind everyday thoughts and worries during the activity. Finally, achievements from leisure-related physical activity can boost your self-esteem.</p>
+                    
+                    <p>There are many options for Leisure-related physical activity. Besides competition-based activities such as sports, there are many non-competitive activities, such as biking at a park. For those who do not like repetitive activities without any competition, participating in a competitive sports league is a great way to engage in leisure-related physical activity. Pick an activity that you suspect that you will like or are already familiar with and just start it. You are more likely to stick with the leisure-related physical activity that you know and like.</p>
+                    
+                    <p>You want to make and manage time for leisure-related physical activity. Maintaining leisure-related physical activity can be daunting, particularly for adults with obesity because of their unique barriers to physical activity (e.g., weight perception, physical ability) that we previously learned about. The following tips can be helpful in managing time, monitoring the activity, and overcoming the unique barriers:</p>
+                    
+                    <ul>
+                        <li>Assess how much unobligated time per week you have for leisure-related activity.</li>
+                        <li>Set physical activity as a priority during free time.</li>
+                        <li>Develop motivators that will encourage you to stick with the leisure activity and use the motivators.</li>
+                        <li>Modify the activity according to your needs. Keep your expectations realistic.</li>
+                        <li>Find an activity buddy.</li>
+                    </ul>
+                    
+                    <p>Finally, check existing community groups, such as community centers, health and sports clubs, schools, and places of worship to see if they provide leisure-related physical activities that interest you. For example, you may enroll in a structured exercise class that ensures that you will attend the class on a given time and day of the week. If it is planned, organized, and scheduled, active participation in the leisure activity is easier to maintain.</p>
+                    
+                    <p>Even brief episodes of physical activity in leisure are better than none for your health. Of course, Leisure-related physical activity may not be enough to meet physical activity recommendations. Therefore, it is important to do other types of physical activity as well, for example, work-, transport-, and domestic-related physical activity.</p>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <a class="btn" href="{% url 'intervention_access' %}" style="text-decoration: none;">Back to Intervention Access</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCaptions() {
+            const captions = document.getElementById('captions');
+            const btn = document.getElementById('captionBtn');
+            
+            if (captions.classList.contains('show')) {
+                captions.classList.remove('show');
+                btn.textContent = 'Show Captions';
+                btn.classList.remove('active');
+            } else {
+                captions.classList.add('show');
+                btn.textContent = 'Hide Captions';
+                btn.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

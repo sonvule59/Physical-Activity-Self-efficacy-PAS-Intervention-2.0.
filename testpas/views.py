@@ -862,6 +862,21 @@ def logout_view(request):
     print(f"[DEBUG] Session cleared, redirecting to landing")
     return redirect('landing')  # Redirect to the landing page after logout
 
+def mark_challenge_completed(user, challenge_number, challenge_name):
+    """Helper function to mark a challenge as completed for a user"""
+    from .models import ChallengeCompletion, Participant
+    
+    try:
+        participant = Participant.objects.get(user=user)
+        ChallengeCompletion.objects.get_or_create(
+            user=user,
+            participant=participant,
+            challenge_number=challenge_number,
+            defaults={'challenge_name': challenge_name}
+        )
+    except Participant.DoesNotExist:
+        pass  # Skip if participant doesn't exist
+
 @login_required
 def intervention_access(request):
     """Handle intervention access for participants"""
@@ -908,15 +923,25 @@ def intervention_access(request):
         else:
             access_message = "You have not been assigned to a group yet."
         
+        # Count completed challenges using the new tracking system
+        from .models import ChallengeCompletion
+        challenges_completed = ChallengeCompletion.objects.filter(user=request.user).count()
+        total_challenges = 35  # Total number of challenges (1-35)
+        
+        # Calculate progress percentage
+        progress_percent = (challenges_completed / total_challenges) * 100 if total_challenges > 0 else 0
+        remaining_challenges = total_challenges - challenges_completed
+        
         context = {
             'participant': participant,
             'study_day': study_day,
             'has_access': has_access,
             'access_message': access_message,
-            'challenges_completed': participant.challenges_completed,
+            'challenges_completed': challenges_completed,
+            'total_challenges': total_challenges,
             'intervention_login_count': participant.intervention_login_count,
-            'progress_percent': min(int((participant.challenges_completed / 24) * 100), 100) if participant.challenges_completed is not None else 0,
-            'remaining_challenges': max(0, 24 - (participant.challenges_completed or 0)),
+            'progress_percent': progress_percent,
+            'remaining_challenges': remaining_challenges,
         }
         
         return render(request, 'intervention_access.html', context)
@@ -939,6 +964,7 @@ def intervention_challenge_25(request):
 def intervention_challenge_1(request):
     """Render Challenge 1: Introduction."""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 1, "Introduction")
     context = {
         'participant': participant,
     }
@@ -948,6 +974,7 @@ def intervention_challenge_1(request):
 def intervention_challenge_2(request):
     """Render Introductory Challenge 2: Contents."""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 2, "Contents")
     context = {
         'participant': participant,
     }
@@ -957,6 +984,7 @@ def intervention_challenge_2(request):
 def intervention_challenge_4(request):
     """Render Introductory Challenge 4: Review."""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 4, "Review")
     context = {
         'participant': participant,
     }
@@ -966,6 +994,7 @@ def intervention_challenge_4(request):
 def intervention_challenge_5(request):
     """Render and handle Introductory Challenge 5: Self-efficacy."""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 5, "Self-efficacy")
     if request.method == 'POST':
         try:
             q1 = int(request.POST.get('q1'))
@@ -1013,6 +1042,7 @@ def export_challenge_5_csv(request):
 def ge_challenge_1(request):
     """General Education - Challenge 1: Physical Activity"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 6, "General Education 1")
     context = { 'participant': participant }
     return render(request, 'interventions/ge_challenge_1.html', context)
 
@@ -1020,6 +1050,7 @@ def ge_challenge_1(request):
 def ge_challenge_2(request):
     """General Education - Challenge 2: Importance"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 7, "General Education 2")
     context = { 'participant': participant }
     return render(request, 'interventions/ge_challenge_2.html', context)
 
@@ -1027,6 +1058,7 @@ def ge_challenge_2(request):
 def ge_challenge_3(request):
     """General Education - Challenge 3: How to do (Part 1)"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 8, "General Education 3")
     context = { 'participant': participant }
     return render(request, 'interventions/ge_challenge_3.html', context)
 
@@ -1034,6 +1066,7 @@ def ge_challenge_3(request):
 def ge_challenge_4(request):
     """General Education - Challenge 4: How to do (Part 2)"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 9, "General Education 4")
     context = { 'participant': participant }
     return render(request, 'interventions/ge_challenge_4.html', context)
 
@@ -1041,6 +1074,7 @@ def ge_challenge_4(request):
 def ge_challenge_5(request):
     """General Education - Challenge 5: How to do (Part 3)"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 10, "General Education 5")
     context = { 'participant': participant }
     return render(request, 'interventions/ge_challenge_5.html', context)
 
@@ -1048,6 +1082,7 @@ def ge_challenge_5(request):
 def ge_challenge_6(request):
     """General Education - Challenge 6: Review"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 11, "General Education 6")
     context = { 'participant': participant }
     return render(request, 'interventions/ge_challenge_6.html', context)
 
@@ -1055,6 +1090,7 @@ def ge_challenge_6(request):
 def wr_challenge_7(request):
     """Work-Related Physical Activity - Challenge 7: Learning"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 12, "Work-Related Learning")
     context = { 'participant': participant }
     return render(request, 'interventions/wr_challenge_7.html', context)
 
@@ -1062,6 +1098,7 @@ def wr_challenge_7(request):
 def wr_challenge_8(request):
     """Work-Related Physical Activity - Challenge 8: Easy Task"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 13, "Work-Related Easy Task")
     
     if request.method == 'POST':
         from .models import WorkRelatedChallenge8Response
@@ -1085,6 +1122,7 @@ def wr_challenge_8(request):
 def wr_challenge_9(request):
     """Work-Related Physical Activity - Challenge 9: Story"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 14, "Work-Related Story")
     context = { 'participant': participant }
     return render(request, 'interventions/wr_challenge_9.html', context)
 
@@ -1092,6 +1130,7 @@ def wr_challenge_9(request):
 def wr_challenge_10(request):
     """Work-Related Physical Activity - Challenge 10: Office Fitness Game"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 15, "Work-Related Fitness Game")
     context = { 
         'participant': participant,
         'current_points': participant.intervention_points if participant else 0
@@ -1102,6 +1141,7 @@ def wr_challenge_10(request):
 def wr_challenge_11(request):
     """Work-Related Physical Activity - Challenge 11: Technique"""
     participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 16, "Work-Related Technique")
     
     if request.method == 'POST':
         from .models import WorkRelatedChallenge11Response
@@ -1122,6 +1162,313 @@ def wr_challenge_11(request):
     
     context = { 'participant': participant }
     return render(request, 'interventions/wr_challenge_11.html', context)
+
+@login_required
+def tr_challenge_12(request):
+    """Transport-Related Physical Activity - Challenge 12: Learning"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 17, "Transport-Related Learning")
+    context = { 'participant': participant }
+    return render(request, 'interventions/tr_challenge_12.html', context)
+
+@login_required
+def tr_challenge_13(request):
+    """Transport-Related Physical Activity - Challenge 13: Easy Task"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 18, "Transport-Related Easy Task")
+    
+    if request.method == 'POST':
+        from .models import TransportRelatedChallenge13Response
+        
+        # Save responses
+        TransportRelatedChallenge13Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+        )
+        messages.success(request, "Your graded task responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/tr_challenge_13.html', context)
+
+@login_required
+def tr_challenge_14(request):
+    """Transport-Related Physical Activity - Challenge 14: Story"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 19, "Transport-Related Story")
+    context = { 'participant': participant }
+    return render(request, 'interventions/tr_challenge_14.html', context)
+
+@login_required
+def tr_challenge_15(request):
+    """Transport-Related Physical Activity - Challenge 15: Transport Game"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 20, "Transport-Related Game")
+    context = { 
+        'participant': participant,
+        'current_points': participant.intervention_points if participant else 0
+    }
+    return render(request, 'interventions/tr_challenge_15.html', context)
+
+@login_required
+def tr_challenge_16(request):
+    """Transport-Related Physical Activity - Challenge 16: Technique"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 21, "Transport-Related Technique")
+    
+    if request.method == 'POST':
+        from .models import TransportRelatedChallenge16Response
+        
+        # Save responses
+        TransportRelatedChallenge16Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+            answer5=request.POST.get('answer5', ''),
+            answer6=request.POST.get('answer6', ''),
+        )
+        messages.success(request, "Your transport technique responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/tr_challenge_16.html', context)
+
+# Domestic-Related Physical Activity Challenges
+@login_required
+def dom_challenge_17(request):
+    """Domestic-Related Physical Activity - Challenge 17: Learning"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 17, "Domestic Learning")
+    context = { 'participant': participant }
+    return render(request, 'interventions/dom_challenge_17.html', context)
+
+@login_required
+def dom_challenge_18(request):
+    """Domestic-Related Physical Activity - Challenge 18: Easy Task"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 18, "Domestic Easy Task")
+    
+    if request.method == 'POST':
+        from .models import DomesticRelatedChallenge18Response
+        
+        # Save responses
+        DomesticRelatedChallenge18Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+        )
+        messages.success(request, "Your domestic graded task responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/dom_challenge_18.html', context)
+
+@login_required
+def dom_challenge_19(request):
+    """Domestic-Related Physical Activity - Challenge 19: Story"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 19, "Domestic Story")
+    context = { 'participant': participant }
+    return render(request, 'interventions/dom_challenge_19.html', context)
+
+@login_required
+def dom_challenge_20(request):
+    """Domestic-Related Physical Activity - Challenge 20: Domestic Game"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 20, "Domestic Game")
+    context = { 
+        'participant': participant,
+        'current_points': participant.intervention_points if participant else 0
+    }
+    return render(request, 'interventions/dom_challenge_20.html', context)
+
+@login_required
+def dom_challenge_21(request):
+    """Domestic-Related Physical Activity - Challenge 21: Technique"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 21, "Domestic Technique")
+    
+    if request.method == 'POST':
+        from .models import DomesticRelatedChallenge21Response
+        
+        # Save responses
+        DomesticRelatedChallenge21Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+            answer5=request.POST.get('answer5', ''),
+            answer6=request.POST.get('answer6', ''),
+        )
+        messages.success(request, "Your domestic technique responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/dom_challenge_21.html', context)
+
+# Leisure-Related Physical Activity Challenges
+@login_required
+def leisure_challenge_22(request):
+    """Leisure-Related Physical Activity - Challenge 22: Learning"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 22, "Leisure Learning")
+    context = { 'participant': participant }
+    return render(request, 'interventions/leisure_challenge_22.html', context)
+
+@login_required
+def leisure_challenge_23(request):
+    """Leisure-Related Physical Activity - Challenge 23: Easy Task"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 23, "Leisure Easy Task")
+    
+    if request.method == 'POST':
+        from .models import LeisureRelatedChallenge23Response
+        
+        # Save responses
+        LeisureRelatedChallenge23Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+        )
+        messages.success(request, "Your leisure graded task responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/leisure_challenge_23.html', context)
+
+@login_required
+def leisure_challenge_24(request):
+    """Leisure-Related Physical Activity - Challenge 24: Story"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 24, "Leisure Story")
+    context = { 'participant': participant }
+    return render(request, 'interventions/leisure_challenge_24.html', context)
+
+@login_required
+def leisure_challenge_25(request):
+    """Leisure-Related Physical Activity - Challenge 25: Game (reuse existing Challenge 25)"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 25, "Leisure Game")
+    context = { 
+        'participant': participant,
+        'current_points': participant.intervention_points if participant else 0
+    }
+    return render(request, 'interventions/challenge_25.html', context)
+
+@login_required
+def leisure_challenge_26(request):
+    """Leisure-Related Physical Activity - Challenge 26: Technique"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 26, "Leisure Technique")
+    
+    if request.method == 'POST':
+        from .models import LeisureRelatedChallenge26Response
+        
+        # Save responses
+        LeisureRelatedChallenge26Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+            answer5=request.POST.get('answer5', ''),
+            answer6=request.POST.get('answer6', ''),
+        )
+        messages.success(request, "Your leisure technique responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/leisure_challenge_26.html', context)
+
+# Mindfulness Challenges
+@login_required
+def mindfulness_challenge_27(request):
+    """Mindfulness - Challenge 27: Learning"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 27, "Mindfulness Learning")
+    context = { 'participant': participant }
+    return render(request, 'interventions/mindfulness_challenge_27.html', context)
+
+@login_required
+def mindfulness_challenge_28(request):
+    """Mindfulness - Challenge 28: Practice"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 28, "Mindfulness Practice")
+    context = { 'participant': participant }
+    return render(request, 'interventions/mindfulness_challenge_28.html', context)
+
+@login_required
+def mindfulness_challenge_29(request):
+    """Mindfulness - Challenge 29: At Work"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 29, "Mindfulness At Work")
+    context = { 'participant': participant }
+    return render(request, 'interventions/mindfulness_challenge_29.html', context)
+
+@login_required
+def mindfulness_challenge_30(request):
+    """Mindfulness - Challenge 30: In Transport"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 30, "Mindfulness In Transport")
+    context = { 'participant': participant }
+    return render(request, 'interventions/mindfulness_challenge_30.html', context)
+
+@login_required
+def mindfulness_challenge_31(request):
+    """Mindfulness - Challenge 31: In Domestic Setting"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 31, "Mindfulness In Domestic Setting")
+    context = { 'participant': participant }
+    return render(request, 'interventions/mindfulness_challenge_31.html', context)
+
+@login_required
+def mindfulness_challenge_32(request):
+    """Mindfulness - Challenge 32: In Leisure"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 32, "Mindfulness In Leisure")
+    context = { 'participant': participant }
+    return render(request, 'interventions/mindfulness_challenge_32.html', context)
+
+# Yoga Challenges
+@login_required
+def yoga_challenge_33(request):
+    """Yoga - Challenge 33: Learning"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 33, "Yoga Learning")
+    context = { 'participant': participant }
+    return render(request, 'interventions/yoga_challenge_33.html', context)
+
+@login_required
+def yoga_challenge_34(request):
+    """Yoga - Challenge 34: Practice 1"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 34, "Yoga Practice 1")
+    context = { 'participant': participant }
+    return render(request, 'interventions/yoga_challenge_34.html', context)
+
+@login_required
+def yoga_challenge_35(request):
+    """Yoga - Challenge 35: Practice 2"""
+    participant = get_object_or_404(Participant, user=request.user)
+    mark_challenge_completed(request.user, 35, "Yoga Practice 2")
+    context = { 'participant': participant }
+    return render(request, 'interventions/yoga_challenge_35.html', context)
 
 @login_required
 def update_intervention_points(request):
@@ -1162,15 +1509,25 @@ def intervention_access_test(request):
         has_access = True
         access_message = "TEST MODE: Intervention access granted for testing purposes."
         
+        # Count completed challenges using the new tracking system
+        from .models import ChallengeCompletion
+        challenges_completed = ChallengeCompletion.objects.filter(user=request.user).count()
+        total_challenges = 35  # Total number of challenges (1-35)
+        
+        # Calculate progress percentage
+        progress_percent = (challenges_completed / total_challenges) * 100 if total_challenges > 0 else 0
+        remaining_challenges = total_challenges - challenges_completed
+        
         context = {
             'participant': participant,
             'study_day': 50,  # Fake study day for testing
             'has_access': has_access,
             'access_message': access_message,
-            'challenges_completed': participant.challenges_completed,
+            'challenges_completed': challenges_completed,
+            'total_challenges': total_challenges,
             'intervention_login_count': participant.intervention_login_count,
-            'progress_percent': min(int((participant.challenges_completed / 24) * 100), 100) if participant.challenges_completed is not None else 0,
-            'remaining_challenges': max(0, 24 - (participant.challenges_completed or 0)),
+            'progress_percent': progress_percent,
+            'remaining_challenges': remaining_challenges,
         }
         
         return render(request, 'intervention_access.html', context)
