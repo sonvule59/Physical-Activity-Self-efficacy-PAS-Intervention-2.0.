@@ -1099,6 +1099,31 @@ def wr_challenge_10(request):
     return render(request, 'interventions/wr_challenge_10.html', context)
 
 @login_required
+def wr_challenge_11(request):
+    """Work-Related Physical Activity - Challenge 11: Technique"""
+    participant = get_object_or_404(Participant, user=request.user)
+    
+    if request.method == 'POST':
+        from .models import WorkRelatedChallenge11Response
+        
+        # Save responses
+        WorkRelatedChallenge11Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+            answer5=request.POST.get('answer5', ''),
+            answer6=request.POST.get('answer6', ''),
+        )
+        messages.success(request, "Your technique responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/wr_challenge_11.html', context)
+
+@login_required
 def update_intervention_points(request):
     """Handle AJAX requests to update intervention points."""
     if request.method == 'POST':

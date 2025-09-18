@@ -417,3 +417,20 @@ class WorkRelatedChallenge8Response(models.Model):
     def __str__(self):
         return f"WorkRelatedChallenge8Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
 
+class WorkRelatedChallenge11Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Past success experiences
+    answer2 = models.TextField(blank=True, null=True)  # Mental rehearsal factors
+    answer3 = models.TextField(blank=True, null=True)  # Prompts and cues plan
+    answer4 = models.TextField(blank=True, null=True)  # General behavior goal
+    answer5 = models.TextField(blank=True, null=True)  # Outcome goal
+    answer6 = models.TextField(blank=True, null=True)  # Social support plan
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"WorkRelatedChallenge11Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+

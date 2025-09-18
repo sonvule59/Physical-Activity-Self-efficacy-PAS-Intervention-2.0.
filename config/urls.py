@@ -81,6 +81,7 @@ urlpatterns = [
     path('intervention/wr/challenge-8/', views.wr_challenge_8, name='wr_challenge_8'),
     path('intervention/wr/challenge-9/', views.wr_challenge_9, name='wr_challenge_9'),
     path('intervention/wr/challenge-10/', views.wr_challenge_10, name='wr_challenge_10'),
+    path('intervention/wr/challenge-11/', views.wr_challenge_11, name='wr_challenge_11'),
     path('intervention/challenge-1/', views.intervention_challenge_1, name='intervention_challenge_1'),
     path('intervention/update-points/', views.update_intervention_points, name='update_intervention_points'),
     path('dev/time-controls/', views.dev_time_controls, name='dev_time_controls'),
