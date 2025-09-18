@@ -6,15 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervention Access</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .card { background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; }
+        .btn { display: inline-block; padding: 12px 24px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; text-decoration: none; transition: all 0.3s ease; cursor: pointer; margin: 0.25rem 0.25rem 0.25rem 0; }
+        .btn-outline { background: #fff; color: #333; border: 2px solid #e0e0e0; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Physical Activity Intervention</h1>
-    </header>
-    
-    <main>
-        <section id="intervention-access">
-    <h2>Intervention Access</h2>
+    <div class="container">
+        <div class="card">
+            <h1 style="margin-top:0;">Physical Activity Intervention</h1>
+            <h2 style="margin-top:0.25rem; font-weight:500;">Intervention Access</h2>
             
             {% if messages %}
                 <ul>
@@ -24,7 +28,7 @@
                 </ul>
             {% endif %}
             
-            <div class="access-status">
+            <div class="access-status" style="margin-bottom: 1rem;">
                 <p><strong>Status:</strong> {{ access_message }}</p>
                 <p><strong>Study Day:</strong> {{ study_day }}</p>
                 <p><strong>Group:</strong> {% if participant.randomized_group == 1 %}Intervention Group{% elif participant.randomized_group == 0 %}Control Group{% else %}Not Assigned{% endif %}</p>
@@ -59,15 +63,107 @@
                         {% endif %}
                     </div>
                     
-                    <div class="intervention-actions">
-                        <a class="btn btn-primary" href="{% url 'intervention_challenge_1' %}">Open Challenge 1: Introduction</a>
-                        <a class="btn btn-primary" href="{% url 'intervention_challenge_2' %}">Open Challenge 2: Contents</a>
-                        <a class="btn btn-primary" href="{% url 'intervention_challenge_3' %}">Open Challenge 3: Game</a>
-                        <a class="btn btn-primary" href="{% url 'intervention_challenge_4' %}">Open Challenge 4: Review</a>
-                        <a class="btn btn-primary" href="{% url 'intervention_challenge_5' %}">Open Challenge 5: Self-efficacy</a>
-                        <a class="btn btn-primary" href="{% url 'ge_challenge_1' %}">General Education: Challenge 1</a>
-                        <!-- <button class="btn btn-primary" onclick="startIntervention()">Start/Continue Intervention</button> -->
-                        <button class="btn btn-secondary" onclick="recordChallenge()">Record Challenge Completion</button>
+                    <style>
+                        .category-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 1rem; align-items: stretch; }
+                        @media (min-width: 700px) {
+                            .category-grid { grid-template-columns: repeat(2, 1fr); }
+                        }
+                        @media (min-width: 1200px) {
+                            .category-grid { grid-template-columns: repeat(4, 1fr); }
+                        }
+                        /* .category-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; min-height: 260px; }
+                        .category-card h4 { margin: 0 0 10px 0; color: #333; }
+                        .category-card p { margin: 0 0 10px 0; color: #666; font-size: 0.95rem; }
+                        .link-list { display: flex; flex-direction: column; gap: 8px; margin-top: auto; } */
+                        .category-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; min-height: 260px; text-align: center; }
+                        .category-card h4 { margin: 0 0 10px 0; color: #333; text-align: center; }
+                        .category-card p { margin: 0 0 10px 0; color: #666; font-size: 0.95rem; text-align: center; }
+                        .link-list { display: flex; flex-direction: column; gap: 8px; margin-top: auto; align-items: center; }
+                        .link-list .btn { width: 100%; text-align: center; padding: 10px 16px; font-size: 0.95rem; }
+                    </style>
+                    <div class="category-grid">
+                        <div class="category-card">
+                            <h4>Introductory</h4>
+                            <p>Start here to learn how the intervention works.</p>
+                            <div class="link-list">
+                                <a class="btn btn-primary" href="{% url 'intervention_challenge_1' %}">Challenge 1: Introduction</a>
+                                <a class="btn btn-primary" href="{% url 'intervention_challenge_2' %}">Challenge 2: Contents</a>
+                                <a class="btn btn-primary" href="{% url 'intervention_challenge_3' %}">Challenge 3: Game</a>
+                                <a class="btn btn-primary" href="{% url 'intervention_challenge_4' %}">Challenge 4: Review</a>
+                                <a class="btn btn-primary" href="{% url 'intervention_challenge_5' %}">Challenge 5: Self-efficacy</a>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>General Education</h4>
+                            <p>Foundational knowledge about physical activity.</p>
+                            <div class="link-list">
+                                <a class="btn btn-primary" href="{% url 'ge_challenge_1' %}">Challenge 1: Physical Activity</a>
+                                <a class="btn btn-primary" href="{% url 'ge_challenge_2' %}">Challenge 2: Importance</a>
+                                <a class="btn btn-primary" href="{% url 'ge_challenge_3' %}">Challenge 3: How to do (Part 1)</a>
+                                <a class="btn btn-primary" href="{% url 'ge_challenge_4' %}">Challenge 4: How to do (Part 2)</a>
+                                <a class="btn btn-primary" href="{% url 'ge_challenge_5' %}">Challenge 5: How to do (Part 3)</a>
+                                <a class="btn btn-primary" href="{% url 'ge_challenge_6' %}">Challenge 6: Review</a>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Work-related Physical Activity</h4>
+                            <p>Tips and challenges for being active at work.</p>
+                            <div class="link-list">
+                                <a class="btn btn-primary" href="{% url 'wr_challenge_7' %}">Challenge 7: Learning</a>
+                                <a class="btn btn-primary" href="{% url 'wr_challenge_8' %}">Challenge 8: Easy Task</a>
+                                <a class="btn btn-primary" href="{% url 'wr_challenge_9' %}">Challenge 9: Story</a>
+                                <a class="btn btn-primary" href="{% url 'wr_challenge_10' %}">Challenge 10: Fitness Game</a>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Transport-related Physical Activity</h4>
+                            <p>Incorporate movement into your travel.</p>
+                            <div class="link-list">
+                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Domestic-related Activity</h4>
+                            <p>Be active in and around your home.</p>
+                            <div class="link-list">
+                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Leisure-related Physical Activity</h4>
+                            <p>Enjoyable activities during free time.</p>
+                            <div class="link-list">
+                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Mindfulness</h4>
+                            <p>Cultivate awareness to support activity.</p>
+                            <div class="link-list">
+                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Yoga</h4>
+                            <p>Gentle movement and flexibility practices.</p>
+                            <div class="link-list">
+                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Talk to Other Users</h4>
+                            <p>Connect and share experiences.</p>
+                            <div class="link-list">
+                                <span class="btn btn-outline" style="pointer-events:none; opacity:0.7;">Coming soon</span>
+                            </div>
+                        </div>
+                        <div class="category-card">
+                            <h4>Actions</h4>
+                            <p>Quick actions and utilities.</p>
+                            <div class="link-list">
+                                <button class="btn btn-secondary" onclick="recordChallenge()">Record Challenge Completion</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% else %}
@@ -81,16 +177,16 @@
                 </div>
             {% endif %}
             
-            <div class="navigation">
+            <div class="navigation" style="margin-top: 1rem;">
                 <a href="{% url 'dashboard' %}" class="btn btn-outline">Back to Dashboard</a>
                 <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
-    <footer>
-        <p>&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
-    </footer>
+    <div style="text-align:center; color: white; margin-top: 1rem; padding-bottom: 2rem;">
+        <p style="margin:0.5rem 0; opacity:0.9;">&copy; Physical Activity Self-efficacy (PAS) Intervention 2.0. All rights reserved.</p>
+    </div>
 
     <script>
         // Set progress bar width via JS to avoid template-in-CSS lint issues

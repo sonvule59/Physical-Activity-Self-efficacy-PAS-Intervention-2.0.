@@ -402,3 +402,18 @@ class Challenge5Response(models.Model):
     def __str__(self):
         return f"Challenge5Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
 
+class WorkRelatedChallenge8Response(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer1 = models.TextField(blank=True, null=True)  # Easy-to-perform task
+    answer2 = models.TextField(blank=True, null=True)  # Increasingly difficult task
+    answer3 = models.TextField(blank=True, null=True)  # Specific plan
+    answer4 = models.TextField(blank=True, null=True)  # Flexible habit
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"WorkRelatedChallenge8Response(user={self.user.username}, created_at={self.created_at:%Y-%m-%d %H:%M})"
+

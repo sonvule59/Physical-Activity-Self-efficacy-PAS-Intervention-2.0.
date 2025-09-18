@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work-Related Physical Activity - Challenge 7: Learning</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Work-Related Physical Activity</h1>
+            <div class="meta">Challenge 7: Learning</div>
+            <h2>Work-Related Physical Activity: Learning</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1042953050" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Work-Related Challenge 7 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+            <div id="caption" class="caption">
+                <p>Work-related physical activity refers to physical activity at your workplace or as part of your work, including paid jobs, farming, and volunteer work outside of your home. This is any physical activity at or near your workplace that includes, but is not limited to, walking to a meeting room, heavy lifting, and climbing up stairs. Even if you have a sedentary job, you can increase work-related physical activity by taking physical activity breaks such as walking near your workplace before lunch. Engaging in workplace physical activity helps keep you fit, energized, and productive! Work-related physical activity is useful if you lack time for leisure-related physical activity, such as playing sports.</p>
+                <p>Full-time workers in the United States spend one-third of their day at the workplace. Many occupations or jobs are sedentary. Employees often spend hours sitting at a desk or in meetings, with little opportunity for physical activity. Getting physical activity in busy workplaces can be a challenge. Lack of knowledge or self-confidence, work deadlines, and other time constraints are common barriers to work-related physical activity.</p>
+                <p>You can overcome the barriers and have some physical activity at work while still finishing your tasks! A good approach is to replace sedentary behavior with light-intensity physical activity. build short, ten-minute physical activity breaks into your workdays. Physical activity breaks at work can include simple activities, such as stretching or standing, to slightly more strenuous activities, such as climbing upstairs or walking. They can be done individually or in groups; for example, colleagues can walk together during lunchtime. In general, physical activity breaks require little to no equipment or training. Here are some activities you can do if you have a sedentary job:</p>
+                <ul>
+                    <li>park further away from the workplace entrance,</li>
+                    <li>climb up stairs every three hours,</li>
+                    <li>carry some loads voluntarily,</li>
+                    <li>walk at or near your workplace during breaks,</li>
+                    <li>reach both arms up and down,</li>
+                    <li>alternately lean side-to-side with one arm overhead and other hand on your hip,</li>
+                    <li>press arms forward, then elbows back,</li>
+                    <li>roll shoulders forward and backward,</li>
+                    <li>alternately lift left and right knees up and down,</li>
+                    <li>roll head in a half circle left and right,</li>
+                    <li>roll up on toes and back on heels, and</li>
+                    <li>take physical activity breaks.</li>
+                </ul>
+                <p>Performing physical activity at work or taking physical activity breaks in the workplace can be easy, fun, safe, and not disruptive to your work if you plan appropriately. You may consult with your manager, director, or employer about taking physical activity breaks, which should be supported and may also increase your work efficiency!</p>
+                <p>Note that repeated vigorous intensity of work-related physical activity, such as heavy lifting, construction work, etc., could lead to overuse injuries. There are some recommendations to protect you during vigorous activity at work. For instance, it is important:</p>
+                <ul>
+                    <li>to receive guidance on safer movements for completing physical tasks,</li>
+                    <li>to lower the intensity through the day if possible,</li>
+                    <li>to take short breaks between tasks,</li>
+                    <li>to use technology, equipment, or tools to avoid high physical stress, and</li>
+                    <li>to exercise regularly to increase endurance for high work demands.</li>
+                </ul>
+                <p>Some physical activity at work, even brief episodes, are better than none for your health. However, Work-related physical activity may not be enough to meet the physical activity recommendation. Therefore, it is important to have other types of physical activity as well, such as transport-, domestic-, and leisure-related physical activity.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

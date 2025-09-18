@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Education - Challenge 2: Importance</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>General Education</h1>
+            <div class="meta">Challenge 2: Importance</div>
+            <h2>Why is Physical Activity Important?</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1041378284" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="GE Challenge 2 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+            <div id="caption" class="caption">
+                <p>The good news for adults with obesity is that regular physical activity provides major health benefits, no matter how their weight changes. Of course, as you know, regular physical activity is helpful for weight loss, but that is not all! Physical activity is valuable for adults with obesity for at least four reasons reported by the U.S. Department of Health and Human Services.</p>
+                <ul>
+                    <li>First, moderate-to-vigorous physical activity has an additive effect on weight loss when combined with dietary restriction, compared to the diet only.</li>
+                    <li>Second, physical activity is helpful to prevent weight gain.</li>
+                    <li>Third, even if weight status of adults with obesity remains the same, they can experience major health benefits such as the relative reduction in incidence of a chronic disease or progression of a chronic disease they already have.</li>
+                    <li>Fourth, vigorous physical activity consistently produces great improvements in insulin sensitivity, blood pressure, and body composition in adults with obesity.</li>
+                </ul>
+                <p>It is important to know that increasing physical activity has other multiple health benefits, in addition to weight loss. While physical activity alone may not result in significant weight loss in the short term without also considering dieting, you are strongly encouraged to increase physical activity for these major health benefits.</p>
+                <p>Additionally, physical activity also gives you a chance to have fun, be with friends and family, enjoy the outdoors, feel more energetic and healthier, and improve fitness so you can more easily participate in additional physical activity, such as playing a sport. The health benefits from physical activity generally outweigh adverse outcomes such as the risk of injury. You can be physically active for any reasons that are meaningful to you.</p>
+                <p>Despite the benefits of physical activity, there is consistent evidence that most adults with obesity do not meet the 150 min per week of moderate-intensity physical activity recommended by public health guidelines. Moreover, there is evidence that adults with obesity tend to be physically active only when trying to lose weight. Simply understanding the benefits of an active lifestyle is insufficient to promote physical activity. This intervention can help you!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

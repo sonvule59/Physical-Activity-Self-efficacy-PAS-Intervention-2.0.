@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Education - Challenge 3: How to do (Part 1)</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>General Education</h1>
+            <div class="meta">Challenge 3: How to do - Part 1</div>
+            <h2>How To Do Physical Activity (Part 1)</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1041378236" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="GE Challenge 3 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+            <div id="caption" class="caption">
+                <p>This is part 1 to explain how you can increase your physical activity.</p>
+                <p>According to the Physical Activity Guidelines for Americans, each week adults need at least 150 minutes (2 hours and 30 minutes) of moderate intensity physical activity or 75 minutes (1 hour and 15 minutes) of vigorous physical activity, or an equivalent combination of moderate and vigorous intensity activity, for substantial health benefits. The focus should be an aerobic physical activity like running, but muscle-strengthening activity such as lifting weights is also helpful. Additional health benefits can be gained by engaging in physical activity beyond the recommended weekly amount.</p>
+                <p>It is important to know that all physical activity, whether light-, moderate-, or vigorous-intensity, counts. You can move more and sit less throughout the day, because any length of physical activity contributes to the health benefits. Some physical activity is better than none for your health, even a brief episode of physical activity like taking the stairs rather than the elevator or adding short walks to your day.</p>
+                <p>Start with light or moderate-intensity physical activity and gradually increase the intensity, duration, and frequency. Physical activity should be increased gradually over time regardless of your physical fitness. You shouldn’t start with high-intensity activities because they may cause injury and exhaustion. Exercising at very high intensity may result in discontinuing the activity. Working incrementally and waiting for the body to adapt and recover should reduce the risk of physical overload, mental stress, decreased motivation, and injury.</p>
+                <p>If you have low physical fitness, you may find that moderate-intensity physical activity is experienced as vigorous intensity. You can get health benefits from starting with activities that would be considered light intensity and, as you are able, gradually build up to moderate or vigorous-intensity activities. If you have chronic disease or disabilities, you need to engage in physical activity adapted for your physical conditions in consultation with your health care provider. A variety of physical activities will be introduced in this intervention. Remember to consult a health care professional about the appropriate types and amounts of physical activity that are right for you.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

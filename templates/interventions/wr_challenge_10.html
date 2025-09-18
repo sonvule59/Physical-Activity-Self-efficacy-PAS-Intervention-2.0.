@@ -1,0 +1,864 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work-Related Physical Activity - Challenge 10: Fitness Game</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        
+        .game-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .character-section {
+            flex: 1;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        
+        .character {
+            width: 120px;
+            height: 120px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #ddd;
+        }
+        
+        .character.active {
+            animation: bounce 0.6s ease-in-out;
+        }
+        
+        .character.level-1 { border-color: #ff6b35; }
+        .character.level-2 { border-color: #ff9800; }
+        .character.level-3 { border-color: #4caf50; }
+        .character.level-4 { border-color: #2196f3; }
+        .character.level-5 { border-color: #9c27b0; }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .character img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: all 0.5s ease;
+        }
+        
+        /* Character progression - showing weight loss through image scaling */
+        .character.level-1 img { transform: scale(1.1); } /* Heaviest - larger */
+        .character.level-2 img { transform: scale(1.05); }
+        .character.level-3 img { transform: scale(1.0); }
+        .character.level-4 img { transform: scale(0.95); }
+        .character.level-5 img { transform: scale(0.9); } /* Fittest - smaller */
+        
+        /* Exercise animations */
+        .exercise-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .exercise-animation.show {
+            animation: exercisePop 1.5s ease-out forwards;
+        }
+        
+        .points-earned {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            border: 2px solid white;
+        }
+        
+        .points-earned.show {
+            animation: pointsPop 2s ease-out forwards;
+        }
+        
+        @keyframes exercisePop {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5); 
+            }
+            20% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.2); 
+            }
+            80% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.8) translateY(-20px); 
+            }
+        }
+        
+        @keyframes pointsPop {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5) translateY(0); 
+            }
+            20% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.1) translateY(-10px); 
+            }
+            40% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.2) translateY(-20px); 
+            }
+            60% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.1) translateY(-30px); 
+            }
+            80% { 
+                opacity: 0.8; 
+                transform: translate(-50%, -50%) scale(1) translateY(-40px); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.8) translateY(-50px); 
+            }
+        }
+        
+        /* Specific exercise animations - Character performing actual motions */
+        .standing-desk-animation img { animation: standingDesk 3s ease-in-out; }
+        .walking-meetings-animation img { animation: walkingMeetings 3s ease-in-out; }
+        .frequent-breaks-animation img { animation: takingBreaks 3s ease-in-out; }
+        .desk-exercises-animation img { animation: deskExercises 3s ease-in-out; }
+        .stretching-animation img { animation: stretching 3s ease-in-out; }
+        .office-yoga-animation img { animation: officeYoga 3s ease-in-out; }
+        .using-stairs-animation img { animation: climbingStairs 3s ease-in-out; }
+        .walking-colleagues-animation img { animation: walkingToColleagues 3s ease-in-out; }
+        .printer-walks-animation img { animation: printerWalks 3s ease-in-out; }
+        .water-breaks-animation img { animation: waterBreaks 3s ease-in-out; }
+        .filing-organizing-animation img { animation: filingOrganizing 3s ease-in-out; }
+        .parking-farther-animation img { animation: parkingFarther 3s ease-in-out; }
+        .lunchtime-walks-animation img { animation: lunchtimeWalks 3s ease-in-out; }
+        .fitness-challenges-animation img { animation: fitnessChallenges 3s ease-in-out; }
+        .chair-squats-animation img { animation: chairSquats 3s ease-in-out; }
+        
+        /* Realistic Exercise Motion Animations */
+        
+        @keyframes standingDesk {
+            /* Sitting to standing motion */
+            0% { transform: scale(1) translateY(0); }
+            20% { transform: scale(1.05) translateY(-5px); }
+            40% { transform: scale(1.1) translateY(-15px); }
+            60% { transform: scale(1.05) translateY(-10px); }
+            80% { transform: scale(1.1) translateY(-15px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes walkingMeetings {
+            /* Walking while talking motion */
+            0% { transform: translateX(0) translateY(0); }
+            15% { transform: translateX(-8px) translateY(-2px); }
+            30% { transform: translateX(-15px) translateY(0); }
+            45% { transform: translateX(-8px) translateY(2px); }
+            60% { transform: translateX(8px) translateY(-2px); }
+            75% { transform: translateX(15px) translateY(0); }
+            90% { transform: translateX(8px) translateY(2px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+        
+        @keyframes takingBreaks {
+            /* Stretching and moving around */
+            0% { transform: scale(1) rotate(0deg); }
+            20% { transform: scale(1.1) rotate(-10deg) translateY(-5px); }
+            40% { transform: scale(1.05) rotate(10deg) translateY(-10px); }
+            60% { transform: scale(1.1) rotate(-5deg) translateY(-5px); }
+            80% { transform: scale(1.05) rotate(5deg) translateY(-8px); }
+            100% { transform: scale(1) rotate(0deg) translateY(0); }
+        }
+        
+        @keyframes deskExercises {
+            /* Seated leg lifts and arm movements */
+            0% { transform: scale(1) translateY(0); }
+            25% { transform: scale(1.1) translateY(-8px) rotate(-5deg); }
+            50% { transform: scale(1.05) translateY(-12px) rotate(0deg); }
+            75% { transform: scale(1.1) translateY(-8px) rotate(5deg); }
+            100% { transform: scale(1) translateY(0) rotate(0deg); }
+        }
+        
+        @keyframes stretching {
+            /* Full body stretching motions */
+            0% { transform: scale(1) rotate(0deg); }
+            20% { transform: scale(1.15) rotate(-15deg) translateY(-5px); }
+            40% { transform: scale(1.1) rotate(15deg) translateY(-10px); }
+            60% { transform: scale(1.15) rotate(-10deg) translateY(-5px); }
+            80% { transform: scale(1.1) rotate(10deg) translateY(-8px); }
+            100% { transform: scale(1) rotate(0deg) translateY(0); }
+        }
+        
+        @keyframes officeYoga {
+            /* Gentle yoga poses */
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-12deg) translateY(-8px); }
+            50% { transform: scale(1.05) rotate(12deg) translateY(-12px); }
+            75% { transform: scale(1.1) rotate(-8deg) translateY(-8px); }
+            100% { transform: scale(1) rotate(0deg) translateY(0); }
+        }
+        
+        @keyframes climbingStairs {
+            /* Upward climbing motion */
+            0% { transform: translateY(0) scale(1); }
+            20% { transform: translateY(-10px) scale(1.05); }
+            40% { transform: translateY(-20px) scale(1.1); }
+            60% { transform: translateY(-30px) scale(1.05); }
+            80% { transform: translateY(-20px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        @keyframes walkingToColleagues {
+            /* Purposeful walking motion */
+            0% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-12px) translateY(-3px); }
+            50% { transform: translateX(-20px) translateY(0); }
+            75% { transform: translateX(-12px) translateY(3px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+        
+        @keyframes printerWalks {
+            /* Quick walking motion */
+            0% { transform: translateX(0) translateY(0); }
+            30% { transform: translateX(-10px) translateY(-2px); }
+            60% { transform: translateX(-18px) translateY(0); }
+            90% { transform: translateX(-10px) translateY(2px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+        
+        @keyframes waterBreaks {
+            /* Getting up and moving to water */
+            0% { transform: scale(1) translateY(0); }
+            30% { transform: scale(1.1) translateY(-8px) rotate(-5deg); }
+            60% { transform: scale(1.05) translateY(-12px) rotate(5deg); }
+            90% { transform: scale(1.1) translateY(-8px) rotate(-3deg); }
+            100% { transform: scale(1) translateY(0) rotate(0deg); }
+        }
+        
+        @keyframes filingOrganizing {
+            /* Standing and organizing motion */
+            0% { transform: scale(1) translateX(0); }
+            25% { transform: scale(1.1) translateX(-8px) translateY(-5px); }
+            50% { transform: scale(1.05) translateX(8px) translateY(-8px); }
+            75% { transform: scale(1.1) translateX(-5px) translateY(-5px); }
+            100% { transform: scale(1) translateX(0) translateY(0); }
+        }
+        
+        @keyframes parkingFarther {
+            /* Walking from far parking */
+            0% { transform: translateX(0) translateY(0); }
+            20% { transform: translateX(-15px) translateY(-3px); }
+            40% { transform: translateX(-25px) translateY(0); }
+            60% { transform: translateX(-15px) translateY(3px); }
+            80% { transform: translateX(-8px) translateY(-2px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+        
+        @keyframes lunchtimeWalks {
+            /* Relaxed walking motion */
+            0% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-10px) translateY(-2px); }
+            50% { transform: translateX(-18px) translateY(0); }
+            75% { transform: translateX(-10px) translateY(2px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+        
+        @keyframes fitnessChallenges {
+            /* Energetic fitness activities */
+            0% { transform: scale(1) rotate(0deg); }
+            20% { transform: scale(1.2) rotate(-10deg) translateY(-8px); }
+            40% { transform: scale(1.15) rotate(10deg) translateY(-12px); }
+            60% { transform: scale(1.2) rotate(-8deg) translateY(-8px); }
+            80% { transform: scale(1.15) rotate(8deg) translateY(-10px); }
+            100% { transform: scale(1) rotate(0deg) translateY(0); }
+        }
+        
+        @keyframes chairSquats {
+            /* Squatting motion using chair */
+            0% { transform: translateY(0) scale(1); }
+            25% { transform: translateY(8px) scale(1.05); }
+            50% { transform: translateY(15px) scale(1.1); }
+            75% { transform: translateY(8px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        .points-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .motivation-message {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+        
+        .activities-section {
+            flex: 2;
+        }
+        
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .activity-card {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .activity-card.clicked {
+            background: #e8f5e8;
+            border-color: #4caf50;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .activity-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .activity-card p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .points-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+            border: 2px solid white;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .actions { 
+            margin-top: 1.25rem; 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .btn { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: #fff; 
+            padding: 10px 16px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: 600; 
+            border: none;
+            cursor: pointer;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        }
+        
+        .level-indicator {
+            background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Work-Related Physical Activity</h1>
+            <div class="meta">Challenge 10: Fitness Game</div>
+            <h2>Help Your Office Worker Stay Active!</h2>
+            <p>Click on the activities below to help your office worker stay active throughout the day. Each activity earns 10 points and makes your character move!</p>
+            
+            <div class="level-indicator" id="levelIndicator">Level 1: Getting Started</div>
+            
+            <div class="game-container">
+                <div class="character-section">
+                    <div class="character level-1" id="character">
+                        <img src="{% static 'demo_game/images/obese_man.png' %}" alt="Office Worker" id="characterImage">
+                        <div class="exercise-animation" id="exerciseAnimation"></div>
+                        <div class="points-earned" id="pointsEarned">+10 Points!</div>
+                    </div>
+                    <div class="points-display">Points: <span id="totalPoints">0</span></div>
+                    <div class="motivation-message" id="motivationMessage">
+                        Ready to help your office worker stay active? Click on any activity to get started!
+                    </div>
+                </div>
+                
+                <div class="activities-section">
+                    <div class="activities-grid" id="activitiesGrid">
+                        <div class="activity-card" data-activity="standing-desk" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Standing Desks</h4>
+                            <p>Use a standing desk to alternate between sitting and standing</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="walking-meetings" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Walking Meetings</h4>
+                            <p>Conduct meetings while walking instead of sitting</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="frequent-breaks" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Frequent Breaks</h4>
+                            <p>Take short breaks to stand up, stretch, and walk around</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="desk-exercises" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Desk Exercises</h4>
+                            <p>Perform simple exercises at your desk like leg lifts</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="stretching" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Stretching</h4>
+                            <p>Incorporate regular stretching to reduce muscle stiffness</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="office-yoga" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Office Yoga</h4>
+                            <p>Practice gentle yoga poses at your desk</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="using-stairs" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Using the Stairs</h4>
+                            <p>Opt for stairs instead of elevators</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="walking-colleagues" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Walking to Colleagues</h4>
+                            <p>Walk to a coworker's desk instead of sending email</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="printer-walks" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Printer Walks</h4>
+                            <p>Place printers centrally to encourage walking</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="water-breaks" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Water Breaks</h4>
+                            <p>Regularly get up to refill your water bottle</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="filing-organizing" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Filing and Organizing</h4>
+                            <p>Stand up while filing papers or organizing workspace</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="parking-farther" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Parking Farther Away</h4>
+                            <p>Park farther from office entrance to increase walking</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="lunchtime-walks" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Lunchtime Walks</h4>
+                            <p>Take a walk during your lunch break</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="fitness-challenges" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Fitness Challenges</h4>
+                            <p>Participate in workplace fitness challenges</p>
+                        </div>
+                        
+                        <div class="activity-card" data-activity="chair-squats" data-points="10">
+                            <div class="points-badge">+10</div>
+                            <h4>Chair Squats</h4>
+                            <p>Perform squats using your office chair for support</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value" id="activitiesCompleted">0</div>
+                    <div class="stat-label">Activities Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="totalClicks">0</div>
+                    <div class="stat-label">Total Clicks</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="currentLevel">1</div>
+                    <div class="stat-label">Current Level</div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn reset-btn" onclick="resetGame()">Reset Game</button>
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalPoints = 0;
+        let activitiesCompleted = 0;
+        let totalClicks = 0;
+        let currentLevel = 1;
+        let completedActivities = new Set();
+        
+        const character = document.getElementById('character');
+        const totalPointsDisplay = document.getElementById('totalPoints');
+        const activitiesCompletedDisplay = document.getElementById('activitiesCompleted');
+        const totalClicksDisplay = document.getElementById('totalClicks');
+        const currentLevelDisplay = document.getElementById('currentLevel');
+        const levelIndicator = document.getElementById('levelIndicator');
+        const motivationMessage = document.getElementById('motivationMessage');
+        
+        const levelMessages = {
+            1: "Level 1: Getting Started - Great job starting your fitness journey!",
+            2: "Level 2: Building Habits - You're developing healthy workplace habits!",
+            3: "Level 3: Fitness Enthusiast - You're becoming a workplace fitness champion!",
+            4: "Level 4: Office Hero - You're inspiring others to stay active!",
+            5: "Level 5: Fitness Master - You've mastered workplace fitness!"
+        };
+        
+        const motivationMessages = [
+            "Great job! Keep up the good work!",
+            "Excellent! Your office worker is getting healthier!",
+            "Amazing! You're building great habits!",
+            "Fantastic! You're a fitness champion!",
+            "Outstanding! You're inspiring others!",
+            "Incredible! You're a workplace fitness hero!",
+            "Phenomenal! You're setting a great example!",
+            "Brilliant! You're making a real difference!",
+            "Spectacular! You're a fitness role model!",
+            "Magnificent! You're transforming the workplace!"
+        ];
+        
+        function updateLevel() {
+            const oldLevel = currentLevel;
+            if (totalPoints >= 200) currentLevel = 5;
+            else if (totalPoints >= 150) currentLevel = 4;
+            else if (totalPoints >= 100) currentLevel = 3;
+            else if (totalPoints >= 50) currentLevel = 2;
+            else currentLevel = 1;
+            
+            currentLevelDisplay.textContent = currentLevel;
+            levelIndicator.textContent = levelMessages[currentLevel];
+            
+            // Update character appearance based on level
+            character.className = `character level-${currentLevel}`;
+            
+            // Show level up message if level changed
+            if (oldLevel < currentLevel) {
+                showLevelUpMessage(currentLevel);
+            }
+        }
+        
+        function showLevelUpMessage(level) {
+            const messages = {
+                2: "🎉 Level Up! Your office worker is getting healthier!",
+                3: "🌟 Amazing! Your character is becoming more active!",
+                4: "💪 Fantastic! Your office worker is a fitness champion!",
+                5: "🏆 Incredible! Your character has achieved peak fitness!"
+            };
+            
+            if (messages[level]) {
+                motivationMessage.textContent = messages[level];
+                motivationMessage.style.display = 'block';
+                motivationMessage.style.background = '#e8f5e8';
+                motivationMessage.style.borderColor = '#4caf50';
+                motivationMessage.style.color = '#2e7d32';
+                setTimeout(() => {
+                    motivationMessage.style.display = 'none';
+                }, 4000);
+            }
+        }
+        
+        function getRandomMotivation() {
+            return motivationMessages[Math.floor(Math.random() * motivationMessages.length)];
+        }
+        //////////////////////////////////////////////////////////////
+        // Animate character with specific exercise animation Sep 18 2025 //////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
+        function animateCharacter(activity) {
+            character.classList.add('active');
+            character.classList.add(`${activity}-animation`);
+            setTimeout(() => {
+                character.classList.remove('active');
+                character.classList.remove(`${activity}-animation`);
+            }, 3000); // Match the 3s animation duration
+        }
+        
+        function showExerciseAnimation(activity) {
+            const exerciseAnimation = document.getElementById('exerciseAnimation');
+            const pointsEarned = document.getElementById('pointsEarned');
+            const exerciseEmojis = {
+                'standing-desk': '🪑',
+                'walking-meetings': '🚶',
+                'frequent-breaks': '⏰',
+                'desk-exercises': '💪',
+                'stretching': '🤸',
+                'office-yoga': '🧘',
+                'using-stairs': '🪜',
+                'walking-colleagues': '👥',
+                'printer-walks': '🖨️',
+                'water-breaks': '💧',
+                'filing-organizing': '📁',
+                'parking-farther': '🚗',
+                'lunchtime-walks': '🍽️',
+                'fitness-challenges': '🏆',
+                'chair-squats': '🪑'
+            };
+            
+            // Show exercise emoji above the character
+            exerciseAnimation.textContent = exerciseEmojis[activity] || '💪';
+            exerciseAnimation.classList.add('show');
+            
+            // Show points earned animation
+            pointsEarned.textContent = '+10 Points!';
+            pointsEarned.classList.add('show');
+            
+            setTimeout(() => {
+                exerciseAnimation.classList.remove('show');
+            }, 1500);
+            
+            setTimeout(() => {
+                pointsEarned.classList.remove('show');
+            }, 2000);
+        }
+        
+        function updatePoints(points) {
+            totalPoints += points;
+            totalPointsDisplay.textContent = totalPoints;
+            updateLevel();
+        }
+        
+        function updateStats() {
+            activitiesCompletedDisplay.textContent = activitiesCompleted;
+            totalClicksDisplay.textContent = totalClicks;
+        }
+        
+        function showMotivation() {
+            motivationMessage.textContent = getRandomMotivation();
+            motivationMessage.style.display = 'block';
+            setTimeout(() => {
+                motivationMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Add click event listeners to all activity cards
+        document.querySelectorAll('.activity-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const points = parseInt(this.dataset.points);
+                const activity = this.dataset.activity;
+                
+                // Animate character with specific exercise animation
+                animateCharacter(activity);
+                
+                // Show exercise-specific animation
+                showExerciseAnimation(activity);
+                
+                // Update points
+                updatePoints(points);
+                
+                // Update stats
+                totalClicks++;
+                if (!completedActivities.has(activity)) {
+                    completedActivities.add(activity);
+                    activitiesCompleted++;
+                }
+                updateStats();
+                
+                // Visual feedback
+                this.classList.add('clicked');
+                setTimeout(() => {
+                    this.classList.remove('clicked');
+                }, 500);
+                
+                // Show motivation message
+                showMotivation();
+                
+                // Update points in backend via AJAX
+                updateBackendPoints(points);
+            });
+        });
+        
+        function updateBackendPoints(points) {
+            fetch('{% url "update_intervention_points" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: 'points=' + points
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Points updated: +' + data.points_added + ' = ' + data.new_total);
+                } else {
+                    console.error('Failed to update points:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating points:', error);
+            });
+        }
+        
+        function resetGame() {
+            totalPoints = 0;
+            activitiesCompleted = 0;
+            totalClicks = 0;
+            currentLevel = 1;
+            completedActivities.clear();
+            
+            totalPointsDisplay.textContent = totalPoints;
+            updateStats();
+            updateLevel();
+            
+            // Reset character to level 1 appearance
+            character.className = 'character level-1';
+            
+            motivationMessage.textContent = "Game reset! Ready to help your office worker stay active again?";
+            motivationMessage.style.display = 'block';
+            motivationMessage.style.background = '#f9f7ff';
+            motivationMessage.style.borderColor = '#eee';
+            motivationMessage.style.color = '#333';
+            setTimeout(() => {
+                motivationMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Initialize game
+        updateStats();
+        updateLevel();
+    </script>
+</body>
+</html>

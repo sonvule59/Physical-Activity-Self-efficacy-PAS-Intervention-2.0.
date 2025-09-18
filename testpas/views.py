@@ -1017,6 +1017,88 @@ def ge_challenge_1(request):
     return render(request, 'interventions/ge_challenge_1.html', context)
 
 @login_required
+def ge_challenge_2(request):
+    """General Education - Challenge 2: Importance"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/ge_challenge_2.html', context)
+
+@login_required
+def ge_challenge_3(request):
+    """General Education - Challenge 3: How to do (Part 1)"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/ge_challenge_3.html', context)
+
+@login_required
+def ge_challenge_4(request):
+    """General Education - Challenge 4: How to do (Part 2)"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/ge_challenge_4.html', context)
+
+@login_required
+def ge_challenge_5(request):
+    """General Education - Challenge 5: How to do (Part 3)"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/ge_challenge_5.html', context)
+
+@login_required
+def ge_challenge_6(request):
+    """General Education - Challenge 6: Review"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/ge_challenge_6.html', context)
+
+@login_required
+def wr_challenge_7(request):
+    """Work-Related Physical Activity - Challenge 7: Learning"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/wr_challenge_7.html', context)
+
+@login_required
+def wr_challenge_8(request):
+    """Work-Related Physical Activity - Challenge 8: Easy Task"""
+    participant = get_object_or_404(Participant, user=request.user)
+    
+    if request.method == 'POST':
+        from .models import WorkRelatedChallenge8Response
+        
+        # Save responses
+        WorkRelatedChallenge8Response.objects.create(
+            user=request.user,
+            participant=participant,
+            answer1=request.POST.get('answer1', ''),
+            answer2=request.POST.get('answer2', ''),
+            answer3=request.POST.get('answer3', ''),
+            answer4=request.POST.get('answer4', ''),
+        )
+        messages.success(request, "Your responses have been recorded. Thank you!")
+        return redirect('intervention_access')
+    
+    context = { 'participant': participant }
+    return render(request, 'interventions/wr_challenge_8.html', context)
+
+@login_required
+def wr_challenge_9(request):
+    """Work-Related Physical Activity - Challenge 9: Story"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 'participant': participant }
+    return render(request, 'interventions/wr_challenge_9.html', context)
+
+@login_required
+def wr_challenge_10(request):
+    """Work-Related Physical Activity - Challenge 10: Office Fitness Game"""
+    participant = get_object_or_404(Participant, user=request.user)
+    context = { 
+        'participant': participant,
+        'current_points': participant.intervention_points if participant else 0
+    }
+    return render(request, 'interventions/wr_challenge_10.html', context)
+
+@login_required
 def update_intervention_points(request):
     """Handle AJAX requests to update intervention points."""
     if request.method == 'POST':

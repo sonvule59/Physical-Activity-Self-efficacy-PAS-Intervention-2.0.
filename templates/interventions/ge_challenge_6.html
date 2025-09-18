@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Education - Challenge 6: Review</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .review-content { background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1.5rem; color: #333; }
+        .badge { display: inline-block; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin: 0.5rem 0.5rem 0.5rem 0; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+        li { margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>General Education</h1>
+            <div class="meta">Challenge 6: Review</div>
+            <h2>General Education Review</h2>
+            
+            <div class="badge">📚 Knowledge Review</div>
+            <div class="badge">🎯 Key Takeaways</div>
+            <div class="badge">💡 Action Items</div>
+            
+            <div class="review-content">
+                <p><strong>Please review the following information from general education.</strong></p>
+                <ul>
+                    <li>The good news for adults with obesity is that regular physical activity provides major health benefits, no matter how their weight changes over time. Therefore, while physical activity alone may not result in significant weight loss in the short term, you are strongly encouraged to increase physical activity for the health benefits.</li>
+                    
+                    <li>Adults with obesity need at least 150 minutes of moderate-intensity physical activity or 75 minutes of vigorous physical activity, or an equivalent combination of moderate and vigorous intensity activity for substantial health benefits.</li>
+                    
+                    <li>It is important to know that all physical activity, whether light-, moderate-, or vigorous-intensity, counts. You can move more and sit less throughout the day because any length of physical activity contributes to the health benefits.</li>
+                    
+                    <li>It is recommended to start with light- or moderate-intensity physical activity and gradually increase the intensity, duration, and frequency. Physical activity should be increased gradually over time regardless of your physical fitness.</li>
+                    
+                    <li>Adults with obesity may experience unique barriers to physical activity. You can overcome these barriers by understanding that: (a) physical activity provides health benefits independent of weight loss, (b) you should increase physical activity gradually over time, and (c) finding a type of physical activity or exercise that you feel comfortable with is important.</li>
+                </ul>
+            </div>
+            
+            <div class="actions">
+                <a class="btn" href="{% url 'intervention_access' %}">Back to Intervention Access</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

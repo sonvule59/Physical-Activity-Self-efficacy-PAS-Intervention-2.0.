@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work-Related Physical Activity - Challenge 8: Easy Task</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 1.5rem; }
+        h1 { margin: 0 0 0.5rem 0; font-weight: 300; color: #333; }
+        h2 { margin: 0 0 1rem 0; font-weight: 600; color: #333; }
+        p { color: #444; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .caption-toggle { display: inline-block; background: #ff6b35; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+        .caption { display: none; margin-top: 1rem; background: #f9f7ff; border: 1px solid #eee; border-radius: 12px; padding: 1rem; color: #333; }
+        .actions { margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+        .form-section { margin-top: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333; }
+        .form-group textarea { width: 100%; min-height: 100px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical; }
+        .form-group textarea:focus { outline: none; border-color: #667eea; }
+        ul { margin: 0.75rem 0 0 1.2rem; }
+        .examples { background: #f8f9fa; border-left: 4px solid #667eea; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+    </style>
+    <script>
+        function toggleCaption() {
+            var el = document.getElementById('caption');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Work-Related Physical Activity</h1>
+            <div class="meta">Challenge 8: Easy Task</div>
+            <h2>Graded Tasks for Physical Activity</h2>
+            <div class="video-wrapper">
+                <iframe src="https://player.vimeo.com/video/1042953180" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Work-Related Challenge 8 Video"></iframe>
+            </div>
+            <div class="actions">
+                <button class="caption-toggle" onclick="toggleCaption()">Show/Hide Captions</button>
+                <a class="btn" href="{% url 'intervention_access' %}" style="text-decoration: none;">Back to Intervention Access</a>
+            </div>
+            <div id="caption" class="caption">
+                <p>Let's talk about graded tasks for the promotion of physical activity. Graded tasks begin as easy-to-perform tasks, and become increasingly difficult. For example, you could walk for 100 yards a day for the first week, then half a mile a day for the second week, and then a mile a day for the third week. Using graded tasks is helpful to promote physical activity because it reduces physical activity-related fatigue, pain, stress, and negative emotional attitude.</p>
+                <p>You are encouraged to practice graded tasks. Please see the instructions.</p>
+            </div>
+            
+            <div class="form-section">
+                <h3>Physical Activity Intensity Examples</h3>
+                <div class="examples">
+                    <p><strong>Light-intensity physical activity includes:</strong> walking slowly, bicycling slowly, making the bed, preparing food, washing dishes, stretching, dancing slowly, golf-using cart, fishing, housework that involves light scrubbing/cleaning, etc.</p>
+                    <p><strong>Moderate-intensity physical activity includes:</strong> walking briskly, yoga, washing windows, carrying a child, shooting a basketball, canoeing, tennis doubles, stair climber with moderate pace, carrying light loads upstairs, housework that involves moderate scrubbing/cleaning, etc.</p>
+                    <p><strong>Vigorous-intensity physical activity includes:</strong> running, swimming, shoveling, vigorous dancing, soccer, jumping rope, carrying heavy loads, pushing non-motorized lawnmower, tennis single, stair climber with vigorous pace, carrying heavy loads upstairs, etc.</p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="answer1">1. Provide any work-related physical activity that is an easy-to-perform task for you. For example, you can stand and stretch every 2 hours at work or during breaks at work. [8.7 graded tasks]</label>
+                        <textarea name="answer1" id="answer1" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answer2">2. Provide any work-related physical activity that is increasingly difficult but achievable. For example, you can climb up stairs for physical activity breaks at work. [8.7 graded tasks]</label>
+                        <textarea name="answer2" id="answer2" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answer3">3. Make a specific plan that defines a context, time, frequency, duration, intensity for the work-related physical activity that you listed. For example, at least three times per week, you can climb up stairs for 15 minutes after lunch at work. [1.4 action planning]</label>
+                        <textarea name="answer3" id="answer3" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answer4">4. Make a flexible habit for the work-related physical activity. For example, as your habit that is flexible (i.e., without strict time constraints), you can walk at or near your workplace before 4 pm. [8.3 habit formation]</label>
+                        <textarea name="answer4" id="answer4" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Submit Answers</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
